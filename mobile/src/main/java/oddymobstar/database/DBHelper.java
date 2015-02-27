@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import oddymobstar.core.Config;
 import oddymobstar.core.*;
 import oddymobstar.core.Package;
+import oddymobstar.util.Configuration;
 
 /**
  * Created by root on 23/02/15.
@@ -66,7 +67,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String CREATE_GRIDS = "CREATE TABLE " + GRIDS_TABLE + " (" + GRID_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10))";
     private static final String CREATE_GRID_INFO = "CREATE TABLE " + GRID_INFO_TABLE + " (" + GRID_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + INFO_TYPE + " VARCHAR2(30), " + INFO_KEY + " VARCHAR2(30), " + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER)";
     private static final String CREATE_TOPICS = "CREATE TABLE " + TOPICS_TABLE + " (" + TOPIC_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + TOPIC_NAME + " VARCHAR2(30)," + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10))";
-    private static final String CREATE_GLOBAL_TOPICS = "CREATE TABLE " + GLOBAL_TOPICS_TABLE + " (" + TOPIC_KEY + " VARCHAR2(200), UNIQUE NOT NULL," + TOPIC_NAME + " VARCHAR2(30))";
+    private static final String CREATE_GLOBAL_TOPICS = "CREATE TABLE " + GLOBAL_TOPICS_TABLE + " (" + TOPIC_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + TOPIC_NAME + " VARCHAR2(30))";
     private static final String CREATE_ALLIANCES = "CREATE TABLE " + ALLIANCES_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + ALLIANCE_NAME + " VARCHAR2(30))";
     private static final String CREATE_ALLIANCE_MEMBERS = "CREATE TABLE " + ALLIANCE_MEMBERS_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200)," + PLAYER_KEY + " VARCHAR2(200)," + PLAYER_NAME + " VARCHAR2(30)," + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER)";
     private static final String CREATE_PACKAGES = "CREATE TABLE " + PACKAGES_TABLE + " (" + PACKAGE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + PACKAGE_NAME + " VARCHAR2(30))";  //need to flesh this out later
@@ -102,6 +103,20 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_ALLIANCES);
         db.execSQL(CREATE_ALLIANCE_MEMBERS);
         db.execSQL(CREATE_PACKAGES);
+
+
+
+    }
+
+
+    public void addBaseConfiguration(){
+        Config config = new Config(Configuration.PORT, "8080");
+        addConfig(config);
+        config = new Config(Configuration.URL, "192.168.0.4");
+        addConfig(config);
+        config = new Config(Configuration.UUID_ALGORITHM, "MD5");
+        addConfig(config);
+
     }
 
     @Override
@@ -128,7 +143,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
 
-        values.put(CONFIG_ID, config.getId());
+        //values.put(CONFIG_ID, config.getId());
         values.put(CONFIG_NAME, config.getName());
         values.put(CONFIG_VALUE, config.getValue());
 
@@ -323,17 +338,17 @@ public class DBHelper extends SQLiteOpenHelper {
     we need to get our display lists
      */
 
-    public Cursor getConfigs(){
-        return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME +","+CONFIG_VALUE+" FROM " + CONFIG_TABLE + " ORDER BY " + CONFIG_NAME + " ASC", null);
+    public Cursor getConfigs() {
+        return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + " FROM " + CONFIG_TABLE + " ORDER BY " + CONFIG_NAME + " ASC", null);
     }
 
 
     public Cursor getTopics() {
-        return this.getReadableDatabase().rawQuery("SELECT " + TOPIC_KEY + " as _id," + TOPIC_KEY + "," + TOPIC_NAME + " FROM " + TOPICS_TABLE + " ORDER BY " + TOPIC_NAME + " ASC", null);
+        return this.getReadableDatabase().rawQuery("SELECT " + TOPIC_KEY + " as _id," + TOPIC_KEY + "," + TOPIC_NAME + "," + UTM + "," + SUBUTM + " FROM " + TOPICS_TABLE + " ORDER BY " + TOPIC_NAME + " ASC", null);
     }
 
     public Cursor getGrids() {
-        return null;
+        return this.getReadableDatabase().rawQuery("SELECT " + GRID_KEY + " as _id," + GRID_KEY + "," + UTM + "," + SUBUTM + " FROM " + GRIDS_TABLE + " ORDER BY " + ALLIANCE_NAME + " ASC", null);
     }
 
     public Cursor getGridItems() {
@@ -341,11 +356,11 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getAlliances() {
-        return null;
+        return this.getReadableDatabase().rawQuery("SELECT " + ALLIANCE_KEY + " as _id," + ALLIANCE_KEY + "," + ALLIANCE_NAME + " FROM " + ALLIANCES_TABLE + " ORDER BY " + ALLIANCE_NAME + " ASC", null);
     }
 
     public Cursor getPackages() {
-        return null;
+        return this.getReadableDatabase().rawQuery("SELECT " + PACKAGE_KEY + " as _id," + PACKAGE_KEY + "," + PACKAGE_NAME + " FROM " + PACKAGES_TABLE + " ORDER BY " + PACKAGE_NAME + " ASC", null);
     }
 
     public Cursor getAllianceMembers() {
@@ -360,27 +375,44 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     /*
-    get specific object.
+    get specific object.  using key.  probably to check it actually exists etc before writing a new
+    entry etc in the database table.....unlikely to require other than to check something exists.
      */
-    public Grid getGrid() {
+    public Grid getGrid(String key) {return null;}
+
+    public Alliance getAlliance(String key) {
         return null;
     }
 
-    public Alliance getAlliance() {
+    public Package getPackage(String key) {
         return null;
     }
 
-    public Package getPackage() {
+    public Topic getTopic(String key) {
         return null;
     }
 
-    public Topic getTopic() {
+    public Config getConfig(String key) {
         return null;
     }
 
-    public Config getConfig() {
-        return null;
+    /*
+    due to locking issues etc and i dont want to pass the instance around but use standard methods.
+     */
+    public boolean hasPreLoad() {
+        Cursor cursor = this.getReadableDatabase().rawQuery(
+                "SELECT COUNT(1) as id FROM "+CONFIG_TABLE, null);
+        int count = 0;
+        while (cursor.moveToNext()) {
+            count = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
+            cursor.moveToLast();
+        }
+
+        cursor.close();
+
+        return count != 0;
     }
+
 
     //on shut down.
     public void close() {

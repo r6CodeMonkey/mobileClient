@@ -1,0 +1,30 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<item android:id="@+id/topics"
+    android:title="Topics">
+<menu>
+    <item android:id="@+id/globalTopics"
+        android:title="Global"></item>
+    <item android:id="@+id/subscribedTopics"
+        android:title="Subscribed Topics"></item>
+    <item android:id="@+id/createTopic"
+        android:title="Create"></item>
+
+</menu>
+
+    </item>
+    <item android:id="@+id/alliances"
+        android:title="Alliances">
+
+        <menu>
+            <item android:id="@+id/myAlliances"
+                android:title="My Alliances"></item>
+            <item android:id="@+id/createAlliance"
+                android:title="Create"></item>
+        </menu>
+
+        </item>
+
+   <item android:id="@+id/configuration"
+         android:title="Configuration"></item>
+
+</menu>
