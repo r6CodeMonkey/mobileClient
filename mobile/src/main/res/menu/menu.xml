@@ -5,7 +5,7 @@
     <item android:id="@+id/globalTopics"
         android:title="Global"></item>
     <item android:id="@+id/subscribedTopics"
-        android:title="Subscribed Topics"></item>
+        android:title="Subscribed"></item>
     <item android:id="@+id/createTopic"
         android:title="Create"></item>
 

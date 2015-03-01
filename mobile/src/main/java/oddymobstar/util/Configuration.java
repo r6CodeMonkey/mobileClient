@@ -2,6 +2,7 @@ package oddymobstar.util;
 
 import android.database.Cursor;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import oddymobstar.database.DBHelper;
 /**
  * Created by root on 27/02/15.
  */
-public class Configuration {
+public class Configuration implements Serializable {
 
     /*
     we hold the static configs here.  we hold them in database as there values can change
@@ -19,7 +20,13 @@ public class Configuration {
     public final static String PORT = "PORT";
     public final static String URL = "URL";
 
+    public final static String PLAYER_KEY = "PLAYER_KEY";
+
     public final static String UUID_ALGORITHM = "UUID_ALGO";
+    public final static String SSL_ALGORITHM = "SSL_ALGO";
+
+    public final static String CURRENT_UTM = "CURRENT_UTM";
+    public final static String CURRENT_SUBUTM = "CURRENT_SUBUTM";
     /*
       we will also need other configs, ie security types...enough to get going tho.
      */

@@ -1,11 +1,23 @@
 package oddymobstar.activity;
 
 import android.app.FragmentTransaction;
+import android.app.IntentService;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -23,16 +35,36 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.logging.Handler;
+
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
+import oddymobstar.message.out.AllianceMessage;
+import oddymobstar.message.out.CoreMessage;
+import oddymobstar.service.CheService;
 import oddymobstar.util.Configuration;
 import oddymobstar.util.CoreDialog;
+import oddymobstar.util.CreateDialog;
+import oddymobstar.util.UUIDGenerator;
 
 public class DemoActivity extends FragmentActivity {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private LocationManager locationManager;
+    private android.os.Handler handler = new android.os.Handler();
+
     private Configuration configuration;
     private CoreDialog core;
+    private CreateDialog create;
+    private UUIDGenerator uuidGenerator;
+
+    private CheService cheService;
+    private ServiceConnection serviceConnection;
+
+    private Intent intent;
 
     //db helper can test this out.  and fix up the map to work.  is a start.
     //also need to set up base configs.
@@ -48,6 +80,29 @@ public class DemoActivity extends FragmentActivity {
             dbHelper.addBaseConfiguration();
         }
         configuration = new Configuration(dbHelper.getConfigs());
+        uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
+
+
+        intent = new Intent(this, CheService.class);
+
+        //we need it started.
+        startService(intent);
+
+         serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                cheService = ((CheService.CheServiceBinder)service).getCheServiceInstance();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                cheService = null;
+            }
+        };
+
+        //and we need to bind to it.
+        bindService(intent, serviceConnection,BIND_AUTO_CREATE);
+
 
         /*
 
@@ -110,16 +165,41 @@ public class DemoActivity extends FragmentActivity {
                 /*
                  we simply name an alliance and send to server.  a test to manage
                  */
-                core = new CoreDialog().newInstance(dbHelper,null, CoreDialog.CREATE_ALLIANCE);
-                core.show(transaction, "core_dialog");
+                create = new CreateDialog().newInstance(new DialogInterface.OnClickListener(){
+
+                    public void onClick(DialogInterface dialog, int value){
+                      //grab text.  then send it to service.  service will create it on id response.
+                        try {
+                            //LatLng latLng, String uid, String ackId, String type
+                            String ackId = uuidGenerator.generateAcknowledgeKey();
+                            AllianceMessage allianceMessage = new AllianceMessage(null,null,ackId);
+
+                            cheService.writeToSocket(allianceMessage, ackId);
+                            //we also need to take the local name.  topics actually send name to server.
+                            //fuck this i need a rest.
+                        }catch(NoSuchAlgorithmException nsae){
+                            Log.d("security", "security "+nsae.toString());
+                        }catch(JSONException jse){
+                            Log.d("json", "json "+jse.toString());
+                        }
+                    }
+
+                }, CreateDialog.CREATE_ALLIANCE);
+                create.show(transaction, "create_dialog");
 
                 break;
             case R.id.createTopic:
                 /*
                 we name a topic and send to server.  its global
                  */
-                core = new CoreDialog().newInstance(dbHelper,null, CoreDialog.CREATE_TOPIC);
-                core.show(transaction, "core_dialog");
+                create = new CreateDialog().newInstance(new DialogInterface.OnClickListener(){
+
+                    public void onClick(DialogInterface dialog, int value){
+                        //grab text.  then send it to service.  service will create it on id response.
+                    }
+
+                }, CreateDialog.CREATE_TOPIC);
+                create.show(transaction, "create_dialog");
 
                 break;
             case R.id.globalTopics:
@@ -159,6 +239,10 @@ public class DemoActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+        //and we need to bind to it.
+        bindService(intent, serviceConnection,BIND_AUTO_CREATE);
+
+
     }
 
     /**
@@ -182,6 +266,7 @@ public class DemoActivity extends FragmentActivity {
             // Try to obtain the map from the SupportMapFragment.
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                     .getMap();
+
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
                 setUpMap();
@@ -190,13 +275,38 @@ public class DemoActivity extends FragmentActivity {
     }
 
     /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
-     * <p/>
-     * This should only be called once and when we are sure that {@link #mMap} is not null.
+     * this is demo code.  we want to zoom in better and use last known location etc.  but for testing its fine
+     * as i can see other code working
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        //now dd our last known location.
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        demoLocationListener = new DemoLocationListener(locationManager);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, demoLocationListener);
+                    }
+                });
+
+            }
+        }).start();
+    }
+
+
+
+
+    public void onPause(){
+        super.onPause();
+
+        if(serviceConnection != null){
+            unbindService(serviceConnection);
+        }
+
     }
 
     public void onDestroy() {
@@ -206,6 +316,74 @@ public class DemoActivity extends FragmentActivity {
             dbHelper.close();
             dbHelper = null;
         }
+
+
     }
+
+    public class DemoLocationListener implements LocationListener{
+
+        private LocationManager locationManager;
+
+        public DemoLocationListener(LocationManager locationManager){
+         this.locationManager = locationManager;
+        }
+
+        @Override
+        public void onLocationChanged(Location location) {
+            // TODO Auto-generated method stub
+          //  callBack.setLocationUpdated(location);
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            mMap.addMarker(new MarkerOptions().position(latLng).title("Me"));
+
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(latLng)
+                    .tilt(mMap.getCameraPosition().tilt)
+                    .bearing(mMap.getCameraPosition().bearing)
+                    .zoom(mMap.getCameraPosition().zoom)
+                    .build();
+
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+            //we need to execute the method we are interested in.  note if we time out then
+            locationManager.removeUpdates(this);
+
+            //lets send our location
+            if(cheService != null){
+                try {
+                    String ackId = uuidGenerator.generateAcknowledgeKey();
+                    CoreMessage coreMessage = new CoreMessage(latLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), ackId, CoreMessage.PLAYER);
+
+                    cheService.writeToSocket(coreMessage, ackId);
+                }catch (JSONException jse){
+
+                }catch (NoSuchAlgorithmException nsae){
+
+                }
+            }
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            // TODO Auto-generated method stub
+            locationManager.removeUpdates(this);
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            // TODO Auto-generated method stub
+            locationManager.requestLocationUpdates(provider, 0, 0, this);
+
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
+    private DemoLocationListener demoLocationListener;
 }
 

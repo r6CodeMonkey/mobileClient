@@ -18,12 +18,9 @@ import oddymobstar.database.DBHelper;
 public class CoreDialog extends DialogFragment {
 
     public static final int CONFIG = 0;
-
     public static final int GLOBAL_TOPICS = 1;
     public static final int MY_TOPICS = 2;
     public static final int MY_ALLIANCES = 3;
-    public static final int CREATE_TOPIC = 4;
-    public static final int CREATE_ALLIANCE = 5;
 
 
 
@@ -63,11 +60,7 @@ public class CoreDialog extends DialogFragment {
                 builder.setTitle("Configuration");
                 adapter = new CoreDialogAdapter(this.getActivity(),dbHelper.getConfigs(),false);
                 break;
-            case CREATE_ALLIANCE:
-                break;
-            case CREATE_TOPIC:
-                break;
-            case GLOBAL_TOPICS:
+             case GLOBAL_TOPICS:
                 break;
             case MY_ALLIANCES:
                 break;

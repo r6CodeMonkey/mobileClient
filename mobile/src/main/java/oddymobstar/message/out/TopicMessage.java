@@ -38,7 +38,7 @@ public class TopicMessage extends CoreMessage {
 
 
 
-    public TopicMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException{
+    public TopicMessage(LatLng latLng, String uid, String ackId) throws JSONException{
         super(latLng,uid,ackId,TOPIC);
     }
 

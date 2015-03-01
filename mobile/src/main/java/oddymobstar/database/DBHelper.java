@@ -110,11 +110,19 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     public void addBaseConfiguration(){
-        Config config = new Config(Configuration.PORT, "8080");
+        Config config = new Config(Configuration.PORT, "8085");
         addConfig(config);
         config = new Config(Configuration.URL, "192.168.0.4");
         addConfig(config);
         config = new Config(Configuration.UUID_ALGORITHM, "MD5");
+        addConfig(config);
+        config = new Config(Configuration.SSL_ALGORITHM, "");
+        addConfig(config);
+        config = new Config(Configuration.PLAYER_KEY, "");
+        addConfig(config);
+        config = new Config(Configuration.CURRENT_UTM, "");
+        addConfig(config);
+        config = new Config(Configuration.CURRENT_SUBUTM, "");
         addConfig(config);
 
     }

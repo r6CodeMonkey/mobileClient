@@ -16,10 +16,15 @@ public class TopicMessage {
     private String tid;
     private String message;
 
+    private JSONObject topic;
 
-    public TopicMessage(String message) throws JSONException{
 
-        JSONObject topic = new JSONObject(message).getJSONObject(TOPIC);
+    public TopicMessage(JSONObject topic) {
+
+        this.topic = topic;
+    }
+
+    public void create() throws JSONException{
 
         tid = topic.getString(TID);
         this.message = topic.getString(MSG);

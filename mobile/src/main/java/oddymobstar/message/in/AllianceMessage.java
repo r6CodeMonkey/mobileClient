@@ -17,9 +17,14 @@ public class AllianceMessage {
     private String aid;
     private String message;
 
-    public AllianceMessage(String message) throws JSONException{
+    private JSONObject alliance;
 
-        JSONObject alliance = new JSONObject(message).getJSONObject(ALLIANCE);
+    public AllianceMessage(JSONObject alliance) {
+        this.alliance = alliance;
+    }
+
+    public void create() throws JSONException{
+
 
         aid = alliance.getString(AID);
         this.message = alliance.getString(MSG);

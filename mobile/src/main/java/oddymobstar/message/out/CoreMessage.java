@@ -13,6 +13,9 @@ public class CoreMessage {
     protected JSONObject message = new JSONObject();
 
     public static final String CORE_OBJECT = "core";
+    //default on core type
+    public static final String PLAYER = "player";
+
     public static final String UID = "uid";
     public static final String TYPE = "type";
     public static final String LONG = "long";

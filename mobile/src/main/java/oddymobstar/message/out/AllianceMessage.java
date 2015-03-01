@@ -35,14 +35,21 @@ public class AllianceMessage extends CoreMessage {
     public static final String ALLIANCE_UTM = "utm";
     public static final String ALLIANCE_SUBUTM = "subutm";
 
-    public AllianceMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException{
+    public AllianceMessage(LatLng latLng, String uid, String ackId) throws JSONException{
         super(latLng,uid,ackId,ALLIANCE);
+
+
     }
 
-    public void setAlliance(Alliance alliance) throws JSONException{
+    public void setAlliance(Alliance alliance, String type, String msg) throws JSONException{
 
         JSONObject json = new JSONObject();
 
+        json.put(AID, alliance.getKey());
+        json.put(ACONTENT,msg);
+        json.put(ATYPE, type);
+
+        //also need lat long etc.
 
         this.message.put(ALLIANCE,json);
 
