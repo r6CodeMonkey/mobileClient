@@ -1,12 +1,12 @@
 package oddymobstar.activity;
 
-import android.app.FragmentTransaction;
-import android.app.IntentService;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,31 +19,31 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import oddymobstar.core.Alliance;
+import oddymobstar.core.Topic;
 import oddymobstar.crazycourier.R;
 
 
-import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import org.json.JSONException;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Handler;
+import java.util.HashMap;
+import java.util.Map;
 
-import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.out.AllianceMessage;
 import oddymobstar.message.out.CoreMessage;
+import oddymobstar.message.out.TopicMessage;
 import oddymobstar.service.CheService;
 import oddymobstar.util.Configuration;
 import oddymobstar.util.CoreDialog;
@@ -65,6 +65,10 @@ public class DemoActivity extends FragmentActivity {
     private ServiceConnection serviceConnection;
 
     private Intent intent;
+
+    private LatLng currentLatLng = new LatLng(0,0);  //should use saved preferences.  to do.
+
+    private Map<String, Marker> markerMap = new HashMap<String, Marker>();
 
     //db helper can test this out.  and fix up the map to work.  is a start.
     //also need to set up base configs.
@@ -153,6 +157,13 @@ public class DemoActivity extends FragmentActivity {
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
+        configuration = new Configuration(dbHelper.getConfigs());
+
+        //bind again if its down.
+        if(cheService == null){
+            bindService(intent, serviceConnection,BIND_AUTO_CREATE);
+        }
+
         switch (item.getItemId()) {
 
             case R.id.configuration:
@@ -167,21 +178,28 @@ public class DemoActivity extends FragmentActivity {
                  */
                 create = new CreateDialog().newInstance(new DialogInterface.OnClickListener(){
 
-                    public void onClick(DialogInterface dialog, int value){
-                      //grab text.  then send it to service.  service will create it on id response.
-                        try {
-                            //LatLng latLng, String uid, String ackId, String type
-                            String ackId = uuidGenerator.generateAcknowledgeKey();
-                            AllianceMessage allianceMessage = new AllianceMessage(null,null,ackId);
+                    public void onClick(DialogInterface dialog, int value) {
+                        //grab text.  then send it to service.  service will create it on id response.
+                        if (!create.getName().trim().isEmpty()) {
 
-                            cheService.writeToSocket(allianceMessage, ackId);
-                            //we also need to take the local name.  topics actually send name to server.
-                            //fuck this i need a rest.
-                        }catch(NoSuchAlgorithmException nsae){
-                            Log.d("security", "security "+nsae.toString());
-                        }catch(JSONException jse){
-                            Log.d("json", "json "+jse.toString());
+                            try {
+                                //LatLng latLng, String uid, String ackId, String type
+                                Alliance alliance = new Alliance();
+                                alliance.setName(create.getName());
+
+
+                                AllianceMessage allianceMessage = new AllianceMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                                allianceMessage.setAlliance(alliance, AllianceMessage.ALLIANCE_CREATE, AllianceMessage.ALLIANCE_GLOBAL, "");
+
+                                cheService.writeToSocket(allianceMessage);
+
+                            } catch (NoSuchAlgorithmException nsae) {
+                                Log.d("security", "security " + nsae.toString());
+                            } catch (JSONException jse) {
+                                Log.d("json", "json " + jse.toString());
+                            }
                         }
+                        dialog.dismiss();
                     }
 
                 }, CreateDialog.CREATE_ALLIANCE);
@@ -196,6 +214,23 @@ public class DemoActivity extends FragmentActivity {
 
                     public void onClick(DialogInterface dialog, int value){
                         //grab text.  then send it to service.  service will create it on id response.
+                        if(!create.getName().trim().isEmpty()) {
+                            Topic topic = new Topic();
+                            topic.setName(create.getName());
+                            try {
+                                TopicMessage topicMessage = new TopicMessage(currentLatLng,configuration.getConfig(Configuration.PLAYER_KEY).getValue() ,uuidGenerator.generateAcknowledgeKey());
+                                topicMessage.setTopic(topic,TopicMessage.TOPIC_CREATE , TopicMessage.TOPIC_GLOBAL,"");
+                                //we now need to send it to server
+                                cheService.writeToSocket(topicMessage);
+
+                            }catch(JSONException jse){
+                                Log.d("json", "json "+jse.toString());
+                            }catch(NoSuchAlgorithmException nsae){
+                                Log.d("security", "security "+nsae.toString());
+                            }
+                        }
+
+                        dialog.dismiss();
                     }
 
                 }, CreateDialog.CREATE_TOPIC);
@@ -207,6 +242,21 @@ public class DemoActivity extends FragmentActivity {
                  we present user with a selectable filter that lists from server (most popular topics)
                  and then a search filter to query server for more topics
                  */
+                try {
+                    Topic topic = new Topic();
+                    TopicMessage topicMessage = new TopicMessage(currentLatLng,configuration.getConfig(Configuration.PLAYER_KEY).getValue() ,uuidGenerator.generateAcknowledgeKey());
+                    topicMessage.setTopic(topic, TopicMessage.TOPIC_GLOBAL, TopicMessage.TOPIC_GET, "");
+                    //this needs lots of thought but for present we can live with it.....its defo not ideal.
+                    //in fact its plain wrong.  we really dont want to do it like this.....traffic will be too high.
+                    //to review.
+                    cheService.writeToSocket(topicMessage);
+
+                }catch(JSONException jse){
+                    Log.d("json", "json "+jse.toString());
+                }catch(NoSuchAlgorithmException nsae){
+                    Log.d("security", "security "+nsae.toString());
+                }
+
                 core = new CoreDialog().newInstance(dbHelper, null, CoreDialog.GLOBAL_TOPICS);
                 core.show(transaction, "core_dialog");
 
@@ -295,6 +345,42 @@ public class DemoActivity extends FragmentActivity {
 
             }
         }).start();
+
+
+
+        SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+
+
+        float zoom = sharedPreferences.getFloat("zoom", 10.0f);
+        float tilt = sharedPreferences.getFloat("tilt", 0.0f);
+        float bearing = sharedPreferences.getFloat("bearing", 0.0f);
+        currentLatLng = new LatLng(Double.parseDouble(sharedPreferences.getString("latitude", "0.0")),
+                           Double.parseDouble(sharedPreferences.getString("longitude", "0.0")));
+
+
+        //need to manage map markers too.  as per old code ie remove and re add.  do this now....joy
+
+        /*
+        really need to then move towards a jira project to manage it as got loads of shit todo.
+
+        bsically its
+         */
+
+
+        markerMap.put("Me", mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
+
+
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(currentLatLng)
+                .tilt(tilt)
+                .bearing(bearing)
+                .zoom(zoom)
+                .build();
+
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+
     }
 
 
@@ -311,6 +397,19 @@ public class DemoActivity extends FragmentActivity {
 
     public void onDestroy() {
         super.onDestroy();
+
+        SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString("latitude", String.valueOf(currentLatLng.latitude));
+        editor.putString("longitude", String.valueOf(currentLatLng.longitude));
+        editor.putFloat("zoom", mMap.getCameraPosition().zoom);
+        editor.putFloat("bearing", mMap.getCameraPosition().bearing);
+        editor.putFloat("tilt", mMap.getCameraPosition().tilt);
+
+        editor.commit();
+
 
         if (dbHelper != null) {
             dbHelper.close();
@@ -332,11 +431,18 @@ public class DemoActivity extends FragmentActivity {
         public void onLocationChanged(Location location) {
             // TODO Auto-generated method stub
           //  callBack.setLocationUpdated(location);
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(latLng).title("Me"));
+
+            currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+            if(markerMap.containsKey("Me")){
+               markerMap.get("Me").remove();
+               markerMap.put("Me",mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
+            }
+
+            ;
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(latLng)
+                    .target(currentLatLng)
                     .tilt(mMap.getCameraPosition().tilt)
                     .bearing(mMap.getCameraPosition().bearing)
                     .zoom(mMap.getCameraPosition().zoom)
@@ -350,10 +456,9 @@ public class DemoActivity extends FragmentActivity {
             //lets send our location
             if(cheService != null){
                 try {
-                    String ackId = uuidGenerator.generateAcknowledgeKey();
-                    CoreMessage coreMessage = new CoreMessage(latLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), ackId, CoreMessage.PLAYER);
+                   CoreMessage coreMessage = new CoreMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), CoreMessage.PLAYER);
 
-                    cheService.writeToSocket(coreMessage, ackId);
+                    cheService.writeToSocket(coreMessage);
                 }catch (JSONException jse){
 
                 }catch (NoSuchAlgorithmException nsae){

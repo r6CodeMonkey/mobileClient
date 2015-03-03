@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -26,8 +27,10 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+import oddymobstar.core.Alliance;
 import oddymobstar.core.Config;
 import oddymobstar.core.Grid;
+import oddymobstar.core.Topic;
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.in.Acknowledge;
@@ -56,6 +59,10 @@ public class CheService extends IntentService {
     private DataOutputStream dOut = null;
     private DataInputStream dIn = null;
 
+    //retry counters + max
+    private int retryCounter = 0;
+    private final static int MAX_RETRY = 10;
+
     private Map<String, CoreMessage> sentAcks = new HashMap<String, CoreMessage>();
 
     public class CheServiceBinder extends Binder {
@@ -68,6 +75,8 @@ public class CheService extends IntentService {
 
 
     private Configuration configuration;
+
+
 
     /*
     we defnitely need an instance of Database as well
@@ -170,6 +179,7 @@ public class CheService extends IntentService {
                         //each message we receive should be a JSON.  We need to work out the type.
                         oddymobstar.message.in.CoreMessage coreMessage = new oddymobstar.message.in.CoreMessage(new String(buffer).substring(0, charsRead));
 
+                        Log.d("incoming", "the core message is "+coreMessage.toString());
                         //what are we?
                         if (!coreMessage.getJsonObject().isNull(Acknowledge.ACKNOWLEDGE)) {
 
@@ -190,7 +200,17 @@ public class CheService extends IntentService {
                                     if (ack.getInfo().equals(Acknowledge.UUID)) {
                                         if (ackSent instanceof oddymobstar.message.out.TopicMessage) {
 
+                                            Topic topic = new Topic();
+                                            topic.setKey(ack.getOid());
+                                            topic.setName(ackSent.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getJSONObject(oddymobstar.message.out.TopicMessage.TOPIC).getString(oddymobstar.message.out.TopicMessage.TNAME));
+                                            dbHelper.addTopic(topic);
+
                                         } else if (ackSent instanceof oddymobstar.message.out.AllianceMessage) {
+
+                                            Alliance alliance = new Alliance();
+                                            alliance.setKey(ack.getOid());
+                                            alliance.setName(ackSent.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getJSONObject(oddymobstar.message.out.AllianceMessage.ALLIANCE).getString(oddymobstar.message.out.AllianceMessage.ANAME));
+                                            dbHelper.addAlliance(alliance);
 
                                         } else if (ackSent instanceof PackageMessage) {
 
@@ -239,6 +259,20 @@ public class CheService extends IntentService {
                             TopicMessage topicMessage = new TopicMessage(coreMessage.getJsonObject().getJSONObject(TopicMessage.TOPIC));
                             topicMessage.create();
 
+                            if(topicMessage.getFilter().equals(TopicMessage.POST)) {
+
+                                try {
+                                  Topic topic = new Topic();
+                                    topic.setKey(topicMessage.getTid());
+                                    topic.setName(topicMessage.getTitle());
+                                    topic.setName(topicMessage.getTitle());
+                                    dbHelper.addGlobalTopic(topic);
+                                    //this may not be catching it lol.
+                                } catch (android.database.sqlite.SQLiteConstraintException e) {
+                                    Log.d("topic error", "sql exception  " + e.toString());
+                                }
+                            }
+
                         }
 
                         Log.d("socket listen", "we have read " + new String(buffer).substring(0, charsRead));
@@ -279,7 +313,9 @@ public class CheService extends IntentService {
     }
 
 
-    public void writeToSocket(CoreMessage coreMessage, String ackId) {
+    public void writeToSocket(final CoreMessage coreMessage) {
+
+
 
 
         try {
@@ -287,14 +323,30 @@ public class CheService extends IntentService {
             //   String ackId = uuidGenerator.generateAcknowledgeKey();
             //   coreMessage = new CoreMessage(new LatLng(1, 1), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), ackId, CoreMessage.PLAYER);
 
-            sentAcks.put(ackId, coreMessage);
+            sentAcks.put(coreMessage.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getString(CoreMessage.ACK_ID), coreMessage);
 
 
             dOut.writeUTF(coreMessage.getMessage().toString());
 
 
         } catch (Exception e) {
-            Log.d("socket exception", "socket " + e.toString());
+            Log.d("socket exception", "socket " + e.toString()+coreMessage.getMessage());
+            //st up our socket.
+            if(retryCounter < MAX_RETRY) {
+                new Thread(new Runnable() {
+                    public void run() {
+                        connectSocket();
+                        retryCounter++;
+                        //need to improve this for bad connections lol....ie once we can ping to it we
+                        //can write to it.
+                        writeToSocket(coreMessage);
+
+                    }
+                }).start();
+            }else{
+                retryCounter=0;
+            }
+
         }
 
     }
@@ -309,6 +361,7 @@ public class CheService extends IntentService {
         try {
             socket = new Socket(configuration.getConfig(Configuration.URL).getValue(), Integer.parseInt(configuration.getConfig(Configuration.PORT).getValue()));
             socket.setKeepAlive(true);
+
 
             //set up the two stream readers
             dOut = new DataOutputStream(socket.getOutputStream());

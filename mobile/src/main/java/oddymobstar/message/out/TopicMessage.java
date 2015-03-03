@@ -42,12 +42,18 @@ public class TopicMessage extends CoreMessage {
         super(latLng,uid,ackId,TOPIC);
     }
 
-    public void setTopic(Topic topic) throws JSONException{
+    public void setTopic(Topic topic, String type, String status, String msg) throws JSONException{
 
         JSONObject json = new JSONObject();
 
+        json.put(TNAME, topic.getName());
+        json.put(TUID, topic.getKey());
+        json.put(TACT, type);
+        json.put(TCONT, msg);
+        json.put(TSTAT, status);
 
-        this.message.put(TOPIC,json);
+
+        message.getJSONObject(CORE_OBJECT).put(TOPIC,json);
 
     }
 }

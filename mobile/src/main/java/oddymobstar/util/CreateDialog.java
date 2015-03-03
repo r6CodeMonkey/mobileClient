@@ -23,6 +23,8 @@ public class CreateDialog extends DialogFragment {
 
     private static int createSource;
 
+    private View view;
+
     private static DialogInterface.OnClickListener createListener;
 
     public CreateDialog(){
@@ -54,16 +56,20 @@ public class CreateDialog extends DialogFragment {
                 break;
 
         }
-/*  dirty hack anyway.  who cares at present for demo
-        EditText et = (EditText)view.findViewById(R.id.create);
+//  dirty hack anyway.  who cares at present for demo
+     //
 
-        InputMethodManager imm = (InputMethodManager)  this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);
-*/
+
         builder.setPositiveButton("CREATE",  createListener);
+
+        this.view = view;
 
         return builder.create();
 
+    }
+
+    public String getName(){
+        return ((EditText)view.findViewById(R.id.create)).getText().toString();
     }
 
 

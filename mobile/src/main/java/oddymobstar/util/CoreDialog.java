@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -58,13 +59,21 @@ public class CoreDialog extends DialogFragment {
 
             case CONFIG:
                 builder.setTitle("Configuration");
-                adapter = new CoreDialogAdapter(this.getActivity(),dbHelper.getConfigs(),false);
+                adapter = new CoreDialogAdapter(this.getActivity(),dbHelper.getConfigs(),false,coreSource);
                 break;
              case GLOBAL_TOPICS:
-                break;
+                 builder.setTitle("Global Topics");
+                 adapter = new CoreDialogAdapter(this.getActivity(),dbHelper.getGlobalTopics(),false,coreSource);
+                 break;
             case MY_ALLIANCES:
+                builder.setTitle("Alliances");
+                adapter = new CoreDialogAdapter(this.getActivity(),dbHelper.getAlliances(),false,coreSource);
                 break;
             case MY_TOPICS:
+                builder.setTitle("Topics");
+                adapter = new CoreDialogAdapter(this.getActivity(),dbHelper.getTopics(),false,coreSource);
+
+
                 break;
 
         }

@@ -21,6 +21,8 @@ public class AllianceMessage extends CoreMessage {
     //override the zones we want to send the information to
     public static final String ALAT = "along";
     public static final String ALONG = "alat";
+    public static final String ANAME = "aname";
+
 
 
     //types of message
@@ -41,17 +43,19 @@ public class AllianceMessage extends CoreMessage {
 
     }
 
-    public void setAlliance(Alliance alliance, String type, String msg) throws JSONException{
+    public void setAlliance(Alliance alliance, String type, String status, String msg) throws JSONException{
 
         JSONObject json = new JSONObject();
 
         json.put(AID, alliance.getKey());
         json.put(ACONTENT,msg);
         json.put(ATYPE, type);
+        json.put(ASTAT, status);
+        json.put(ANAME, alliance.getName());
 
         //also need lat long etc.
 
-        this.message.put(ALLIANCE,json);
+        message.getJSONObject(CORE_OBJECT).put(ALLIANCE,json);
 
     }
 }

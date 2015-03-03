@@ -112,7 +112,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void addBaseConfiguration(){
         Config config = new Config(Configuration.PORT, "8085");
         addConfig(config);
-        config = new Config(Configuration.URL, "192.168.0.4");
+        config = new Config(Configuration.URL, "82.23.41.68");
         addConfig(config);
         config = new Config(Configuration.UUID_ALGORITHM, "MD5");
         addConfig(config);
@@ -205,9 +205,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
         db.insert(TOPICS_TABLE, null, values);
 
+        //our topics are also global. to filter out after test phase.
+        this.addGlobalTopic(topic);
+
     }
 
-    public void addGlobalTopic(Topic topic) {
+    public void addGlobalTopic(Topic topic) throws android.database.sqlite.SQLiteConstraintException {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();

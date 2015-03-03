@@ -5,8 +5,8 @@ package oddymobstar.core;
  */
 public class Alliance {
 
-    private String key;
-    private String name;
+    private String key = "";
+    private String name = "";
 
     public Alliance(){
 

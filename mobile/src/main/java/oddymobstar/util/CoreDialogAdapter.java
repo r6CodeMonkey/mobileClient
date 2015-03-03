@@ -19,10 +19,12 @@ public class CoreDialogAdapter extends CursorAdapter {
 
     private Context context;
     private int layout = R.layout.core_list_item;
+    private int source;
 
-    public CoreDialogAdapter(Context context, Cursor cursor, boolean autoRequery) {
+    public CoreDialogAdapter(Context context, Cursor cursor, boolean autoRequery, int source) {
         super(context, cursor, autoRequery);
 
+        this.source = source;
         this.context = context;
 
     }
@@ -41,7 +43,22 @@ public class CoreDialogAdapter extends CursorAdapter {
 
         TextView tv = (TextView) view.findViewById(R.id.core_item_name);
 
-        tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_VALUE)));
+        switch(source){
+
+            case CoreDialog.MY_TOPICS:
+                tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_NAME)));
+                break;
+            case CoreDialog.GLOBAL_TOPICS:
+                tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_NAME)));
+                break;
+            case CoreDialog.CONFIG:
+                tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_VALUE)));
+                break;
+            case CoreDialog.MY_ALLIANCES:
+                tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME)));
+                break;
+        }
+
 
 
     }
