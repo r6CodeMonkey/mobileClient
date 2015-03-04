@@ -1,37 +1,23 @@
 package oddymobstar.service;
 
 import android.app.IntentService;
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
-
-import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
 import oddymobstar.core.Alliance;
 import oddymobstar.core.Config;
-import oddymobstar.core.Grid;
 import oddymobstar.core.Topic;
-import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.in.Acknowledge;
 import oddymobstar.message.in.AllianceMessage;
@@ -40,7 +26,7 @@ import oddymobstar.message.in.TopicMessage;
 import oddymobstar.message.out.CoreMessage;
 import oddymobstar.message.out.PackageMessage;
 import oddymobstar.util.Configuration;
-import oddymobstar.util.UUIDGenerator;
+
 
 /**
  * Created by root on 23/02/15.
@@ -266,7 +252,7 @@ public class CheService extends IntentService {
                                 topic.setKey(topicMessage.getTid());
                                 topic.setName(topicMessage.getTitle());
                                 Topic checkGlobal = dbHelper.getGlobalTopic(topic.getKey());
-                                if(!checkGlobal.getKey().equals(topic.getKey())) {
+                                if (!checkGlobal.getKey().equals(topic.getKey())) {
                                     dbHelper.addGlobalTopic(topic);
                                 }
                                 //this may not be catching it lol.  it seems not.  otherwise it all works (ie get global topics)

@@ -3,8 +3,6 @@ package oddymobstar.message.in;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import oddymobstar.core.Alliance;
-
 /**
  * Created by root on 26/02/15.
  */

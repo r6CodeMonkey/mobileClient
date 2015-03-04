@@ -6,9 +6,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import oddymobstar.core.Alliance;
 import oddymobstar.core.Config;
-import oddymobstar.core.*;
+import oddymobstar.core.Grid;
 import oddymobstar.core.Package;
+import oddymobstar.core.Topic;
 import oddymobstar.util.Configuration;
 
 /**
@@ -404,13 +406,13 @@ public class DBHelper extends SQLiteOpenHelper {
         return null;
     }
 
-    public Topic getGlobalTopic(String key){
+    public Topic getGlobalTopic(String key) {
 
-        Cursor topic = this.getReadableDatabase().rawQuery("SELECT " + TOPIC_KEY + " as _id," + TOPIC_KEY + "," + TOPIC_NAME + " FROM " + GLOBAL_TOPICS_TABLE +" WHERE "+TOPIC_KEY+" =? " +" ORDER BY " + TOPIC_NAME + " ASC", new String[]{key});
+        Cursor topic = this.getReadableDatabase().rawQuery("SELECT " + TOPIC_KEY + " as _id," + TOPIC_KEY + "," + TOPIC_NAME + " FROM " + GLOBAL_TOPICS_TABLE + " WHERE " + TOPIC_KEY + " =? " + " ORDER BY " + TOPIC_NAME + " ASC", new String[]{key});
 
         Topic returnTopic = new Topic();
 
-        while(topic.moveToNext()){
+        while (topic.moveToNext()) {
             returnTopic.setName(topic.getString(topic.getColumnIndexOrThrow((DBHelper.TOPIC_NAME))));
             returnTopic.setKey(topic.getString(topic.getColumnIndexOrThrow((DBHelper.TOPIC_KEY))));
 

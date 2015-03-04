@@ -4,8 +4,6 @@ import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 
-import oddymobstar.core.*;
-
 /**
  * Created by root on 26/02/15.
  */

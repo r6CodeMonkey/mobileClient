@@ -13,6 +13,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,23 +25,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import oddymobstar.core.Alliance;
-import oddymobstar.core.Topic;
-import oddymobstar.crazycourier.R;
-
-
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-
 import org.json.JSONException;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import oddymobstar.core.Alliance;
+import oddymobstar.core.Topic;
+import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.out.AllianceMessage;
 import oddymobstar.message.out.CoreMessage;
