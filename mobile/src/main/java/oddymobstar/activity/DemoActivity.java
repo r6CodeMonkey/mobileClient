@@ -27,7 +27,6 @@ import oddymobstar.core.Topic;
 import oddymobstar.crazycourier.R;
 
 
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -64,9 +63,11 @@ public class DemoActivity extends FragmentActivity {
     private CheService cheService;
     private ServiceConnection serviceConnection;
 
+    private static final Long TWO_MINUTES = 120000l;
+
     private Intent intent;
 
-    private LatLng currentLatLng = new LatLng(0,0);  //should use saved preferences.  to do.
+    private LatLng currentLatLng = new LatLng(0, 0);  //should use saved preferences.  to do.
 
     private Map<String, Marker> markerMap = new HashMap<String, Marker>();
 
@@ -88,14 +89,21 @@ public class DemoActivity extends FragmentActivity {
 
 
         intent = new Intent(this, CheService.class);
+        final Intent serviceIntent = new Intent(this, CheService.class);
 
         //we need it started.
-        startService(intent);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                startService(serviceIntent);
+            }
+        }).start();
 
-         serviceConnection = new ServiceConnection() {
+
+        serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                cheService = ((CheService.CheServiceBinder)service).getCheServiceInstance();
+                cheService = ((CheService.CheServiceBinder) service).getCheServiceInstance();
             }
 
             @Override
@@ -105,7 +113,7 @@ public class DemoActivity extends FragmentActivity {
         };
 
         //and we need to bind to it.
-        bindService(intent, serviceConnection,BIND_AUTO_CREATE);
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
 
         /*
@@ -160,8 +168,8 @@ public class DemoActivity extends FragmentActivity {
         configuration = new Configuration(dbHelper.getConfigs());
 
         //bind again if its down.
-        if(cheService == null){
-            bindService(intent, serviceConnection,BIND_AUTO_CREATE);
+        if (cheService == null) {
+            bindService(intent, serviceConnection, BIND_AUTO_CREATE);
         }
 
         switch (item.getItemId()) {
@@ -176,7 +184,7 @@ public class DemoActivity extends FragmentActivity {
                 /*
                  we simply name an alliance and send to server.  a test to manage
                  */
-                create = new CreateDialog().newInstance(new DialogInterface.OnClickListener(){
+                create = new CreateDialog().newInstance(new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface dialog, int value) {
                         //grab text.  then send it to service.  service will create it on id response.
@@ -210,23 +218,23 @@ public class DemoActivity extends FragmentActivity {
                 /*
                 we name a topic and send to server.  its global
                  */
-                create = new CreateDialog().newInstance(new DialogInterface.OnClickListener(){
+                create = new CreateDialog().newInstance(new DialogInterface.OnClickListener() {
 
-                    public void onClick(DialogInterface dialog, int value){
+                    public void onClick(DialogInterface dialog, int value) {
                         //grab text.  then send it to service.  service will create it on id response.
-                        if(!create.getName().trim().isEmpty()) {
+                        if (!create.getName().trim().isEmpty()) {
                             Topic topic = new Topic();
                             topic.setName(create.getName());
                             try {
-                                TopicMessage topicMessage = new TopicMessage(currentLatLng,configuration.getConfig(Configuration.PLAYER_KEY).getValue() ,uuidGenerator.generateAcknowledgeKey());
-                                topicMessage.setTopic(topic,TopicMessage.TOPIC_CREATE , TopicMessage.TOPIC_GLOBAL,"");
+                                TopicMessage topicMessage = new TopicMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                                topicMessage.setTopic(topic, TopicMessage.TOPIC_CREATE, TopicMessage.TOPIC_GLOBAL, "");
                                 //we now need to send it to server
                                 cheService.writeToSocket(topicMessage);
 
-                            }catch(JSONException jse){
-                                Log.d("json", "json "+jse.toString());
-                            }catch(NoSuchAlgorithmException nsae){
-                                Log.d("security", "security "+nsae.toString());
+                            } catch (JSONException jse) {
+                                Log.d("json", "json " + jse.toString());
+                            } catch (NoSuchAlgorithmException nsae) {
+                                Log.d("security", "security " + nsae.toString());
                             }
                         }
 
@@ -244,17 +252,17 @@ public class DemoActivity extends FragmentActivity {
                  */
                 try {
                     Topic topic = new Topic();
-                    TopicMessage topicMessage = new TopicMessage(currentLatLng,configuration.getConfig(Configuration.PLAYER_KEY).getValue() ,uuidGenerator.generateAcknowledgeKey());
+                    TopicMessage topicMessage = new TopicMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
                     topicMessage.setTopic(topic, TopicMessage.TOPIC_GLOBAL, TopicMessage.TOPIC_GET, "");
                     //this needs lots of thought but for present we can live with it.....its defo not ideal.
                     //in fact its plain wrong.  we really dont want to do it like this.....traffic will be too high.
                     //to review.
                     cheService.writeToSocket(topicMessage);
 
-                }catch(JSONException jse){
-                    Log.d("json", "json "+jse.toString());
-                }catch(NoSuchAlgorithmException nsae){
-                    Log.d("security", "security "+nsae.toString());
+                } catch (JSONException jse) {
+                    Log.d("json", "json " + jse.toString());
+                } catch (NoSuchAlgorithmException nsae) {
+                    Log.d("security", "security " + nsae.toString());
                 }
 
                 core = new CoreDialog().newInstance(dbHelper, null, CoreDialog.GLOBAL_TOPICS);
@@ -290,7 +298,7 @@ public class DemoActivity extends FragmentActivity {
         super.onResume();
         setUpMapIfNeeded();
         //and we need to bind to it.
-        bindService(intent, serviceConnection,BIND_AUTO_CREATE);
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
 
     }
@@ -339,13 +347,12 @@ public class DemoActivity extends FragmentActivity {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, demoLocationListener);
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, TWO_MINUTES, 0, demoLocationListener);
                     }
                 });
 
             }
         }).start();
-
 
 
         SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
@@ -355,7 +362,7 @@ public class DemoActivity extends FragmentActivity {
         float tilt = sharedPreferences.getFloat("tilt", 0.0f);
         float bearing = sharedPreferences.getFloat("bearing", 0.0f);
         currentLatLng = new LatLng(Double.parseDouble(sharedPreferences.getString("latitude", "0.0")),
-                           Double.parseDouble(sharedPreferences.getString("longitude", "0.0")));
+                Double.parseDouble(sharedPreferences.getString("longitude", "0.0")));
 
 
         //need to manage map markers too.  as per old code ie remove and re add.  do this now....joy
@@ -368,7 +375,6 @@ public class DemoActivity extends FragmentActivity {
 
 
         markerMap.put("Me", mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
-
 
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -384,12 +390,10 @@ public class DemoActivity extends FragmentActivity {
     }
 
 
-
-
-    public void onPause(){
+    public void onPause() {
         super.onPause();
 
-        if(serviceConnection != null){
+        if (serviceConnection != null) {
             unbindService(serviceConnection);
         }
 
@@ -419,24 +423,24 @@ public class DemoActivity extends FragmentActivity {
 
     }
 
-    public class DemoLocationListener implements LocationListener{
+    public class DemoLocationListener implements LocationListener {
 
         private LocationManager locationManager;
 
-        public DemoLocationListener(LocationManager locationManager){
-         this.locationManager = locationManager;
+        public DemoLocationListener(LocationManager locationManager) {
+            this.locationManager = locationManager;
         }
 
         @Override
         public void onLocationChanged(Location location) {
             // TODO Auto-generated method stub
-          //  callBack.setLocationUpdated(location);
+            //  callBack.setLocationUpdated(location);
 
             currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 
-            if(markerMap.containsKey("Me")){
-               markerMap.get("Me").remove();
-               markerMap.put("Me",mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
+            if (markerMap.containsKey("Me")) {
+                markerMap.get("Me").remove();
+                markerMap.put("Me", mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
             }
 
             ;
@@ -453,15 +457,20 @@ public class DemoActivity extends FragmentActivity {
             //we need to execute the method we are interested in.  note if we time out then
             locationManager.removeUpdates(this);
 
+            //bind again if its down.
+            if (cheService == null) {
+                bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+            }
+
             //lets send our location
-            if(cheService != null){
+            if (cheService != null) {
                 try {
-                   CoreMessage coreMessage = new CoreMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), CoreMessage.PLAYER);
+                    CoreMessage coreMessage = new CoreMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), CoreMessage.PLAYER);
 
                     cheService.writeToSocket(coreMessage);
-                }catch (JSONException jse){
+                } catch (JSONException jse) {
 
-                }catch (NoSuchAlgorithmException nsae){
+                } catch (NoSuchAlgorithmException nsae) {
 
                 }
             }

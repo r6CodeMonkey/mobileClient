@@ -59,6 +59,8 @@ public class CheService extends IntentService {
     private DataOutputStream dOut = null;
     private DataInputStream dIn = null;
 
+    private Thread write;
+
     //retry counters + max
     private int retryCounter = 0;
     private final static int MAX_RETRY = 10;
@@ -75,30 +77,7 @@ public class CheService extends IntentService {
 
 
     private Configuration configuration;
-
-
-
-    /*
-    we defnitely need an instance of Database as well
-     */
     private DBHelper dbHelper = new DBHelper(this);
-
-    /*
-    this is the key class. to design.  once i get old source back
-
-    basically it runs permanently.
-    it can be turned off and controlled via config.  but basically it does
-    the dirty work.  it marshalls the acknowledges and updates the database.
-
-    the client can execute on it.  ie, it can bind to service, but client has no
-    ability to access server directly.
-
-    Techincally we need a secondary service to maintain the config?
-
-    That would allow us to reconfigure this service.
-
-
-     */
 
 
     public CheService() {
@@ -138,6 +117,7 @@ public class CheService extends IntentService {
                 dIn.close();
             } catch (Exception e) {
                 Log.d("dIn error", e.toString());
+                dIn = null;
             }
         }
 
@@ -146,6 +126,7 @@ public class CheService extends IntentService {
                 dOut.close();
             } catch (Exception e) {
                 Log.d("dOut error", e.toString());
+                dOut = null;
             }
         }
 
@@ -154,6 +135,7 @@ public class CheService extends IntentService {
                 socket.close();
             } catch (Exception e) {
                 Log.d("socket error", e.toString());
+                socket = null;
             }
         }
 
@@ -168,121 +150,138 @@ public class CheService extends IntentService {
 
         try {
 
-            while (socket.isConnected()) {
 
-                byte[] buffer = new byte[BUFFER_SIZE];
+            byte[] buffer = new byte[BUFFER_SIZE];
 
-                int charsRead = 0;
+            int charsRead = 0;
 
-                while ((charsRead = dIn.read(buffer)) != -1) {
-                    try {
-                        //each message we receive should be a JSON.  We need to work out the type.
-                        oddymobstar.message.in.CoreMessage coreMessage = new oddymobstar.message.in.CoreMessage(new String(buffer).substring(0, charsRead));
+            while ((charsRead = dIn.read(buffer)) != -1) {
+                try {
+                    //each message we receive should be a JSON.  We need to work out the type.
+                    oddymobstar.message.in.CoreMessage coreMessage = new oddymobstar.message.in.CoreMessage(new String(buffer).substring(0, charsRead));
 
-                        Log.d("incoming", "the core message is "+coreMessage.toString());
-                        //what are we?
-                        if (!coreMessage.getJsonObject().isNull(Acknowledge.ACKNOWLEDGE)) {
+                    Log.d("incoming", "the core message is " + coreMessage.getJsonObject().toString());
+                    //what are we?
+                    if (!coreMessage.getJsonObject().isNull(Acknowledge.ACKNOWLEDGE)) {
 
-                            Acknowledge ack = new Acknowledge(coreMessage.getJsonObject().getJSONObject(Acknowledge.ACKNOWLEDGE));
-                            ack.create();
+                        Acknowledge ack = new Acknowledge(coreMessage.getJsonObject().getJSONObject(Acknowledge.ACKNOWLEDGE));
+                        ack.create();
 
                             /*
                             acknowledges either tell us of a fail (we can log it etc) or tell us of a success and generally a UUID.
                            */
-                            if (ack.getState().equals(Acknowledge.ERROR)) {
-                                Log.d("ack error", "error information is " + ack.getInfo());
-                            } else {
-                                //match to our acknowledge sent list...and this will hold the relevant action required.
-                                CoreMessage ackSent = sentAcks.get(ack.getAckId());
 
-                                if (ackSent != null) {
-                                    //is it a UUID message
-                                    if (ack.getInfo().equals(Acknowledge.UUID)) {
-                                        if (ackSent instanceof oddymobstar.message.out.TopicMessage) {
+                        if (ack.getState().equals(Acknowledge.ERROR)) {
+                            Log.d("ack error", "error information is " + ack.getInfo());
+                        } else {
+                            if (ack.getInfo().equals(Acknowledge.ACTIVE)) {
+                                //we need to wake up our write thread.
+                                if (write != null) {
 
-                                            Topic topic = new Topic();
-                                            topic.setKey(ack.getOid());
-                                            topic.setName(ackSent.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getJSONObject(oddymobstar.message.out.TopicMessage.TOPIC).getString(oddymobstar.message.out.TopicMessage.TNAME));
-                                            dbHelper.addTopic(topic);
+                                    Log.d("ack error", "trying to wake up thread");
 
-                                        } else if (ackSent instanceof oddymobstar.message.out.AllianceMessage) {
-
-                                            Alliance alliance = new Alliance();
-                                            alliance.setKey(ack.getOid());
-                                            alliance.setName(ackSent.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getJSONObject(oddymobstar.message.out.AllianceMessage.ALLIANCE).getString(oddymobstar.message.out.AllianceMessage.ANAME));
-                                            dbHelper.addAlliance(alliance);
-
-                                        } else if (ackSent instanceof PackageMessage) {
-
-                                        } else {
-                                            //its core.  therefore player.
-                                            Config config = configuration.getConfig(Configuration.PLAYER_KEY);
-                                            config.setValue(ack.getUid());
-                                            dbHelper.updateConfig(config);
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            synchronized (write) {
+                                                write.notify();
+                                            }
                                         }
+                                    }).start();
+
+
+                                }
+                            }
+                            //match to our acknowledge sent list...and this will hold the relevant action required.
+                            CoreMessage ackSent = sentAcks.get(ack.getAckId());
+
+                            if (ackSent != null) {
+                                //is it a UUID message
+                                if (ack.getInfo().equals(Acknowledge.UUID)) {
+                                    if (ackSent instanceof oddymobstar.message.out.TopicMessage) {
+
+                                        Topic topic = new Topic();
+                                        topic.setKey(ack.getOid());
+                                        topic.setName(ackSent.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getJSONObject(oddymobstar.message.out.TopicMessage.TOPIC).getString(oddymobstar.message.out.TopicMessage.TNAME));
+                                        dbHelper.addTopic(topic);
+
+                                    } else if (ackSent instanceof oddymobstar.message.out.AllianceMessage) {
+
+                                        Alliance alliance = new Alliance();
+                                        alliance.setKey(ack.getOid());
+                                        alliance.setName(ackSent.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getJSONObject(oddymobstar.message.out.AllianceMessage.ALLIANCE).getString(oddymobstar.message.out.AllianceMessage.ANAME));
+                                        dbHelper.addAlliance(alliance);
+
+                                    } else if (ackSent instanceof PackageMessage) {
+
+                                    } else {
+                                        //its core.  therefore player.
+                                        Config config = configuration.getConfig(Configuration.PLAYER_KEY);
+                                        config.setValue(ack.getUid());
+                                        dbHelper.updateConfig(config);
                                     }
+                                }
 
                                   /*
                                    also we have the current UTM / SUBUTM so we need to update this too.
 
                                    */
-                                    if (!(ackSent instanceof oddymobstar.message.out.AllianceMessage
-                                            || ackSent instanceof oddymobstar.message.out.TopicMessage
-                                            || ackSent instanceof PackageMessage)) {
-                                        Config config = configuration.getConfig(Configuration.CURRENT_UTM);
-                                        config.setValue(ack.getUtm());
-                                        dbHelper.updateConfig(config);
+                                if (!(ackSent instanceof oddymobstar.message.out.AllianceMessage
+                                        || ackSent instanceof oddymobstar.message.out.TopicMessage
+                                        || ackSent instanceof PackageMessage)) {
+                                    Config config = configuration.getConfig(Configuration.CURRENT_UTM);
+                                    config.setValue(ack.getUtm());
+                                    dbHelper.updateConfig(config);
 
-                                        config = configuration.getConfig(Configuration.CURRENT_SUBUTM);
-                                        config.setValue(ack.getSubUtm());
-                                        dbHelper.updateConfig(config);
-                                    }
-
-                                    sentAcks.remove(ack.getAckId());
+                                    config = configuration.getConfig(Configuration.CURRENT_SUBUTM);
+                                    config.setValue(ack.getSubUtm());
+                                    dbHelper.updateConfig(config);
                                 }
 
-                            }
-
-                        } else if (!coreMessage.getJsonObject().isNull(GridMessage.GRID)) {
-
-                            GridMessage gridMessage = new GridMessage(coreMessage.getJsonObject().getJSONObject(GridMessage.GRID));
-                            gridMessage.create();
-
-                        } else if (!coreMessage.getJsonObject().isNull(AllianceMessage.ALLIANCE)) {
-
-                            AllianceMessage allianceMessage = new AllianceMessage(coreMessage.getJsonObject().getJSONObject(AllianceMessage.ALLIANCE));
-                            allianceMessage.create();
-
-
-                        } else if (!coreMessage.getJsonObject().isNull(TopicMessage.TOPIC)) {
-
-                            TopicMessage topicMessage = new TopicMessage(coreMessage.getJsonObject().getJSONObject(TopicMessage.TOPIC));
-                            topicMessage.create();
-
-                            if(topicMessage.getFilter().equals(TopicMessage.POST)) {
-
-                                try {
-                                  Topic topic = new Topic();
-                                    topic.setKey(topicMessage.getTid());
-                                    topic.setName(topicMessage.getTitle());
-                                    topic.setName(topicMessage.getTitle());
-                                    dbHelper.addGlobalTopic(topic);
-                                    //this may not be catching it lol.
-                                } catch (android.database.sqlite.SQLiteConstraintException e) {
-                                    Log.d("topic error", "sql exception  " + e.toString());
-                                }
+                                sentAcks.remove(ack.getAckId());
                             }
 
                         }
 
-                        Log.d("socket listen", "we have read " + new String(buffer).substring(0, charsRead));
+                    } else if (!coreMessage.getJsonObject().isNull(GridMessage.GRID)) {
 
-                    } catch (JSONException jse) {
-                        Log.d("json exception", "json exception " + jse.toString());
+                        GridMessage gridMessage = new GridMessage(coreMessage.getJsonObject().getJSONObject(GridMessage.GRID));
+                        gridMessage.create();
+
+                    } else if (!coreMessage.getJsonObject().isNull(AllianceMessage.ALLIANCE)) {
+
+                        AllianceMessage allianceMessage = new AllianceMessage(coreMessage.getJsonObject().getJSONObject(AllianceMessage.ALLIANCE));
+                        allianceMessage.create();
+
+
+                    } else if (!coreMessage.getJsonObject().isNull(TopicMessage.TOPIC)) {
+
+                        TopicMessage topicMessage = new TopicMessage(coreMessage.getJsonObject().getJSONObject(TopicMessage.TOPIC));
+                        topicMessage.create();
+
+                        if (topicMessage.getFilter().equals(TopicMessage.POST)) {
+
+                            try {
+                                Topic topic = new Topic();
+                                topic.setKey(topicMessage.getTid());
+                                topic.setName(topicMessage.getTitle());
+                                Topic checkGlobal = dbHelper.getGlobalTopic(topic.getKey());
+                                if(!checkGlobal.getKey().equals(topic.getKey())) {
+                                    dbHelper.addGlobalTopic(topic);
+                                }
+                                //this may not be catching it lol.  it seems not.  otherwise it all works (ie get global topics)
+                            } catch (android.database.sqlite.SQLiteConstraintException e) {
+                                Log.d("topic error", "sql exception  " + e.toString());
+                            }
+                        }
+
                     }
 
-                }
+                    Log.d("socket listen", "we have read " + new String(buffer).substring(0, charsRead));
 
+                } catch (JSONException jse) {
+                    Log.d("json exception", "json exception " + jse.toString());
+                }
 
             }
 
@@ -296,19 +295,49 @@ public class CheService extends IntentService {
 
     }
 
-    private void reConnect() {
+    private void reConnect(final CoreMessage coreMessage) {
 
-        /*
-        id we go down we need to be able to re connect.  not issue at moment as we are running service from app
-        Long term, we want service running and managing itself outside of app (android system permissions to review).
+        try {
+            socket.close();
+        } catch (Exception e) {
 
-        cant be accessed publicly tho, so we need to manage it all here.
+        }
 
-        Likely need a watcher thread on connection, and to try to reconnect it if it goes down.
+        socket = null;
 
-        Stupid test here as i am wired into local network,
 
-         */
+        try {
+            dIn.close();
+        } catch (Exception e) {
+        }
+        try {
+            dOut.close();
+        } catch (Exception e) {
+        }
+
+        //try again
+        connectSocket();
+
+
+        //we now need to wait for the active connection message again.
+        write = new Thread();
+
+        write.start();
+
+        synchronized (write) {
+            try {
+                this.wait();
+            } catch (InterruptedException ie) {
+                Log.d("wait", "wait " + ie.toString());
+            } catch (Exception e) {
+                Log.d("wait", "wait " + e.toString());
+            }
+
+
+            writeToSocket(coreMessage);
+
+        }
+
 
     }
 
@@ -316,36 +345,20 @@ public class CheService extends IntentService {
     public void writeToSocket(final CoreMessage coreMessage) {
 
 
-
-
         try {
-            //to tidy this all up its just a test
-            //   String ackId = uuidGenerator.generateAcknowledgeKey();
-            //   coreMessage = new CoreMessage(new LatLng(1, 1), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), ackId, CoreMessage.PLAYER);
 
             sentAcks.put(coreMessage.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getString(CoreMessage.ACK_ID), coreMessage);
-
-
             dOut.writeUTF(coreMessage.getMessage().toString());
 
 
         } catch (Exception e) {
-            Log.d("socket exception", "socket " + e.toString()+coreMessage.getMessage());
-            //st up our socket.
-            if(retryCounter < MAX_RETRY) {
-                new Thread(new Runnable() {
-                    public void run() {
-                        connectSocket();
-                        retryCounter++;
-                        //need to improve this for bad connections lol....ie once we can ping to it we
-                        //can write to it.
-                        writeToSocket(coreMessage);
-
-                    }
-                }).start();
-            }else{
-                retryCounter=0;
-            }
+            Log.d("socket exception", "socket " + e.toString() + coreMessage.getMessage());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    reConnect(coreMessage);
+                }
+            }).start();
 
         }
 
@@ -381,6 +394,7 @@ public class CheService extends IntentService {
             //crashed.
             Log.d("socket error", "socket " + e.toString());
 
+
         }
     }
 
@@ -399,7 +413,7 @@ public class CheService extends IntentService {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         //to review this.
-        return START_NOT_STICKY;
+        return START_STICKY;
         //  return super.onStartCommand(intent,flags,startId);
     }
 

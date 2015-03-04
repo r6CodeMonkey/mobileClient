@@ -12,9 +12,11 @@ public class CoreMessage {
 
     protected JSONObject jsonObject;
 
-    public CoreMessage(String message) throws JSONException{
+    public CoreMessage(String message) throws JSONException {
         jsonObject = new JSONObject(message).getJSONObject(CORE);
     }
 
-    public JSONObject getJsonObject(){return jsonObject;}
+    public JSONObject getJsonObject() {
+        return jsonObject;
+    }
 }

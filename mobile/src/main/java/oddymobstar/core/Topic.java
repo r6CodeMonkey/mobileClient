@@ -8,23 +8,23 @@ public class Topic {
     private String key = "";
     private String name = "";
 
-    public Topic(){
+    public Topic() {
 
     }
 
-    public void setKey(String key){
+    public void setKey(String key) {
         this.key = key;
     }
 
-    public void setName(String name){
+    public void setName(String name) {
         this.name = name;
     }
 
-    public String getKey(){
+    public String getKey() {
         return key;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 

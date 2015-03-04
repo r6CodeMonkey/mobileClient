@@ -37,12 +37,11 @@ public class TopicMessage extends CoreMessage {
     public static final String TOPIC_SUB_UTM = "subutm";
 
 
-
-    public TopicMessage(LatLng latLng, String uid, String ackId) throws JSONException{
-        super(latLng,uid,ackId,TOPIC);
+    public TopicMessage(LatLng latLng, String uid, String ackId) throws JSONException {
+        super(latLng, uid, ackId, TOPIC);
     }
 
-    public void setTopic(Topic topic, String type, String status, String msg) throws JSONException{
+    public void setTopic(Topic topic, String type, String status, String msg) throws JSONException {
 
         JSONObject json = new JSONObject();
 
@@ -53,7 +52,7 @@ public class TopicMessage extends CoreMessage {
         json.put(TSTAT, status);
 
 
-        message.getJSONObject(CORE_OBJECT).put(TOPIC,json);
+        message.getJSONObject(CORE_OBJECT).put(TOPIC, json);
 
     }
 }

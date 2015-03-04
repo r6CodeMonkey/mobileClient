@@ -24,7 +24,6 @@ public class AllianceMessage extends CoreMessage {
     public static final String ANAME = "aname";
 
 
-
     //types of message
     public static final String ALLIANCE_JOIN = "join";
     public static final String ALLIANCE_LEAVE = "leave";
@@ -37,25 +36,25 @@ public class AllianceMessage extends CoreMessage {
     public static final String ALLIANCE_UTM = "utm";
     public static final String ALLIANCE_SUBUTM = "subutm";
 
-    public AllianceMessage(LatLng latLng, String uid, String ackId) throws JSONException{
-        super(latLng,uid,ackId,ALLIANCE);
+    public AllianceMessage(LatLng latLng, String uid, String ackId) throws JSONException {
+        super(latLng, uid, ackId, ALLIANCE);
 
 
     }
 
-    public void setAlliance(Alliance alliance, String type, String status, String msg) throws JSONException{
+    public void setAlliance(Alliance alliance, String type, String status, String msg) throws JSONException {
 
         JSONObject json = new JSONObject();
 
         json.put(AID, alliance.getKey());
-        json.put(ACONTENT,msg);
+        json.put(ACONTENT, msg);
         json.put(ATYPE, type);
         json.put(ASTAT, status);
         json.put(ANAME, alliance.getName());
 
         //also need lat long etc.
 
-        message.getJSONObject(CORE_OBJECT).put(ALLIANCE,json);
+        message.getJSONObject(CORE_OBJECT).put(ALLIANCE, json);
 
     }
 }

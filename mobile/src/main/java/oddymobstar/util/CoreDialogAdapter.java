@@ -43,7 +43,7 @@ public class CoreDialogAdapter extends CursorAdapter {
 
         TextView tv = (TextView) view.findViewById(R.id.core_item_name);
 
-        switch(source){
+        switch (source) {
 
             case CoreDialog.MY_TOPICS:
                 tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_NAME)));
@@ -58,7 +58,6 @@ public class CoreDialogAdapter extends CursorAdapter {
                 tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME)));
                 break;
         }
-
 
 
     }

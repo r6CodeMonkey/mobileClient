@@ -13,12 +13,12 @@ public class PackageMessage extends CoreMessage {
 
     public static final String PACKAGE = "package";
 
-    public PackageMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException{
-       super(latLng,uid,ackId,PACKAGE);
+    public PackageMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException {
+        super(latLng, uid, ackId, PACKAGE);
 
     }
 
-    public void setPackage(oddymobstar.core.Package pack){
+    public void setPackage(oddymobstar.core.Package pack) {
 
     }
 }

@@ -6,19 +6,21 @@ import org.json.JSONObject;
 /**
  * Created by root on 25/02/15.
  */
-public class Acknowledge{
+public class Acknowledge {
 
     public static final String ACKNOWLEDGE = "acknowledge";
     private static final String UID = "uid";
     private static final String OID = "oid";
     private static final String UTM = "utm";
     private static final String SUB_UTM = "subutm";
-    private static final String ACK_ID ="ackid";
+    private static final String ACK_ID = "ackid";
     private static final String STATE = "state";
     private static final String INFO = "info";
 
     public static final String ERROR = "error";
     public static final String SUCCESS = "success";
+
+    public static final String ACTIVE = "ACTIVE";
 
     public static final String UUID = "UUID";
 
@@ -33,14 +35,13 @@ public class Acknowledge{
     private JSONObject acknowledge;
 
 
-
-    public Acknowledge(JSONObject acknowledge){
+    public Acknowledge(JSONObject acknowledge) {
 
         this.acknowledge = acknowledge;
 
     }
 
-    public void create() throws JSONException{
+    public void create() throws JSONException {
 
 
         uid = acknowledge.getString(UID);
@@ -54,14 +55,33 @@ public class Acknowledge{
 
     }
 
-    public String getUid(){return uid;}
-    public String getOid(){return oid;}
-    public String getAckId(){return ackId;}
-    public String getState(){return state;}
-    public String getInfo(){return info;}
-    public String getUtm(){return utm;}
-    public String getSubUtm(){return subUtm;}
+    public String getUid() {
+        return uid;
+    }
 
+    public String getOid() {
+        return oid;
+    }
+
+    public String getAckId() {
+        return ackId;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public String getUtm() {
+        return utm;
+    }
+
+    public String getSubUtm() {
+        return subUtm;
+    }
 
 
 }

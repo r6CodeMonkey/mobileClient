@@ -20,9 +20,9 @@ public class CoreMessage {
     public static final String TYPE = "type";
     public static final String LONG = "long";
     public static final String LAT = "lat";
-    public static final String ACK_ID ="ackid";
+    public static final String ACK_ID = "ackid";
 
-    public CoreMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException{
+    public CoreMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException {
 
         JSONObject core = new JSONObject();
         core.put(UID, uid);
@@ -31,11 +31,11 @@ public class CoreMessage {
         core.put(LONG, latLng.longitude);
         core.put(ACK_ID, ackId);
 
-        message.put(CORE_OBJECT,core);
+        message.put(CORE_OBJECT, core);
 
     }
 
-    public JSONObject getMessage(){
+    public JSONObject getMessage() {
         return message;
     }
 }

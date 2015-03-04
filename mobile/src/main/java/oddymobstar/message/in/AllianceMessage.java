@@ -23,13 +23,18 @@ public class AllianceMessage {
         this.alliance = alliance;
     }
 
-    public void create() throws JSONException{
+    public void create() throws JSONException {
 
 
         aid = alliance.getString(AID);
         this.message = alliance.getString(MSG);
     }
 
-    public String getAid(){return aid;}
-    public String getMessage(){return message;}
+    public String getAid() {
+        return aid;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }

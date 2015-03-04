@@ -10,38 +10,38 @@ public class Config {
     private String value;
 
 
-    public Config( String name, String value){
+    public Config(String name, String value) {
         this.name = name;
         this.value = value;
     }
 
-    public Config(int id, String name, String value){
-      this.id = id;
-      this.name = name;
-      this.value = value;
+    public Config(int id, String name, String value) {
+        this.id = id;
+        this.name = name;
+        this.value = value;
     }
 
-    public void setId(int id){
+    public void setId(int id) {
         this.id = id;
     }
 
-    public void setName(String name){
+    public void setName(String name) {
         this.name = name;
     }
 
-    public void setValue(String value){
+    public void setValue(String value) {
         this.value = value;
     }
 
-    public int getId(){
+    public int getId() {
         return id;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    public String getValue(){
+    public String getValue() {
         return value;
     }
 }

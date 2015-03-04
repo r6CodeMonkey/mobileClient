@@ -30,7 +30,7 @@ public class TopicMessage {
         this.topic = topic;
     }
 
-    public void create() throws JSONException{
+    public void create() throws JSONException {
 
         tid = topic.getString(TID);
         this.message = topic.getString(MSG);
@@ -38,8 +38,19 @@ public class TopicMessage {
         filter = topic.getString(FILTER);
     }
 
-    public String getTid(){return tid;}
-    public String getMessage(){return message;}
-    public String getTitle(){ return title;}
-    public String getFilter(){return filter;}
+    public String getTid() {
+        return tid;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getFilter() {
+        return filter;
+    }
 }

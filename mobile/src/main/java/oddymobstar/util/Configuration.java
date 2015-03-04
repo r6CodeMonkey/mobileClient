@@ -32,15 +32,15 @@ public class Configuration implements Serializable {
      */
     private Map<String, Config> configs = new HashMap<String, Config>();
 
-    public Configuration(Cursor cursor){
+    public Configuration(Cursor cursor) {
 
         /*
           load whatever configs we have.  we need to add in some base ones on the create method.
          */
-        while(cursor.moveToNext()){
+        while (cursor.moveToNext()) {
             Config config = new Config(cursor.getInt(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_ID)),
-                            cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)),
-                            cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_VALUE)));
+                    cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_VALUE)));
             configs.put(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)), config);
         }
 
@@ -49,6 +49,11 @@ public class Configuration implements Serializable {
 
     }
 
-    public Map<String, Config> getConfigs(){return configs;}
-    public Config getConfig(String key){return configs.get(key);}
+    public Map<String, Config> getConfigs() {
+        return configs;
+    }
+
+    public Config getConfig(String key) {
+        return configs.get(key);
+    }
 }

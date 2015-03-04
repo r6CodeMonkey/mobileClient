@@ -24,7 +24,6 @@ public class CoreDialog extends DialogFragment {
     public static final int MY_ALLIANCES = 3;
 
 
-
     /*
     passed in from parent
      */
@@ -34,11 +33,11 @@ public class CoreDialog extends DialogFragment {
 
     private static DialogInterface.OnClickListener coreListener;
 
-    public CoreDialog(){
+    public CoreDialog() {
 
     }
 
-    public static CoreDialog newInstance(DBHelper db, DialogInterface.OnClickListener listener, int source){
+    public static CoreDialog newInstance(DBHelper db, DialogInterface.OnClickListener listener, int source) {
         coreListener = listener;
         dbHelper = db;
         coreSource = source;
@@ -47,47 +46,47 @@ public class CoreDialog extends DialogFragment {
 
     }
 
-    public Dialog onCreateDialog(Bundle savedInstance){
+    public Dialog onCreateDialog(Bundle savedInstance) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
 
-        LayoutInflater inflater = (LayoutInflater)this.getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) this.getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.core_dialog, null);
         builder.setView(view);
         builder.setTitle("Testing");
 
-        switch(coreSource){
+        switch (coreSource) {
 
             case CONFIG:
                 builder.setTitle("Configuration");
-                adapter = new CoreDialogAdapter(this.getActivity(),dbHelper.getConfigs(),false,coreSource);
+                adapter = new CoreDialogAdapter(this.getActivity(), dbHelper.getConfigs(), false, coreSource);
                 break;
-             case GLOBAL_TOPICS:
-                 builder.setTitle("Global Topics");
-                 adapter = new CoreDialogAdapter(this.getActivity(),dbHelper.getGlobalTopics(),false,coreSource);
-                 break;
+            case GLOBAL_TOPICS:
+                builder.setTitle("Global Topics");
+                adapter = new CoreDialogAdapter(this.getActivity(), dbHelper.getGlobalTopics(), false, coreSource);
+                break;
             case MY_ALLIANCES:
                 builder.setTitle("Alliances");
-                adapter = new CoreDialogAdapter(this.getActivity(),dbHelper.getAlliances(),false,coreSource);
+                adapter = new CoreDialogAdapter(this.getActivity(), dbHelper.getAlliances(), false, coreSource);
                 break;
             case MY_TOPICS:
                 builder.setTitle("Topics");
-                adapter = new CoreDialogAdapter(this.getActivity(),dbHelper.getTopics(),false,coreSource);
+                adapter = new CoreDialogAdapter(this.getActivity(), dbHelper.getTopics(), false, coreSource);
 
 
                 break;
 
         }
 
-        builder.setAdapter(adapter,coreListener);
+        builder.setAdapter(adapter, coreListener);
 
         return builder.create();
 
     }
 
-    public void dismiss(){
+    public void dismiss() {
         super.dismiss();
 
-        if(dbHelper != null) {
+        if (dbHelper != null) {
             dbHelper.close();
         }
     }

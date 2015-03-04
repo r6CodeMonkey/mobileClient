@@ -6,7 +6,7 @@ import org.json.JSONObject;
 /**
  * Created by root on 26/02/15.
  */
-public class GridMessage{
+public class GridMessage {
 
     public static final String GRID = "grid";
     private static final String GRID_UTM = "utm";
@@ -23,8 +23,7 @@ public class GridMessage{
         this.grid = grid;
     }
 
-    public void create() throws JSONException{
-
+    public void create() throws JSONException {
 
 
         utm = grid.getString(GRID_UTM);
@@ -32,8 +31,16 @@ public class GridMessage{
         this.message = grid.getString(MSG);
     }
 
-    public String getUtm(){return utm;}
-    public String getSubUtm(){return subUtm;}
-    public String getMessage(){return message;}
+    public String getUtm() {
+        return utm;
+    }
+
+    public String getSubUtm() {
+        return subUtm;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 
 }

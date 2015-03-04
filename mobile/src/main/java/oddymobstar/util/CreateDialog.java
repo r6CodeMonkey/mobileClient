@@ -27,26 +27,26 @@ public class CreateDialog extends DialogFragment {
 
     private static DialogInterface.OnClickListener createListener;
 
-    public CreateDialog(){
+    public CreateDialog() {
 
     }
 
-    public static CreateDialog newInstance(DialogInterface.OnClickListener listener, int source){
+    public static CreateDialog newInstance(DialogInterface.OnClickListener listener, int source) {
         createListener = listener;
         createSource = source;
 
         return new CreateDialog();
     }
 
-    public Dialog onCreateDialog(Bundle savedInstance){
+    public Dialog onCreateDialog(Bundle savedInstance) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
 
-        LayoutInflater inflater = (LayoutInflater)this.getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) this.getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.create_dialog, null);
         builder.setView(view);
         builder.setTitle("Create");
 
-        switch(createSource){
+        switch (createSource) {
 
             case CREATE_ALLIANCE:
                 builder.setTitle("Create Alliance");
@@ -57,10 +57,10 @@ public class CreateDialog extends DialogFragment {
 
         }
 //  dirty hack anyway.  who cares at present for demo
-     //
+        //
 
 
-        builder.setPositiveButton("CREATE",  createListener);
+        builder.setPositiveButton("CREATE", createListener);
 
         this.view = view;
 
@@ -68,8 +68,8 @@ public class CreateDialog extends DialogFragment {
 
     }
 
-    public String getName(){
-        return ((EditText)view.findViewById(R.id.create)).getText().toString();
+    public String getName() {
+        return ((EditText) view.findViewById(R.id.create)).getText().toString();
     }
 
 

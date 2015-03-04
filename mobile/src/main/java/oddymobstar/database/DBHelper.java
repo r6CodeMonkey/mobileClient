@@ -105,11 +105,10 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_PACKAGES);
 
 
-
     }
 
 
-    public void addBaseConfiguration(){
+    public void addBaseConfiguration() {
         Config config = new Config(Configuration.PORT, "8085");
         addConfig(config);
         config = new Config(Configuration.URL, "82.23.41.68");
@@ -389,7 +388,9 @@ public class DBHelper extends SQLiteOpenHelper {
     get specific object.  using key.  probably to check it actually exists etc before writing a new
     entry etc in the database table.....unlikely to require other than to check something exists.
      */
-    public Grid getGrid(String key) {return null;}
+    public Grid getGrid(String key) {
+        return null;
+    }
 
     public Alliance getAlliance(String key) {
         return null;
@@ -403,6 +404,23 @@ public class DBHelper extends SQLiteOpenHelper {
         return null;
     }
 
+    public Topic getGlobalTopic(String key){
+
+        Cursor topic = this.getReadableDatabase().rawQuery("SELECT " + TOPIC_KEY + " as _id," + TOPIC_KEY + "," + TOPIC_NAME + " FROM " + GLOBAL_TOPICS_TABLE +" WHERE "+TOPIC_KEY+" =? " +" ORDER BY " + TOPIC_NAME + " ASC", new String[]{key});
+
+        Topic returnTopic = new Topic();
+
+        while(topic.moveToNext()){
+            returnTopic.setName(topic.getString(topic.getColumnIndexOrThrow((DBHelper.TOPIC_NAME))));
+            returnTopic.setKey(topic.getString(topic.getColumnIndexOrThrow((DBHelper.TOPIC_KEY))));
+
+        }
+        topic.close();
+
+        return returnTopic;
+
+    }
+
     public Config getConfig(String key) {
         return null;
     }
@@ -412,7 +430,7 @@ public class DBHelper extends SQLiteOpenHelper {
      */
     public boolean hasPreLoad() {
         Cursor cursor = this.getReadableDatabase().rawQuery(
-                "SELECT COUNT(1) as id FROM "+CONFIG_TABLE, null);
+                "SELECT COUNT(1) as id FROM " + CONFIG_TABLE, null);
         int count = 0;
         while (cursor.moveToNext()) {
             count = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
