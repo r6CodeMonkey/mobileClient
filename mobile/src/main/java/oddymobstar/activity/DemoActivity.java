@@ -58,9 +58,14 @@ public class DemoActivity extends FragmentActivity {
     private CheService cheService;
     private ServiceConnection serviceConnection;
 
-    private static final Long TWO_MINUTES = 120000l;
+    public static final Long TWO_MINUTES = 120000l;
 
     private Intent intent;
+    private Intent serviceIntent;
+
+
+    private Thread locationUpdates;
+    private Thread service;
 
     private LatLng currentLatLng = new LatLng(0, 0);  //should use saved preferences.  to do.
 
@@ -83,16 +88,19 @@ public class DemoActivity extends FragmentActivity {
         uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
 
 
-        intent = new Intent(this, CheService.class);
-        final Intent serviceIntent = new Intent(this, CheService.class);
+         intent = new Intent(this, CheService.class);
+         serviceIntent = new Intent(this, CheService.class);
+
 
         //we need it started.
-        new Thread(new Runnable() {
+        service = new Thread(new Runnable() {
             @Override
             public void run() {
                 startService(serviceIntent);
             }
-        }).start();
+        });
+
+        service.start();
 
 
         serviceConnection = new ServiceConnection() {
@@ -292,6 +300,33 @@ public class DemoActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+
+        if(service == null){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    startService(serviceIntent);
+                }
+            });
+
+            service.start();
+        }
+
+        if(locationUpdates == null){
+            locationUpdates = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, TWO_MINUTES, 0, demoLocationListener);
+                        }
+                    });
+
+                }
+            });
+            locationUpdates.start();
+        }
         //and we need to bind to it.
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
@@ -336,7 +371,7 @@ public class DemoActivity extends FragmentActivity {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         demoLocationListener = new DemoLocationListener(locationManager);
 
-        new Thread(new Runnable() {
+        locationUpdates = new Thread(new Runnable() {
             @Override
             public void run() {
                 handler.post(new Runnable() {
@@ -347,7 +382,9 @@ public class DemoActivity extends FragmentActivity {
                 });
 
             }
-        }).start();
+        });
+
+        locationUpdates.start();
 
 
         SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
@@ -397,6 +434,9 @@ public class DemoActivity extends FragmentActivity {
     public void onDestroy() {
         super.onDestroy();
 
+        service = null;
+        locationUpdates = null;
+
         SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -419,6 +459,10 @@ public class DemoActivity extends FragmentActivity {
     }
 
     public class DemoLocationListener implements LocationListener {
+
+        /*
+        this really needs to be moved to the service not the app......to review and test nearer time.  use away cambridge as test
+         */
 
         private LocationManager locationManager;
 
@@ -482,7 +526,7 @@ public class DemoActivity extends FragmentActivity {
         @Override
         public void onProviderEnabled(String provider) {
             // TODO Auto-generated method stub
-            locationManager.requestLocationUpdates(provider, 0, 0, this);
+            locationManager.requestLocationUpdates(provider, TWO_MINUTES, 0, this);
 
         }
 

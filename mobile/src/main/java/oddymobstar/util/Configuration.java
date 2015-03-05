@@ -27,6 +27,8 @@ public class Configuration implements Serializable {
 
     public final static String CURRENT_UTM = "CURRENT_UTM";
     public final static String CURRENT_SUBUTM = "CURRENT_SUBUTM";
+
+ //Need last server contact.   public final static String CURRENT_SUBUTM = "CURRENT_SUBUTM";
     /*
       we will also need other configs, ie security types...enough to get going tho.
      */

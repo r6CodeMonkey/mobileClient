@@ -2,19 +2,31 @@ package oddymobstar.service;
 
 import android.app.IntentService;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import oddymobstar.activity.DemoActivity;
 import oddymobstar.core.Alliance;
 import oddymobstar.core.Config;
 import oddymobstar.core.Topic;
@@ -26,6 +38,7 @@ import oddymobstar.message.in.TopicMessage;
 import oddymobstar.message.out.CoreMessage;
 import oddymobstar.message.out.PackageMessage;
 import oddymobstar.util.Configuration;
+import oddymobstar.util.UUIDGenerator;
 
 
 /**
@@ -46,10 +59,14 @@ public class CheService extends IntentService {
     private DataInputStream dIn = null;
 
     private Thread write;
+    private Thread connect;
+    private Thread read;
+    private Thread locationUpdates;
 
-    //retry counters + max
-    private int retryCounter = 0;
-    private final static int MAX_RETRY = 10;
+    //service manager
+    private LocationManager locationManager;
+    private android.os.Handler handler = new android.os.Handler();
+
 
     private Map<String, CoreMessage> sentAcks = new HashMap<String, CoreMessage>();
 
@@ -61,6 +78,60 @@ public class CheService extends IntentService {
 
     private CheServiceBinder cheServiceBinder = new CheServiceBinder();
 
+
+    public class DemoLocationListener implements LocationListener {
+
+        private UUIDGenerator uuidGenerator;
+
+        /*
+        this really needs to be moved to the service not the app......to review and test nearer time.  use away cambridge as test
+         */
+
+        private LocationManager locationManager;
+
+        public DemoLocationListener(LocationManager locationManager) {
+            this.locationManager = locationManager;
+        }
+
+        @Override
+        public void onLocationChanged(Location location) {
+            // TODO Auto-generated method stub
+            //  callBack.setLocationUpdated(location);
+            uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
+            try {
+                CoreMessage coreMessage = new CoreMessage(new LatLng(location.getLatitude(), location.getLongitude()), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), CoreMessage.PLAYER);
+                writeToSocket(coreMessage);
+
+            }catch(NoSuchAlgorithmException nsae){
+                Log.d("Security error", nsae.toString());
+            }catch(JSONException jse){
+                Log.d("JSON error", jse.toString());
+            }
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            // TODO Auto-generated method stub
+            locationManager.removeUpdates(this);
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            // TODO Auto-generated method stub
+            locationManager.requestLocationUpdates(provider, DemoActivity.TWO_MINUTES, 0, this);
+
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
+    private DemoLocationListener demoLocationListener;
 
     private Configuration configuration;
     private DBHelper dbHelper = new DBHelper(this);
@@ -74,17 +145,39 @@ public class CheService extends IntentService {
     @Override
     public void onCreate() {
 
+
+
         //this works fine for what i want (need to ensure it stays up.
         //also need to have timeout / reconnect etc.
         configuration = new Configuration(dbHelper.getConfigs());
 
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        demoLocationListener = new DemoLocationListener(locationManager);
+
+        locationUpdates = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, DemoActivity.TWO_MINUTES, 0, demoLocationListener);
+                    }
+                });
+
+            }
+        });
+
+        locationUpdates.start();
+
 
         //st up our socket.
-        new Thread(new Runnable() {
+        connect = new Thread(new Runnable() {
             public void run() {
                 connectSocket();
             }
-        }).start();
+        });
+
+        connect.start();
 
 
     }
@@ -96,6 +189,8 @@ public class CheService extends IntentService {
 
     @Override
     public void onDestroy() {
+
+
         super.onDestroy();
 
         if (dIn != null) {
@@ -124,6 +219,11 @@ public class CheService extends IntentService {
                 socket = null;
             }
         }
+
+        locationUpdates = null;
+        write = null;
+        read = null;
+        connect = null;
 
 
         if (dbHelper != null) {
@@ -290,6 +390,9 @@ public class CheService extends IntentService {
         }
 
         socket = null;
+        connect = null;
+        write = null;
+        read = null;
 
 
         try {
@@ -310,9 +413,10 @@ public class CheService extends IntentService {
 
         write.start();
 
+
         synchronized (write) {
             try {
-                this.wait();
+                write.wait();
             } catch (InterruptedException ie) {
                 Log.d("wait", "wait " + ie.toString());
             } catch (Exception e) {
@@ -331,6 +435,7 @@ public class CheService extends IntentService {
     public void writeToSocket(final CoreMessage coreMessage) {
 
 
+
         try {
 
             sentAcks.put(coreMessage.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getString(CoreMessage.ACK_ID), coreMessage);
@@ -339,12 +444,14 @@ public class CheService extends IntentService {
 
         } catch (Exception e) {
             Log.d("socket exception", "socket " + e.toString() + coreMessage.getMessage());
-            new Thread(new Runnable() {
+            connect = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     reConnect(coreMessage);
                 }
-            }).start();
+            });
+
+            connect.start();
 
         }
 
@@ -368,12 +475,14 @@ public class CheService extends IntentService {
 
 
             //now start listening to the socket this is ongoing.
-            new Thread((new Runnable() {
+            read = new Thread((new Runnable() {
                 @Override
                 public void run() {
                     socketListen();
                 }
-            })).start();
+            }));
+
+            read.start();
 
 
         } catch (Exception e) {
