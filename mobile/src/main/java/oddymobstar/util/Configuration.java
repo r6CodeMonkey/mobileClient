@@ -28,6 +28,8 @@ public class Configuration implements Serializable {
     public final static String CURRENT_UTM = "CURRENT_UTM";
     public final static String CURRENT_SUBUTM = "CURRENT_SUBUTM";
 
+    public final static String GPS_UPDATE_INTERVAL = "GPS_UPDATE_INTERVAL";
+
  //Need last server contact.   public final static String CURRENT_SUBUTM = "CURRENT_SUBUTM";
     /*
       we will also need other configs, ie security types...enough to get going tho.

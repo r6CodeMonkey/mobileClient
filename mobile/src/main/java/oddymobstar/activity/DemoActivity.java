@@ -1,6 +1,7 @@
 package oddymobstar.activity;
 
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -67,7 +68,7 @@ public class DemoActivity extends FragmentActivity {
     private Thread locationUpdates;
     private Thread service;
 
-    private LatLng currentLatLng = new LatLng(0, 0);  //should use saved preferences.  to do.
+    private LatLng currentLatLng = new LatLng(0, 0);  //it does use saved prefs now
 
     private Map<String, Marker> markerMap = new HashMap<String, Marker>();
 
@@ -92,15 +93,18 @@ public class DemoActivity extends FragmentActivity {
          serviceIntent = new Intent(this, CheService.class);
 
 
-        //we need it started.
-        service = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                startService(serviceIntent);
-            }
-        });
+        //dont restart it
+    //    if(!isMyServiceRunning(CheService.class)) {
+            //we need it started.
+            service = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    startService(serviceIntent);
+                }
+            });
 
-        service.start();
+            service.start();
+     //   }
 
 
         serviceConnection = new ServiceConnection() {
@@ -119,40 +123,16 @@ public class DemoActivity extends FragmentActivity {
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
 
-        /*
+    }
 
-        next up...and i dont want to program all night have big hockey game tomoz
-
-        (plus i need to clean house and r6 before match and do some washing)
-
-        menus launch list driven dialogs (its fine for this long term needs custom list fragments etc)
-
-        we also need sub menu actions to them
-
-        ie
-        my alliances: message (plus zone filters), leave
-        my topics: message, amend zone filters, leave
-        global topics: register (plus zone filters)
-
-
-        Key thing we need before all this is register and ongoing grid / core updating.
-
-        This must be driven by the service and is really first test before making stupid lists (which is dead easy anyway).
-
-
-        Finally: create (topic | alliance) is basically a popup with a text field to name it and then send it to server.
-
-
-        And advanced: is add members to alliances.  currently this will be locked to bluetooth | nfc so is some work.
-
-        Well nfc isnt. and neither is bluetooth either.
-
-        Once we have done all this we then need to be able to allow display of the items on the map using specific markers
-        per type.
-
-         */
-
-
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -319,7 +299,7 @@ public class DemoActivity extends FragmentActivity {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, TWO_MINUTES, 0, demoLocationListener);
+                            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, demoLocationListener);
                         }
                     });
 
@@ -377,7 +357,7 @@ public class DemoActivity extends FragmentActivity {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, TWO_MINUTES, 0, demoLocationListener);
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, demoLocationListener);
                     }
                 });
 
@@ -526,7 +506,7 @@ public class DemoActivity extends FragmentActivity {
         @Override
         public void onProviderEnabled(String provider) {
             // TODO Auto-generated method stub
-            locationManager.requestLocationUpdates(provider, TWO_MINUTES, 0, this);
+           // locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
 
         }
 

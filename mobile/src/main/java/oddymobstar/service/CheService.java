@@ -23,7 +23,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import oddymobstar.activity.DemoActivity;
@@ -63,12 +65,16 @@ public class CheService extends IntentService {
     private Thread read;
     private Thread locationUpdates;
 
+    private static boolean ON_CONNECT = false;
+
+    private List<CoreMessage> messageBuffer = new ArrayList<>();
+
     //service manager
     private LocationManager locationManager;
     private android.os.Handler handler = new android.os.Handler();
 
 
-    private Map<String, CoreMessage> sentAcks = new HashMap<String, CoreMessage>();
+    private Map<String, CoreMessage> sentAcks = new HashMap<>();
 
     public class CheServiceBinder extends Binder {
         public CheService getCheServiceInstance() {
@@ -120,7 +126,7 @@ public class CheService extends IntentService {
         @Override
         public void onProviderEnabled(String provider) {
             // TODO Auto-generated method stub
-            locationManager.requestLocationUpdates(provider, DemoActivity.TWO_MINUTES, 0, this);
+         //   locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
 
         }
 
@@ -160,7 +166,7 @@ public class CheService extends IntentService {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, DemoActivity.TWO_MINUTES, 0, demoLocationListener);
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, demoLocationListener);
                     }
                 });
 
@@ -247,6 +253,9 @@ public class CheService extends IntentService {
                     oddymobstar.message.in.CoreMessage coreMessage = new oddymobstar.message.in.CoreMessage(new String(buffer).substring(0, charsRead));
 
                     Log.d("incoming", "the core message is " + coreMessage.getJsonObject().toString());
+                    //at this point we could have more than 1 core message here.
+
+
                     //what are we?
                     if (!coreMessage.getJsonObject().isNull(Acknowledge.ACKNOWLEDGE)) {
 
@@ -263,6 +272,7 @@ public class CheService extends IntentService {
                             if (ack.getInfo().equals(Acknowledge.ACTIVE)) {
                                 //we need to wake up our write thread.
                                 if (write != null) {
+                                    ON_CONNECT =true;
 
                                     Log.d("ack error", "trying to wake up thread");
 
@@ -363,7 +373,7 @@ public class CheService extends IntentService {
 
                     }
 
-                    Log.d("socket listen", "we have read " + new String(buffer).substring(0, charsRead));
+                  //  Log.d("socket listen", "we have read " + new String(buffer).substring(0, charsRead));
 
                 } catch (JSONException jse) {
                     Log.d("json exception", "json exception " + jse.toString());
@@ -381,7 +391,7 @@ public class CheService extends IntentService {
 
     }
 
-    private void reConnect(final CoreMessage coreMessage) {
+    private void reConnect() {
 
         try {
             socket.close();
@@ -423,8 +433,11 @@ public class CheService extends IntentService {
                 Log.d("wait", "wait " + e.toString());
             }
 
+            for(CoreMessage coreMessage : messageBuffer) {
+                writeToSocket(coreMessage);
+            }
 
-            writeToSocket(coreMessage);
+            messageBuffer.clear();
 
         }
 
@@ -444,10 +457,13 @@ public class CheService extends IntentService {
 
         } catch (Exception e) {
             Log.d("socket exception", "socket " + e.toString() + coreMessage.getMessage());
+            ON_CONNECT = false;
+            messageBuffer.add(coreMessage);
+
             connect = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    reConnect(coreMessage);
+                    reConnect();
                 }
             });
 

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import oddymobstar.activity.DemoActivity;
 import oddymobstar.core.Alliance;
 import oddymobstar.core.Config;
 import oddymobstar.core.Grid;
@@ -124,6 +125,8 @@ public class DBHelper extends SQLiteOpenHelper {
         config = new Config(Configuration.CURRENT_UTM, "");
         addConfig(config);
         config = new Config(Configuration.CURRENT_SUBUTM, "");
+        addConfig(config);
+        config = new Config(Configuration.GPS_UPDATE_INTERVAL, String.valueOf(DemoActivity.TWO_MINUTES));
         addConfig(config);
 
     }
