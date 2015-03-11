@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
@@ -30,7 +31,8 @@ public class CoreDialog extends DialogFragment {
     private CoreDialogAdapter adapter;
     private static int coreSource;
 
-    private static DialogInterface.OnClickListener coreListener;
+     private static DialogInterface.OnClickListener coreListener;
+
 
     public CoreDialog() {
 

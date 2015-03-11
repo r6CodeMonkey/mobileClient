@@ -2,10 +2,12 @@ package oddymobstar.activity;
 
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -14,9 +16,11 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -37,7 +41,6 @@ import oddymobstar.core.Topic;
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.out.AllianceMessage;
-import oddymobstar.message.out.CoreMessage;
 import oddymobstar.message.out.TopicMessage;
 import oddymobstar.service.CheService;
 import oddymobstar.util.Configuration;
@@ -56,25 +59,64 @@ public class DemoActivity extends FragmentActivity {
     private CreateDialog create;
     private UUIDGenerator uuidGenerator;
 
+
     private CheService cheService;
     private ServiceConnection serviceConnection;
 
     public static final Long TWO_MINUTES = 120000l;
 
+    public static final String MESSAGE_INTENT = "MESSAGE_INTENT";
+
     private Intent intent;
     private Intent serviceIntent;
 
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            messageHandler(message);
+            Log.d("message received is ", "message " + message);
+
+        }
+    };
+/*
+
+    private AdapterView.OnItemClickListener listClickListener = new AdapterView.OnItemClickListener(){
+        public void onItemClick(AdapterView<?> listView, View v, int position, long id){
+             //need to launch dialog for item selected, need to know if its global or alliance
+
+        }
+    };
+
+    private DialogInterface.OnClickListener ll = new DialogInterface.OnClickListener(){
+
+        public void onClick(DialogInterface dialog, int value) {
+            show
+        }
+
+    };
+
+*/
 
     private Thread locationUpdates;
-    private Thread service;
+    // private Thread service;
 
     private LatLng currentLatLng = new LatLng(0, 0);  //it does use saved prefs now
 
-    private Map<String, Marker> markerMap = new HashMap<String, Marker>();
+    private Map<String, Marker> markerMap = new HashMap<>();
 
     //db helper can test this out.  and fix up the map to work.  is a start.
     //also need to set up base configs.
     private DBHelper dbHelper = new DBHelper(this);
+
+
+    private void messageHandler(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showChatDialog(String key) {
+        //  ChatDialog chatDialog = ChatDialog.newInstance(listClickListener);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,22 +131,12 @@ public class DemoActivity extends FragmentActivity {
         uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
 
 
-         intent = new Intent(this, CheService.class);
-         serviceIntent = new Intent(this, CheService.class);
+        intent = new Intent(this, CheService.class);
+        serviceIntent = new Intent(this, CheService.class);
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter(MESSAGE_INTENT));
 
-        //dont restart it
-    //    if(!isMyServiceRunning(CheService.class)) {
-            //we need it started.
-            service = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    startService(serviceIntent);
-                }
-            });
-
-            service.start();
-     //   }
+        startService(serviceIntent);
 
 
         serviceConnection = new ServiceConnection() {
@@ -281,7 +313,7 @@ public class DemoActivity extends FragmentActivity {
         super.onResume();
         setUpMapIfNeeded();
 
-        if(service == null){
+     /*   if(service == null){
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -290,9 +322,9 @@ public class DemoActivity extends FragmentActivity {
             });
 
             service.start();
-        }
+        } */
 
-        if(locationUpdates == null){
+        if (locationUpdates == null) {
             locationUpdates = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -308,7 +340,9 @@ public class DemoActivity extends FragmentActivity {
             locationUpdates.start();
         }
         //and we need to bind to it.
-        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+        if (cheService == null) {
+            bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+        }
 
 
     }
@@ -405,17 +439,18 @@ public class DemoActivity extends FragmentActivity {
     public void onPause() {
         super.onPause();
 
-        if (serviceConnection != null) {
+       /* if (cheService != null) {
             unbindService(serviceConnection);
-        }
+        }*/
 
     }
 
     public void onDestroy() {
         super.onDestroy();
 
-        service = null;
+        //service = null;
         locationUpdates = null;
+        unbindService(serviceConnection);
 
         SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
 
@@ -426,6 +461,8 @@ public class DemoActivity extends FragmentActivity {
         editor.putFloat("zoom", mMap.getCameraPosition().zoom);
         editor.putFloat("bearing", mMap.getCameraPosition().bearing);
         editor.putFloat("tilt", mMap.getCameraPosition().tilt);
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
 
         editor.commit();
 
@@ -476,8 +513,8 @@ public class DemoActivity extends FragmentActivity {
             //we need to execute the method we are interested in.  note if we time out then
             locationManager.removeUpdates(this);
 
-            //bind again if its down.
-            if (cheService == null) {
+            //bind again if its down.  see if this imrpves things.  long term can send a message back to it rather than this.
+        /*    if (cheService == null) {
                 bindService(intent, serviceConnection, BIND_AUTO_CREATE);
             }
 
@@ -492,7 +529,7 @@ public class DemoActivity extends FragmentActivity {
                 } catch (NoSuchAlgorithmException nsae) {
 
                 }
-            }
+            } */
 
         }
 
@@ -506,7 +543,7 @@ public class DemoActivity extends FragmentActivity {
         @Override
         public void onProviderEnabled(String provider) {
             // TODO Auto-generated method stub
-           // locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
+            locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
 
         }
 
@@ -518,5 +555,7 @@ public class DemoActivity extends FragmentActivity {
     }
 
     private DemoLocationListener demoLocationListener;
+
+
 }
 
