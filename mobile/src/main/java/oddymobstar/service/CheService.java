@@ -91,7 +91,7 @@ public class CheService extends IntentService {
             uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
             try {
                 CoreMessage coreMessage = new CoreMessage(new LatLng(location.getLatitude(), location.getLongitude()), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), CoreMessage.PLAYER);
-                writeToSocket(coreMessage);
+                    writeToSocket(coreMessage);
 
             }catch(NoSuchAlgorithmException nsae){
                 Log.d("Security error", nsae.toString());
@@ -541,6 +541,7 @@ public class CheService extends IntentService {
             socket = new Socket(configuration.getConfig(Configuration.URL).getValue(), Integer.parseInt(configuration.getConfig(Configuration.PORT).getValue()));
             socket.setKeepAlive(true);
 
+            //probably not required due to message issue. todo (TEST)
             connect.interrupt();
             connect = null;
 
