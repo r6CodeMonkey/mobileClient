@@ -1,4 +1,4 @@
-package oddymobstar.util;
+package oddymobstar.adapter;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,17 +11,18 @@ import android.widget.TextView;
 
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
+import oddymobstar.fragment.ListFragment;
 
 /**
  * Created by root on 27/02/15.
  */
-public class CoreDialogAdapter extends CursorAdapter {
+public class CoreAdapter extends CursorAdapter {
 
     private Context context;
     private int layout = R.layout.core_list_item;
     private int source;
 
-    public CoreDialogAdapter(Context context, Cursor cursor, boolean autoRequery, int source) {
+    public CoreAdapter(Context context, Cursor cursor, boolean autoRequery, int source) {
         super(context, cursor, autoRequery);
 
         this.source = source;
@@ -45,16 +46,13 @@ public class CoreDialogAdapter extends CursorAdapter {
 
         switch (source) {
 
-            case CoreDialog.MY_TOPICS:
+            case ListFragment.MY_TOPICS:
                 tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_NAME)));
                 break;
-            case CoreDialog.GLOBAL_TOPICS:
+            case ListFragment.GLOBAL_TOPICS:
                 tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_NAME)));
                 break;
-            case CoreDialog.CONFIG:
-                tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_VALUE)));
-                break;
-            case CoreDialog.MY_ALLIANCES:
+            case ListFragment.MY_ALLIANCES:
                 tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME)));
                 break;
         }

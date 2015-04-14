@@ -7,11 +7,10 @@ import org.json.JSONException;
 /**
  * Created by root on 26/02/15.
  */
-public class PackageMessage extends CoreMessage {
+public class OutPackageMessage extends OutCoreMessage {
 
-    public static final String PACKAGE = "package";
 
-    public PackageMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException {
+    public OutPackageMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException {
         super(latLng, uid, ackId, PACKAGE);
 
     }

@@ -5,21 +5,26 @@ import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -37,15 +42,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import oddymobstar.core.Alliance;
+import oddymobstar.core.Message;
 import oddymobstar.core.Topic;
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
-import oddymobstar.message.out.AllianceMessage;
-import oddymobstar.message.out.TopicMessage;
+import oddymobstar.fragment.ChatFragment;
+import oddymobstar.fragment.ListFragment;
+import oddymobstar.message.out.OutAllianceMessage;
+import oddymobstar.message.out.OutTopicMessage;
 import oddymobstar.service.CheService;
 import oddymobstar.util.Configuration;
-import oddymobstar.util.CoreDialog;
-import oddymobstar.util.CreateDialog;
 import oddymobstar.util.UUIDGenerator;
 
 public class DemoActivity extends FragmentActivity {
@@ -55,10 +61,7 @@ public class DemoActivity extends FragmentActivity {
     private android.os.Handler handler = new android.os.Handler();
 
     private Configuration configuration;
-    private CoreDialog core;
-    private CreateDialog create;
     private UUIDGenerator uuidGenerator;
-
 
     private CheService cheService;
     private ServiceConnection serviceConnection;
@@ -67,8 +70,76 @@ public class DemoActivity extends FragmentActivity {
 
     public static final String MESSAGE_INTENT = "MESSAGE_INTENT";
 
+    private static Typeface font = null;
+
     private Intent intent;
     private Intent serviceIntent;
+
+    private ChatFragment chatFrag = new ChatFragment();
+    private ListFragment listFrag = new ListFragment();
+
+    public class CreateHandler extends Handler{
+
+        public void handleMessage(){
+            if(listFrag != null) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        listFrag.refreshAdapter();
+                    }
+                });
+
+            }
+        }
+
+    }
+
+
+
+    private class ListClickListener implements AdapterView.OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> listView, View v, int position,
+                                long id) {
+
+            /*
+            basically if they select an item we launch chat frag with an ID...
+             */
+            Cursor cursor = (Cursor)listFrag.getListAdapter().getItem(position);
+            removeFragments();
+
+            android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+
+            switch(listFrag.getType()){
+                case ListFragment.MY_TOPICS:
+
+                    chatFrag.setCursor(dbHelper.getMessages(Message.TOPIC_MESSAGE, cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_KEY))));
+
+                    transaction.replace(R.id.chat_fragment, chatFrag);
+                    transaction.addToBackStack(null);
+                    break;
+                case ListFragment.MY_ALLIANCES:
+                    chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_KEY))));
+
+                    transaction.replace(R.id.chat_fragment, chatFrag);
+                    transaction.addToBackStack(null);
+                    break;
+                case ListFragment.GLOBAL_TOPICS:
+                    //we need to launch something to offer a register.  like the fucking dialogs i just ditched!
+                    //well maybe a global / utm / sub utm selector fragment would be better...
+                    break;
+            }
+
+            transaction.commit();
+
+
+
+        }
+    }
+
+    private ListClickListener listClickListener = new ListClickListener();
+
 
     private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
@@ -114,9 +185,10 @@ public class DemoActivity extends FragmentActivity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    private void showChatDialog(String key) {
-        //  ChatDialog chatDialog = ChatDialog.newInstance(listClickListener);
+    public static Typeface getFont() {
+        return font;
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +199,11 @@ public class DemoActivity extends FragmentActivity {
         if (!dbHelper.hasPreLoad()) {
             dbHelper.addBaseConfiguration();
         }
+
+        font = Typeface.createFromAsset(
+                this.getAssets(), "fontawesome-webfont.ttf");
+
+        //get messages in.
         configuration = new Configuration(dbHelper.getConfigs());
         uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
 
@@ -143,6 +220,7 @@ public class DemoActivity extends FragmentActivity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 cheService = ((CheService.CheServiceBinder) service).getCheServiceInstance();
+                cheService.setCreateHandler(new CreateHandler());
             }
 
             @Override
@@ -156,6 +234,7 @@ public class DemoActivity extends FragmentActivity {
 
 
     }
+
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -175,8 +254,31 @@ public class DemoActivity extends FragmentActivity {
         return true;
     }
 
+    private void removeFragments() {
+
+        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        try {
+            transaction.remove(chatFrag);
+        } catch (Exception e) {
+
+        }
+
+        try {
+            listFrag.clearAdapter();
+            transaction.remove(listFrag);
+        } catch (Exception e) {
+
+        }
+
+        transaction.commit();
+    }
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        removeFragments();
+
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
@@ -190,76 +292,18 @@ public class DemoActivity extends FragmentActivity {
         switch (item.getItemId()) {
 
             case R.id.configuration:
-                core = new CoreDialog().newInstance(dbHelper, null, CoreDialog.CONFIG);
-                core.show(transaction, "core_dialog");
+
+
+                chatFrag.setCursor(dbHelper.getConfigs());
+
+
+                transaction.replace(R.id.chat_fragment, chatFrag);
+                transaction.addToBackStack(null);
+                transaction.commit();
 
                 break;
 
-            case R.id.createAlliance:
-                /*
-                 we simply name an alliance and send to server.  a test to manage
-                 */
-                create = new CreateDialog().newInstance(new DialogInterface.OnClickListener() {
 
-                    public void onClick(DialogInterface dialog, int value) {
-                        //grab text.  then send it to service.  service will create it on id response.
-                        if (!create.getName().trim().isEmpty()) {
-
-                            try {
-                                //LatLng latLng, String uid, String ackId, String type
-                                Alliance alliance = new Alliance();
-                                alliance.setName(create.getName());
-
-
-                                AllianceMessage allianceMessage = new AllianceMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
-                                allianceMessage.setAlliance(alliance, AllianceMessage.ALLIANCE_CREATE, AllianceMessage.ALLIANCE_GLOBAL, "");
-
-                                cheService.writeToSocket(allianceMessage);
-
-                            } catch (NoSuchAlgorithmException nsae) {
-                                Log.d("security", "security " + nsae.toString());
-                            } catch (JSONException jse) {
-                                Log.d("json", "json " + jse.toString());
-                            }
-                        }
-                        dialog.dismiss();
-                    }
-
-                }, CreateDialog.CREATE_ALLIANCE);
-                create.show(transaction, "create_dialog");
-
-                break;
-            case R.id.createTopic:
-                /*
-                we name a topic and send to server.  its global
-                 */
-                create = new CreateDialog().newInstance(new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int value) {
-                        //grab text.  then send it to service.  service will create it on id response.
-                        if (!create.getName().trim().isEmpty()) {
-                            Topic topic = new Topic();
-                            topic.setName(create.getName());
-                            try {
-                                TopicMessage topicMessage = new TopicMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
-                                topicMessage.setTopic(topic, TopicMessage.TOPIC_CREATE, TopicMessage.TOPIC_GLOBAL, "");
-                                //we now need to send it to server
-                                cheService.writeToSocket(topicMessage);
-
-                            } catch (JSONException jse) {
-                                Log.d("json", "json " + jse.toString());
-                            } catch (NoSuchAlgorithmException nsae) {
-                                Log.d("security", "security " + nsae.toString());
-                            }
-                        }
-
-                        dialog.dismiss();
-                    }
-
-                }, CreateDialog.CREATE_TOPIC);
-                create.show(transaction, "create_dialog");
-
-                break;
             case R.id.globalTopics:
                 /*
                  we present user with a selectable filter that lists from server (most popular topics)
@@ -267,8 +311,8 @@ public class DemoActivity extends FragmentActivity {
                  */
                 try {
                     Topic topic = new Topic();
-                    TopicMessage topicMessage = new TopicMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
-                    topicMessage.setTopic(topic, TopicMessage.TOPIC_GLOBAL, TopicMessage.TOPIC_GET, "");
+                    OutTopicMessage topicMessage = new OutTopicMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                    topicMessage.setTopic(topic, OutTopicMessage.GLOBAL, OutTopicMessage.TOPIC_GET, "");
                     //this needs lots of thought but for present we can live with it.....its defo not ideal.
                     //in fact its plain wrong.  we really dont want to do it like this.....traffic will be too high.
                     //to review.
@@ -280,26 +324,30 @@ public class DemoActivity extends FragmentActivity {
                     Log.d("security", "security " + nsae.toString());
                 }
 
-                core = new CoreDialog().newInstance(dbHelper, null, CoreDialog.GLOBAL_TOPICS);
-                core.show(transaction, "core_dialog");
+                listFrag.init(ListFragment.GLOBAL_TOPICS, listClickListener);
+                transaction.replace(R.id.chat_fragment, listFrag);
+                transaction.addToBackStack(null);
+                transaction.commit();
+
 
                 break;
-            case R.id.myAlliances:
+            case R.id.alliances:
 
-   /*
-                 shows my alliances for selection
-                 */
-                core = new CoreDialog().newInstance(dbHelper, null, CoreDialog.MY_ALLIANCES);
-                core.show(transaction, "core_dialog");
+                listFrag.init(ListFragment.MY_ALLIANCES, listClickListener);
+                transaction.replace(R.id.chat_fragment, listFrag);
+                transaction.addToBackStack(null);
+                transaction.commit();
+
 
                 break;
             case R.id.subscribedTopics:
 
-                 /*
-                shows my subscribed topics for selection.
-                 */
-                core = new CoreDialog().newInstance(dbHelper, null, CoreDialog.MY_TOPICS);
-                core.show(transaction, "core_dialog");
+
+                listFrag.init(ListFragment.MY_TOPICS, listClickListener);
+                transaction.replace(R.id.chat_fragment, listFrag);
+                transaction.addToBackStack(null);
+                transaction.commit();
+
 
                 break;
         }
@@ -343,6 +391,80 @@ public class DemoActivity extends FragmentActivity {
         if (cheService == null) {
             bindService(intent, serviceConnection, BIND_AUTO_CREATE);
         }
+
+
+    }
+
+    public void sendPost(View view) {
+
+        /*
+          now focus on this.  we need to send the chat message to service....
+         */
+        ///what is our chat type?  we find out we instantiate the message then it should run....
+        //probably need to spend time making service write messages to db
+
+        cheService.writeToSocket(null);
+
+        Toast.makeText(this, chatFrag.getPost(), Toast.LENGTH_SHORT).show();
+    }
+
+    public void cancelPost(View view) {
+        //make it clear message
+        chatFrag.cancelPost();
+    }
+
+    public void createButton(View view) {
+
+        String createText = listFrag.getCreateText();
+
+        switch (listFrag.getType()) {
+
+            case ListFragment.MY_ALLIANCES:
+
+                if (!createText.trim().isEmpty()) {
+
+                    try {
+                        //LatLng latLng, String uid, String ackId, String type
+                        Alliance alliance = new Alliance();
+                        alliance.setName(createText);
+
+
+                        OutAllianceMessage allianceMessage = new OutAllianceMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                        allianceMessage.setAlliance(alliance, OutAllianceMessage.CREATE, OutAllianceMessage.GLOBAL, "");
+
+                        cheService.writeToSocket(allianceMessage);
+
+                    } catch (NoSuchAlgorithmException nsae) {
+                        Log.d("security", "security " + nsae.toString());
+                    } catch (JSONException jse) {
+                        Log.d("json", "json " + jse.toString());
+                    }
+                }
+
+                break;
+            case ListFragment.MY_TOPICS:
+
+                if (!createText.trim().isEmpty()) {
+                    Topic topic = new Topic();
+                    topic.setName(createText);
+                    try {
+                        OutTopicMessage topicMessage = new OutTopicMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                        topicMessage.setTopic(topic, OutTopicMessage.CREATE, OutTopicMessage.GLOBAL, "");
+                        //we now need to send it to server
+                        cheService.writeToSocket(topicMessage);
+
+                    } catch (JSONException jse) {
+                        Log.d("json", "json " + jse.toString());
+                    } catch (NoSuchAlgorithmException nsae) {
+                        Log.d("security", "security " + nsae.toString());
+                    }
+                }
+
+                break;
+        }
+
+        listFrag.clear();
+
 
 
     }
@@ -475,6 +597,7 @@ public class DemoActivity extends FragmentActivity {
 
     }
 
+
     public class DemoLocationListener implements LocationListener {
 
         /*
@@ -499,7 +622,6 @@ public class DemoActivity extends FragmentActivity {
                 markerMap.put("Me", mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
             }
 
-            ;
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(currentLatLng)

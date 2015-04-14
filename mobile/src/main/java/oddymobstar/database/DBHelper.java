@@ -10,6 +10,7 @@ import oddymobstar.activity.DemoActivity;
 import oddymobstar.core.Alliance;
 import oddymobstar.core.Config;
 import oddymobstar.core.Grid;
+import oddymobstar.core.Message;
 import oddymobstar.core.Package;
 import oddymobstar.core.Topic;
 import oddymobstar.util.Configuration;
@@ -35,6 +36,8 @@ public class DBHelper extends SQLiteOpenHelper {
     //global topics are called from server......to consider if this gets hectic.
     //ie we allow a search filter?  otherwise, how do we maintain it? .. well we could store locally...maybe we need a local table
     public static final String GLOBAL_TOPICS_TABLE = "GLOBAL_TOPICS";
+
+    public static final String MESSAGE_TABLE = "MESSAGES";
 
 
     /*
@@ -65,6 +68,13 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String INFO_KEY = "grid_info_key";
     public static final String INFO_TYPE = "grid_info_type";
 
+    public static final String MESSAGE_ID = "message_id";
+    public static final String MESSAGE_CONTENT = "message_content";
+    public static final String MESSAGE_TIME = "message_time";
+    public static final String MESSAGE_KEY = "message_key";
+    public static final String MESSAGE_TYPE = "message_type";
+    public static final String MY_MESSAGE = "my_message";
+
 
     private static final String CREATE_CONFIG = "CREATE TABLE " + CONFIG_TABLE + " (" + CONFIG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + CONFIG_NAME + " VARCHAR2(30)," + CONFIG_VALUE + " VARCHAR2(30))";
     private static final String CREATE_GRIDS = "CREATE TABLE " + GRIDS_TABLE + " (" + GRID_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10))";
@@ -74,7 +84,10 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String CREATE_ALLIANCES = "CREATE TABLE " + ALLIANCES_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + ALLIANCE_NAME + " VARCHAR2(30))";
     private static final String CREATE_ALLIANCE_MEMBERS = "CREATE TABLE " + ALLIANCE_MEMBERS_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200)," + PLAYER_KEY + " VARCHAR2(200)," + PLAYER_NAME + " VARCHAR2(30)," + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER)";
     private static final String CREATE_PACKAGES = "CREATE TABLE " + PACKAGES_TABLE + " (" + PACKAGE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + PACKAGE_NAME + " VARCHAR2(30))";  //need to flesh this out later
+    private static final String CREATE_MESSAGES = "CREATE TABLE " + MESSAGE_TABLE + "(" + MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + MESSAGE_CONTENT + " VARCHAR2(300), " + MESSAGE_KEY + " VARCHAR2(200)," + MESSAGE_TYPE + " CHAR(1), " + MESSAGE_TIME + " INTEGER," + MY_MESSAGE + " CHAR(1))";
 
+
+    private DemoActivity.CreateHandler createHandler;
 
 
     /*
@@ -88,6 +101,11 @@ public class DBHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+
+    public void setCreateHandler(DemoActivity.CreateHandler createHandler){
+        this.createHandler = createHandler;
+    }
+
     public static DBHelper getInstance(Context context) {
         if (dbHelper == null) {
             dbHelper = new DBHelper(context);
@@ -95,6 +113,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         return dbHelper;
     }
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -106,8 +125,14 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_ALLIANCES);
         db.execSQL(CREATE_ALLIANCE_MEMBERS);
         db.execSQL(CREATE_PACKAGES);
+        db.execSQL(CREATE_MESSAGES);
 
 
+    }
+
+    public void test() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(CREATE_MESSAGES);
     }
 
 
@@ -148,6 +173,21 @@ public class DBHelper extends SQLiteOpenHelper {
     /*
     add methods
      */
+
+    public void addMessage(Message message) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(MESSAGE_KEY, message.getMessageKey());
+        values.put(MESSAGE_CONTENT, message.getMessage());
+        values.put(MESSAGE_TYPE, message.getMessageType());
+        values.put(MESSAGE_TIME, message.getTime());
+        values.put(MY_MESSAGE, message.isMyMessage() ? "Y" : "N");
+
+        db.insert(MESSAGE_TABLE, null, values);
+    }
 
     public void addConfig(Config config) {
 
@@ -192,6 +232,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
         db.insert(ALLIANCES_TABLE, null, values);
 
+        createHandler.handleMessage();
+
 
     }
 
@@ -211,6 +253,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
         //our topics are also global. to filter out after test phase.
         this.addGlobalTopic(topic);
+
+        createHandler.handleMessage();
 
     }
 
@@ -241,6 +285,14 @@ public class DBHelper extends SQLiteOpenHelper {
     /*
     delete methods..we dont delete configs?
      */
+
+    public void deleteMessage(Message message) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(MESSAGE_TABLE, MESSAGE_ID + " = ?", new String[]{String.valueOf(message.getId())});
+
+    }
+
 
     public void deleteGrid(Grid grid) {
 
@@ -352,6 +404,10 @@ public class DBHelper extends SQLiteOpenHelper {
     /*
     we need to get our display lists
      */
+
+    public Cursor getMessages(String messageType, String messageKey) {
+        return this.getReadableDatabase().rawQuery("SELECT " + MESSAGE_ID + " as _id," + MESSAGE_ID + "," + MESSAGE_CONTENT + "," + MESSAGE_TIME + "," + MY_MESSAGE + " FROM " + MESSAGE_TABLE + " WHERE " + MESSAGE_TYPE + "=? AND " + MESSAGE_KEY + "=? ORDER BY " + MESSAGE_TIME + " ASC", new String[]{messageType, messageKey});
+    }
 
     public Cursor getConfigs() {
         return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + " FROM " + CONFIG_TABLE + " ORDER BY " + CONFIG_NAME + " ASC", null);

@@ -6,30 +6,34 @@ import org.json.JSONObject;
 /**
  * Created by root on 26/02/15.
  */
-public class AllianceMessage {
+public class InAllianceMessage {
 
-    public final static String ALLIANCE = "alliance";
-    private final static String AID = "aid";
-    private final static String MSG = "msg";
 
     private String aid;
+    private String amid;
     private String message;
 
     private JSONObject alliance;
 
-    public AllianceMessage(JSONObject alliance) {
+    public InAllianceMessage(JSONObject alliance) {
         this.alliance = alliance;
     }
 
     public void create() throws JSONException {
 
 
-        aid = alliance.getString(AID);
-        this.message = alliance.getString(MSG);
+        aid = alliance.getString(InCoreMessage.AID);
+        amid = alliance.getString(InCoreMessage.AMID);
+        message = alliance.getString(InCoreMessage.MSG);
+
     }
 
     public String getAid() {
         return aid;
+    }
+
+    public String getAmid() {
+        return amid;
     }
 
     public String getMessage() {

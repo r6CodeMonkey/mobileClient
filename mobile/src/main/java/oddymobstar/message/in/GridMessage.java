@@ -8,10 +8,6 @@ import org.json.JSONObject;
  */
 public class GridMessage {
 
-    public static final String GRID = "grid";
-    private static final String GRID_UTM = "utm";
-    private static final String SUB_UTM = "subutm";
-    private static final String MSG = "msg";
 
     private String utm;
     private String subUtm;
@@ -26,9 +22,9 @@ public class GridMessage {
     public void create() throws JSONException {
 
 
-        utm = grid.getString(GRID_UTM);
-        subUtm = grid.getString(SUB_UTM);
-        this.message = grid.getString(MSG);
+        utm = grid.getString(InCoreMessage.GRID_UTM);
+        subUtm = grid.getString(InCoreMessage.SUB_UTM);
+        this.message = grid.getString(InCoreMessage.MSG);
     }
 
     public String getUtm() {

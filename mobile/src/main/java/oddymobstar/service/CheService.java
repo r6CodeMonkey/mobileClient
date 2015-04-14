@@ -7,34 +7,30 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
+
 import org.json.JSONException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import oddymobstar.activity.DemoActivity;
-import oddymobstar.core.Alliance;
-import oddymobstar.core.Config;
-import oddymobstar.core.Topic;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.in.Acknowledge;
-import oddymobstar.message.in.AllianceMessage;
-import oddymobstar.message.in.GridMessage;
-import oddymobstar.message.in.TopicMessage;
-import oddymobstar.message.out.CoreMessage;
-import oddymobstar.message.out.PackageMessage;
+import oddymobstar.message.in.InCoreMessage;
+import oddymobstar.message.out.OutCoreMessage;
 import oddymobstar.util.Configuration;
 import oddymobstar.util.UUIDGenerator;
 
@@ -50,20 +46,23 @@ public class CheService extends IntentService {
     private DataOutputStream dOut = null;
     private DataInputStream dIn = null;
 
+    private DBHelper dbHelper = new DBHelper(this);
+
+    private ServiceMessageHandler messageHandler;
+
+
     private Thread write;
     private Thread connect;
     private Thread read;
     private Thread locationUpdates;
 
-    private List<CoreMessage> messageBuffer = new ArrayList<>();
+    private List<OutCoreMessage> messageBuffer = new ArrayList<>();
 
 
     //service manager
     private LocationManager locationManager;
     private android.os.Handler handler = new android.os.Handler();
 
-
-    private Map<String, CoreMessage> sentAcks = new HashMap<>();
 
     public class CheServiceBinder extends Binder {
         public CheService getCheServiceInstance() {
@@ -90,12 +89,12 @@ public class CheService extends IntentService {
             //  callBack.setLocationUpdated(location);
             uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
             try {
-                CoreMessage coreMessage = new CoreMessage(new LatLng(location.getLatitude(), location.getLongitude()), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), CoreMessage.PLAYER);
-                    writeToSocket(coreMessage);
+                OutCoreMessage coreMessage = new OutCoreMessage(new LatLng(location.getLatitude(), location.getLongitude()), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), OutCoreMessage.PLAYER);
+                writeToSocket(coreMessage);
 
-            }catch(NoSuchAlgorithmException nsae){
+            } catch (NoSuchAlgorithmException nsae) {
                 Log.d("Security error", nsae.toString());
-            }catch(JSONException jse){
+            } catch (JSONException jse) {
                 Log.d("JSON error", jse.toString());
             }
 
@@ -119,17 +118,23 @@ public class CheService extends IntentService {
         public void onStatusChanged(String provider, int status, Bundle extras) {
             // TODO Auto-generated method stub
 
+            if ((!locationManager.isProviderEnabled(provider)) && status == LocationProvider.AVAILABLE) {
+                locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
+            }
         }
     }
 
     private DemoLocationListener demoLocationListener;
 
     private Configuration configuration;
-    private DBHelper dbHelper = new DBHelper(this);
 
 
     public CheService() {
         super("CheService");
+    }
+
+    public void setCreateHandler(DemoActivity.CreateHandler createHandler){
+       dbHelper.setCreateHandler(createHandler);
     }
 
 
@@ -139,6 +144,8 @@ public class CheService extends IntentService {
         //this works fine for what i want (need to ensure it stays up.
         //also need to have timeout / reconnect etc.
         configuration = new Configuration(dbHelper.getConfigs());
+
+        messageHandler = new ServiceMessageHandler(dbHelper, configuration);
 
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -159,7 +166,7 @@ public class CheService extends IntentService {
 
         locationUpdates.start();
 
-        if(connect == null) {
+        if (connect == null) {
             //st up our socket.
             connect = new Thread(new Runnable() {
                 public void run() {
@@ -224,6 +231,10 @@ public class CheService extends IntentService {
 
     private void socketListen() {
 
+        /*
+          this needs to be broken up and call a secondary class to handle the various input
+          bar acknowledge.  that way the actions can be overriden.  part of refactor work.
+         */
 
         try {
 
@@ -239,8 +250,8 @@ public class CheService extends IntentService {
             while ((charsRead = dIn.read(buffer)) != -1) {
                 try {
                     //we need to grab each core message out.
-                    int openBracket = partialOpenBracket > 0? partialOpenBracket : 0;
-                    int closeBracket = partialCloseBracket> 0? partialCloseBracket : 0;
+                    int openBracket = partialOpenBracket > 0 ? partialOpenBracket : 0;
+                    int closeBracket = partialCloseBracket > 0 ? partialCloseBracket : 0;
                     partialOpenBracket = 0;
                     partialCloseBracket = 0;
 
@@ -251,61 +262,66 @@ public class CheService extends IntentService {
 
                     while (objectsToRead) {
 
-                       boolean objectFound = false;
-                       String object = partialObject.trim().isEmpty() ? "" : partialObject;
-                       partialObject = "";
+                        boolean objectFound = false;
+                        String object = partialObject.trim().isEmpty() ? "" : partialObject;
+                        partialObject = "";
 
 
+                        for (int i = charPos; i < lineRead.length && !objectFound; i++) {
+                            if (lineRead[i] == '{') {
+                                openBracket++;
+                            }
+                            if (lineRead[i] == '}') {
+                                closeBracket++;
+                            }
 
-                       for(int i=charPos;i<lineRead.length&&!objectFound;i++){
-                           if(lineRead[i] == '{'){openBracket++;}
-                           if(lineRead[i] == '}'){closeBracket++;}
+                            object = object + lineRead[i];
 
-                           object = object+lineRead[i];
+                            if (openBracket == closeBracket) {
+                                objectFound = true;
+                                charPos = i + 1;
+                            }
 
-                           if(openBracket==closeBracket){
-                               objectFound=true;
-                               charPos=i+1;
-                           }
+                            if (i == lineRead.length - 1) {
+                                objectsToRead = false;
+                            }
+                            //if we are partial we need to carry on.
+                            if (i == lineRead.length - 1 && !objectFound) {
+                                partialObject = object;
+                                partialOpenBracket = openBracket;
+                                partialCloseBracket = closeBracket;
+                            }
 
-                           if(i == lineRead.length-1){
-                               objectsToRead = false;
-                           }
-                           //if we are partial we need to carry on.
-                           if(i==lineRead.length-1 && !objectFound){
-                               partialObject = object;
-                               partialOpenBracket = openBracket;
-                               partialCloseBracket = closeBracket;
-                           }
-
-                       }
+                        }
 
                         Log.d("the buffer is ", "buffer " + new String(buffer).substring(0, charsRead));
                         //each message we receive should be a JSON.  We need to work out the type.
-                        oddymobstar.message.in.CoreMessage coreMessage = new oddymobstar.message.in.CoreMessage(object);
+                        InCoreMessage coreMessage = new InCoreMessage(object);
 
 
                         Intent messageIntent = new Intent(DemoActivity.MESSAGE_INTENT);
                         messageIntent.putExtra("message", coreMessage.getJsonObject().toString());
                         LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
-                        Log.d("message received", "message recieved " + coreMessage.getJsonObject().toString());
+                        Log.d("message received", "message received " + coreMessage.getJsonObject().toString());
                         //at this point we could have more than 1 core message here.
 
+                        OutCoreMessage ackSent = null;
+                        Acknowledge ack = null;
 
                         //what are we?
-                        if (!coreMessage.getJsonObject().isNull(Acknowledge.ACKNOWLEDGE)) {
+                        if (!coreMessage.getJsonObject().isNull(InCoreMessage.ACKNOWLEDGE)) {
 
-                            Acknowledge ack = new Acknowledge(coreMessage.getJsonObject().getJSONObject(Acknowledge.ACKNOWLEDGE));
+                            ack = new Acknowledge(coreMessage.getJsonObject().getJSONObject(InCoreMessage.ACKNOWLEDGE));
                             ack.create();
 
                             /*
                             acknowledges either tell us of a fail (we can log it etc) or tell us of a success and generally a UUID.
                            */
 
-                            if (ack.getState().equals(Acknowledge.ERROR)) {
+                            if (ack.getState().equals(InCoreMessage.ERROR)) {
                                 Log.d("ack error", "error information is " + ack.getInfo());
                             } else {
-                                if (ack.getInfo().equals(Acknowledge.ACTIVE)) {
+                                if (ack.getInfo().equals(InCoreMessage.ACTIVE)) {
                                     //we need to wake up our write thread.
                                     if (write != null) {
 
@@ -324,106 +340,28 @@ public class CheService extends IntentService {
                                             }
                                         }).start();
 
-
                                     }
                                 }
                                 //match to our acknowledge sent list...and this will hold the relevant action required.
-                                CoreMessage ackSent = sentAcks.get(ack.getAckId());
+                                ackSent = messageHandler.getSentAcks().get(ack.getAckId());
 
-                                if (ackSent != null) {
-                                    //is it a UUID message
-                                    if (ack.getInfo().equals(Acknowledge.UUID)) {
-                                        if (ackSent instanceof oddymobstar.message.out.TopicMessage) {
-
-                                            Topic topic = new Topic();
-                                            topic.setKey(ack.getOid());
-                                            topic.setName(ackSent.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getJSONObject(oddymobstar.message.out.TopicMessage.TOPIC).getString(oddymobstar.message.out.TopicMessage.TNAME));
-                                            dbHelper.addTopic(topic);
-
-                                        } else if (ackSent instanceof oddymobstar.message.out.AllianceMessage) {
-
-                                            Alliance alliance = new Alliance();
-                                            alliance.setKey(ack.getOid());
-                                            alliance.setName(ackSent.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getJSONObject(oddymobstar.message.out.AllianceMessage.ALLIANCE).getString(oddymobstar.message.out.AllianceMessage.ANAME));
-                                            dbHelper.addAlliance(alliance);
-
-                                        } else if (ackSent instanceof PackageMessage) {
-
-                                        } else {
-                                            //its core.  therefore player.
-                                            Config config = configuration.getConfig(Configuration.PLAYER_KEY);
-                                            config.setValue(ack.getUid());
-                                            dbHelper.updateConfig(config);
-                                        }
-                                    }
-
-                                  /*
-                                   also we have the current UTM / SUBUTM so we need to update this too.
-
-                                   */
-                                    if (!(ackSent instanceof oddymobstar.message.out.AllianceMessage
-                                            || ackSent instanceof oddymobstar.message.out.TopicMessage
-                                            || ackSent instanceof PackageMessage)) {
-                                        Config config = configuration.getConfig(Configuration.CURRENT_UTM);
-                                        config.setValue(ack.getUtm());
-                                        dbHelper.updateConfig(config);
-
-                                        config = configuration.getConfig(Configuration.CURRENT_SUBUTM);
-                                        config.setValue(ack.getSubUtm());
-                                        dbHelper.updateConfig(config);
-                                    }
-
-                                    sentAcks.remove(ack.getAckId());
-                                }
-
-                            }
-
-                        } else if (!coreMessage.getJsonObject().isNull(GridMessage.GRID)) {
-
-                            GridMessage gridMessage = new GridMessage(coreMessage.getJsonObject().getJSONObject(GridMessage.GRID));
-                            gridMessage.create();
-
-                        } else if (!coreMessage.getJsonObject().isNull(AllianceMessage.ALLIANCE)) {
-
-                            AllianceMessage allianceMessage = new AllianceMessage(coreMessage.getJsonObject().getJSONObject(AllianceMessage.ALLIANCE));
-                            allianceMessage.create();
-
-
-                        } else if (!coreMessage.getJsonObject().isNull(TopicMessage.TOPIC)) {
-
-                            TopicMessage topicMessage = new TopicMessage(coreMessage.getJsonObject().getJSONObject(TopicMessage.TOPIC));
-                            topicMessage.create();
-
-                            if (topicMessage.getFilter().equals(TopicMessage.POST)) {
-
-                                try {
-                                    Topic topic = new Topic();
-                                    topic.setKey(topicMessage.getTid());
-                                    topic.setName(topicMessage.getTitle());
-                                    Topic checkGlobal = dbHelper.getGlobalTopic(topic.getKey());
-                                    if (!checkGlobal.getKey().equals(topic.getKey())) {
-                                        dbHelper.addGlobalTopic(topic);
-                                    }
-                                    //this may not be catching it lol.  it seems not.  otherwise it all works (ie get global topics)
-                                } catch (android.database.sqlite.SQLiteConstraintException e) {
-                                    Log.d("topic error", "sql exception  " + e.toString());
-                                }
                             }
 
                         }
+
+                        messageHandler.handleMessage(coreMessage, ackSent, ack);
+
                     }
 
-                        //  Log.d("socket listen", "we have read " + new String(buffer).substring(0, charsRead));
 
-                    }catch(JSONException jse){
-                        Log.d("json exception", "json exception " + jse.toString());
-                    }
-
+                } catch (JSONException jse) {
+                    Log.d("json exception", "json exception " + jse.toString());
                 }
 
+            }
 
 
-        } catch (Exception e) {
+        } catch (IOException e) {
 
             Log.d("socket listen", "socket listen error " + e.toString());
 
@@ -445,11 +383,11 @@ public class CheService extends IntentService {
         } catch (Exception e) {
 
         }
-        if(write != null) {
+        if (write != null) {
             write.interrupt();
         }
 
-        if(read != null){
+        if (read != null) {
             read.interrupt();
         }
 
@@ -484,7 +422,7 @@ public class CheService extends IntentService {
                 Log.d("wait", "wait " + e.toString());
             }
 
-            for(CoreMessage coreMessage : messageBuffer) {
+            for (OutCoreMessage coreMessage : messageBuffer) {
                 writeToSocket(coreMessage);
             }
 
@@ -496,20 +434,15 @@ public class CheService extends IntentService {
         write.start();
 
 
-
-
-
-
     }
 
 
-    public void writeToSocket(final CoreMessage coreMessage) {
-
+    public void writeToSocket(final OutCoreMessage coreMessage) {
 
 
         try {
 
-            sentAcks.put(coreMessage.getMessage().getJSONObject(CoreMessage.CORE_OBJECT).getString(CoreMessage.ACK_ID), coreMessage);
+            messageHandler.getSentAcks().put(coreMessage.getMessage().getJSONObject(OutCoreMessage.CORE_OBJECT).getString(OutCoreMessage.ACK_ID), coreMessage);
             dOut.writeUTF(coreMessage.getMessage().toString());
 
 
@@ -517,14 +450,14 @@ public class CheService extends IntentService {
             Log.d("socket exception", "socket " + e.toString() + coreMessage.getMessage());
             messageBuffer.add(coreMessage);
 
-                connect = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                       reConnect();
-                    }
-                });
+            connect = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    reConnect();
+                }
+            });
 
-                connect.start();
+            connect.start();
 
         }
 
@@ -562,11 +495,13 @@ public class CheService extends IntentService {
             read.start();
 
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             //crashed.
             Log.d("socket error", "socket " + e.toString());
         }
+
     }
+
 
     @Override
     public ComponentName startService(Intent intent) {

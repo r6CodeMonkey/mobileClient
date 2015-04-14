@@ -9,9 +9,6 @@
             <item
                 android:id="@+id/subscribedTopics"
                 android:title="Subscribed"></item>
-            <item
-                android:id="@+id/createTopic"
-                android:title="Create"></item>
 
         </menu>
 
@@ -19,15 +16,6 @@
     <item
         android:id="@+id/alliances"
         android:title="Alliances">
-
-        <menu>
-            <item
-                android:id="@+id/myAlliances"
-                android:title="My Alliances"></item>
-            <item
-                android:id="@+id/createAlliance"
-                android:title="Create"></item>
-        </menu>
 
     </item>
 

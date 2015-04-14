@@ -6,16 +6,8 @@ import org.json.JSONObject;
 /**
  * Created by root on 26/02/15.
  */
-public class TopicMessage {
+public class InTopicMessage {
 
-    public final static String TOPIC = "topic";
-
-    private final static String TID = "tid";
-    private final static String TNAME = "tname";
-    private final static String MSG = "msg";
-    private final static String FILTER = "filter";
-
-    public static final String POST = "post";
 
     private String tid;
     private String message;
@@ -25,17 +17,17 @@ public class TopicMessage {
     private JSONObject topic;
 
 
-    public TopicMessage(JSONObject topic) {
+    public InTopicMessage(JSONObject topic) {
 
         this.topic = topic;
     }
 
     public void create() throws JSONException {
 
-        tid = topic.getString(TID);
-        this.message = topic.getString(MSG);
-        title = topic.getString(TNAME);
-        filter = topic.getString(FILTER);
+        tid = topic.getString(InCoreMessage.TID);
+        this.message = topic.getString(InCoreMessage.MSG);
+        title = topic.getString(InCoreMessage.TNAME);
+        filter = topic.getString(InCoreMessage.FILTER);
     }
 
     public String getTid() {

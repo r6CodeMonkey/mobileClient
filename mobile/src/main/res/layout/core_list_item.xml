@@ -7,7 +7,10 @@
 
     <TextView
         android:id="@+id/core_item_name"
-        android:gravity="center"
+        android:gravity="left"
+        android:textSize="32dp"
+        android:textStyle="bold"
+        android:textColor="@android:color/holo_red_dark"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
 
