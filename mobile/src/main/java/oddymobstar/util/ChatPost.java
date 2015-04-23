@@ -3,6 +3,7 @@ package oddymobstar.util;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -13,13 +14,16 @@ import oddymobstar.crazycourier.R;
  */
 public class ChatPost extends LinearLayout {
 
+    private EditText post;
+
 
     public ChatPost(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        inflater.inflate(R.layout.chat_post, this, true);
+        View view = inflater.inflate(R.layout.chat_post, this, true);
+        post = (EditText) findViewById(R.id.post_text);
 
 
     }
@@ -31,12 +35,12 @@ public class ChatPost extends LinearLayout {
 
     public String getPost() {
 
-        return ((EditText) findViewById(R.id.post_text)).getText().toString();
+        return post.getText().toString();
 
     }
 
     public void cancelPost() {
-        ((EditText) findViewById(R.id.post_text)).setText("");
+        post.setText("");
     }
 
 }

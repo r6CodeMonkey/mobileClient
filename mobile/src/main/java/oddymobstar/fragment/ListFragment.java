@@ -75,8 +75,7 @@ public class ListFragment extends android.support.v4.app.ListFragment {
 
 
     public ListFragment() {
-
-
+        setRetainInstance(true);
     }
 
     public int getType() {

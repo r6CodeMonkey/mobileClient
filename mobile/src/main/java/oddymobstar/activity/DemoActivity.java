@@ -2,6 +2,7 @@ package oddymobstar.activity;
 
 
 import android.app.ActivityManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -24,7 +26,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -49,6 +50,7 @@ import oddymobstar.database.DBHelper;
 import oddymobstar.fragment.ChatFragment;
 import oddymobstar.fragment.ListFragment;
 import oddymobstar.message.out.OutAllianceMessage;
+import oddymobstar.message.out.OutCoreMessage;
 import oddymobstar.message.out.OutTopicMessage;
 import oddymobstar.service.CheService;
 import oddymobstar.util.Configuration;
@@ -78,10 +80,10 @@ public class DemoActivity extends FragmentActivity {
     private ChatFragment chatFrag = new ChatFragment();
     private ListFragment listFrag = new ListFragment();
 
-    public class CreateHandler extends Handler{
+    public class MessageHandler extends Handler {
 
-        public void handleMessage(){
-            if(listFrag != null) {
+        public void handleList() {
+            if (listFrag != null) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -92,8 +94,21 @@ public class DemoActivity extends FragmentActivity {
             }
         }
 
-    }
+        public void handleChat(final String type){
+            if(chatFrag != null){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        chatFrag.refreshAdapter(dbHelper.getMessages(type, chatFrag.getKey()));
+                    }
+                });
+            }
 
+        }
+
+
+
+    }
 
 
     private class ListClickListener implements AdapterView.OnItemClickListener {
@@ -105,22 +120,23 @@ public class DemoActivity extends FragmentActivity {
             /*
             basically if they select an item we launch chat frag with an ID...
              */
-            Cursor cursor = (Cursor)listFrag.getListAdapter().getItem(position);
+            Cursor cursor = (Cursor) listFrag.getListAdapter().getItem(position);
             removeFragments();
 
             android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-
-            switch(listFrag.getType()){
+            String key = "";
+            switch (listFrag.getType()) {
                 case ListFragment.MY_TOPICS:
-
-                    chatFrag.setCursor(dbHelper.getMessages(Message.TOPIC_MESSAGE, cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_KEY))));
+                    key = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_KEY));
+                    chatFrag.setCursor(dbHelper.getMessages(Message.TOPIC_MESSAGE, key), key);
 
                     transaction.replace(R.id.chat_fragment, chatFrag);
                     transaction.addToBackStack(null);
                     break;
                 case ListFragment.MY_ALLIANCES:
-                    chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_KEY))));
+                    key = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_KEY));
+                    chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key);
 
                     transaction.replace(R.id.chat_fragment, chatFrag);
                     transaction.addToBackStack(null);
@@ -132,7 +148,6 @@ public class DemoActivity extends FragmentActivity {
             }
 
             transaction.commit();
-
 
 
         }
@@ -220,7 +235,7 @@ public class DemoActivity extends FragmentActivity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 cheService = ((CheService.CheServiceBinder) service).getCheServiceInstance();
-                cheService.setCreateHandler(new CreateHandler());
+                cheService.setMessageHandler(new MessageHandler());
             }
 
             @Override
@@ -257,6 +272,9 @@ public class DemoActivity extends FragmentActivity {
     private void removeFragments() {
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+
+
         try {
             transaction.remove(chatFrag);
         } catch (Exception e) {
@@ -294,7 +312,7 @@ public class DemoActivity extends FragmentActivity {
             case R.id.configuration:
 
 
-                chatFrag.setCursor(dbHelper.getConfigs());
+                chatFrag.setCursor(dbHelper.getConfigs(), "");
 
 
                 transaction.replace(R.id.chat_fragment, chatFrag);
@@ -304,11 +322,8 @@ public class DemoActivity extends FragmentActivity {
                 break;
 
 
-            case R.id.globalTopics:
-                /*
-                 we present user with a selectable filter that lists from server (most popular topics)
-                 and then a search filter to query server for more topics
-                 */
+          /*  case R.id.globalTopics:
+
                 try {
                     Topic topic = new Topic();
                     OutTopicMessage topicMessage = new OutTopicMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
@@ -330,7 +345,7 @@ public class DemoActivity extends FragmentActivity {
                 transaction.commit();
 
 
-                break;
+                break; */
             case R.id.alliances:
 
                 listFrag.init(ListFragment.MY_ALLIANCES, listClickListener);
@@ -340,7 +355,7 @@ public class DemoActivity extends FragmentActivity {
 
 
                 break;
-            case R.id.subscribedTopics:
+         /*   case R.id.subscribedTopics:
 
 
                 listFrag.init(ListFragment.MY_TOPICS, listClickListener);
@@ -349,11 +364,18 @@ public class DemoActivity extends FragmentActivity {
                 transaction.commit();
 
 
-                break;
+                break; */
         }
 
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+
     }
 
     @Override
@@ -395,6 +417,15 @@ public class DemoActivity extends FragmentActivity {
 
     }
 
+    public void deletePosts(View view){
+        //grab the chat frag id...
+        dbHelper.deleteMessages(chatFrag.getKey());
+        //now we need to clear the screen basically..but if its a delete just go back to map.
+        //or maybe to lists..
+        removeFragments();
+    }
+
+
     public void sendPost(View view) {
 
         /*
@@ -402,10 +433,39 @@ public class DemoActivity extends FragmentActivity {
          */
         ///what is our chat type?  we find out we instantiate the message then it should run....
         //probably need to spend time making service write messages to db
+        try {
 
-        cheService.writeToSocket(null);
+            OutCoreMessage coreMessage = null;
 
+            switch (listFrag.getType()) {
+                case ListFragment.MY_ALLIANCES:
+                    //create a message for the alliance....
+                    coreMessage = new OutAllianceMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                    ((OutAllianceMessage) coreMessage).setAlliance(dbHelper.getAlliance(chatFrag.getKey()), OutCoreMessage.PUBLISH, OutCoreMessage.GLOBAL, chatFrag.getPost());
+                    break;
+                case ListFragment.MY_TOPICS:
+                    //create a message for the topic....
+                    coreMessage = new OutTopicMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                    ((OutTopicMessage) coreMessage).setTopic(dbHelper.getTopic(chatFrag.getKey()), OutCoreMessage.PUBLISH, OutCoreMessage.GLOBAL, chatFrag.getPost());
+                    break;
+
+            }
+
+            cheService.writeToSocket(coreMessage);
+
+        } catch (NoSuchAlgorithmException nse) {
+
+        } catch (JSONException jse) {
+
+        }
+
+        //delete this..
         Toast.makeText(this, chatFrag.getPost(), Toast.LENGTH_SHORT).show();
+
+        cancelPost(null);
+
+
+
     }
 
     public void cancelPost(View view) {
@@ -464,7 +524,6 @@ public class DemoActivity extends FragmentActivity {
         }
 
         listFrag.clear();
-
 
 
     }

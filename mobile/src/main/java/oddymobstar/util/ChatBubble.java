@@ -3,6 +3,7 @@ package oddymobstar.util;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -13,12 +14,20 @@ import oddymobstar.crazycourier.R;
  */
 public class ChatBubble extends LinearLayout {
 
+    private TextView message;
+    private TextView dateTime;
+    private TextView author;
+
     public ChatBubble(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        inflater.inflate(R.layout.chat_bubble, this, true);
+        View view = inflater.inflate(R.layout.chat_bubble, this, true);
+
+        author = (TextView)view.findViewById(R.id.from);
+        message = (TextView)view.findViewById(R.id.message);
+        dateTime = (TextView)view.findViewById(R.id.datetime);
 
 
     }
@@ -29,20 +38,17 @@ public class ChatBubble extends LinearLayout {
 
     }
 
-    public void setMessage(String message) {
-        TextView tv = (TextView) this.findViewById(R.id.message);
-        tv.setText(message);
+    public void setMessage(String msg) {
+        message.setText(msg);
     }
 
     public void setFrom(String from) {
-        TextView tv = (TextView) this.findViewById(R.id.from);
-        tv.setText(from);
+        author.setText(from);
 
     }
 
-    public void setDateTime(String dateTime) {
-        TextView tv = (TextView) this.findViewById(R.id.datetime);
-        tv.setText(dateTime);
+    public void setDateTime(String dt) {
+        dateTime.setText(dt);
 
     }
 

@@ -1,5 +1,6 @@
 package oddymobstar.core;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.Timestamp;
@@ -18,15 +19,13 @@ public class Message {
     private String message;
     private String messageType;
     private String messageKey;
-    private String myMessage;
+    private String myMessage = "N";
+    private String author;
 
     public Message() {
 
     }
 
-    public Message(JSONObject message) {
-
-    }
 
     public void setId(long id) {
         this.id = id;
@@ -52,6 +51,8 @@ public class Message {
         this.myMessage = myMessage;
     }
 
+    public void setAuthor(String author){this.author = author;}
+
     public long getTime() {
         return time;
     }
@@ -71,6 +72,8 @@ public class Message {
     public String getMessageKey() {
         return messageKey;
     }
+
+    public String getAuthor(){return author;}
 
     public boolean isMyMessage() {
         return myMessage.equals("Y");

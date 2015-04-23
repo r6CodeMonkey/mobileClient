@@ -5,6 +5,7 @@
     <string name="title_activity_game">Project Che</string>
     <string name="fa_cancel">&#xf00d;</string>
     <string name="fa_send">&#xf1d8;</string>
+    <string name="fa_trash">&#xf1f8;</string>
 
 
 </resources>

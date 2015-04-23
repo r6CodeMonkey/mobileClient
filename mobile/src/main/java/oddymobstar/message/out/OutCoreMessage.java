@@ -12,6 +12,8 @@ public class OutCoreMessage {
 
     protected JSONObject message = new JSONObject();
 
+    protected boolean post = false;
+
     public static final String CORE_OBJECT = "core";
     public static final String PLAYER = "player";
     public static final String UID = "uid";
@@ -65,6 +67,9 @@ public class OutCoreMessage {
         message.put(CORE_OBJECT, core);
 
     }
+
+    public boolean isPost(){ return post; }
+
 
     public JSONObject getMessage() {
         return message;

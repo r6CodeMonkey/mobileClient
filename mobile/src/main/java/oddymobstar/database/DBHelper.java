@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.core.Alliance;
@@ -74,6 +75,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String MESSAGE_KEY = "message_key";
     public static final String MESSAGE_TYPE = "message_type";
     public static final String MY_MESSAGE = "my_message";
+    public static final String MESSAGE_AUTHOR = "message_author";
 
 
     private static final String CREATE_CONFIG = "CREATE TABLE " + CONFIG_TABLE + " (" + CONFIG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + CONFIG_NAME + " VARCHAR2(30)," + CONFIG_VALUE + " VARCHAR2(30))";
@@ -84,10 +86,10 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String CREATE_ALLIANCES = "CREATE TABLE " + ALLIANCES_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + ALLIANCE_NAME + " VARCHAR2(30))";
     private static final String CREATE_ALLIANCE_MEMBERS = "CREATE TABLE " + ALLIANCE_MEMBERS_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200)," + PLAYER_KEY + " VARCHAR2(200)," + PLAYER_NAME + " VARCHAR2(30)," + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER)";
     private static final String CREATE_PACKAGES = "CREATE TABLE " + PACKAGES_TABLE + " (" + PACKAGE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + PACKAGE_NAME + " VARCHAR2(30))";  //need to flesh this out later
-    private static final String CREATE_MESSAGES = "CREATE TABLE " + MESSAGE_TABLE + "(" + MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + MESSAGE_CONTENT + " VARCHAR2(300), " + MESSAGE_KEY + " VARCHAR2(200)," + MESSAGE_TYPE + " CHAR(1), " + MESSAGE_TIME + " INTEGER," + MY_MESSAGE + " CHAR(1))";
+    private static final String CREATE_MESSAGES = "CREATE TABLE " + MESSAGE_TABLE + "(" + MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + MESSAGE_CONTENT + " VARCHAR2(300), " + MESSAGE_KEY + " VARCHAR2(200)," + MESSAGE_TYPE + " CHAR(1), " + MESSAGE_TIME + " INTEGER," + MY_MESSAGE + " CHAR(1),"+MESSAGE_AUTHOR+" VARCHAR2(200) )";
 
 
-    private DemoActivity.CreateHandler createHandler;
+    private DemoActivity.MessageHandler messageHandler;
 
 
     /*
@@ -102,8 +104,8 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-    public void setCreateHandler(DemoActivity.CreateHandler createHandler){
-        this.createHandler = createHandler;
+    public void setMessageHandler(DemoActivity.MessageHandler messageHandler){
+        this.messageHandler = messageHandler;
     }
 
     public static DBHelper getInstance(Context context) {
@@ -184,9 +186,15 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(MESSAGE_CONTENT, message.getMessage());
         values.put(MESSAGE_TYPE, message.getMessageType());
         values.put(MESSAGE_TIME, message.getTime());
+        values.put(MESSAGE_AUTHOR, message.getAuthor());
         values.put(MY_MESSAGE, message.isMyMessage() ? "Y" : "N");
 
+        Log.d("adding message", "values are "+message.getMessageKey()+", "+message.getMessage()+", "+message.getTimeStamp()+" ,"+message.getMessageType());
+
+
         db.insert(MESSAGE_TABLE, null, values);
+
+        messageHandler.handleChat(message.getMessageType());
     }
 
     public void addConfig(Config config) {
@@ -232,7 +240,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         db.insert(ALLIANCES_TABLE, null, values);
 
-        createHandler.handleMessage();
+        messageHandler.handleList();
 
 
     }
@@ -254,7 +262,7 @@ public class DBHelper extends SQLiteOpenHelper {
         //our topics are also global. to filter out after test phase.
         this.addGlobalTopic(topic);
 
-        createHandler.handleMessage();
+        messageHandler.handleList();
 
     }
 
@@ -290,6 +298,13 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(MESSAGE_TABLE, MESSAGE_ID + " = ?", new String[]{String.valueOf(message.getId())});
+
+    }
+
+    public void deleteMessages(String key){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.delete(MESSAGE_TABLE, MESSAGE_KEY + " = ?", new String[]{key});
 
     }
 
@@ -406,7 +421,7 @@ public class DBHelper extends SQLiteOpenHelper {
      */
 
     public Cursor getMessages(String messageType, String messageKey) {
-        return this.getReadableDatabase().rawQuery("SELECT " + MESSAGE_ID + " as _id," + MESSAGE_ID + "," + MESSAGE_CONTENT + "," + MESSAGE_TIME + "," + MY_MESSAGE + " FROM " + MESSAGE_TABLE + " WHERE " + MESSAGE_TYPE + "=? AND " + MESSAGE_KEY + "=? ORDER BY " + MESSAGE_TIME + " ASC", new String[]{messageType, messageKey});
+        return this.getReadableDatabase().rawQuery("SELECT " + MESSAGE_ID + " as _id," + MESSAGE_ID + "," + MESSAGE_CONTENT + "," + MESSAGE_TIME + "," + MY_MESSAGE + ","+MESSAGE_AUTHOR+" FROM " + MESSAGE_TABLE + " WHERE " + MESSAGE_TYPE + "=? AND " + MESSAGE_KEY + "=? ORDER BY " + MESSAGE_TIME + " ASC", new String[]{messageType, messageKey});
     }
 
     public Cursor getConfigs() {
@@ -454,7 +469,21 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Alliance getAlliance(String key) {
-        return null;
+
+        Cursor alliance = this.getReadableDatabase().rawQuery("SELECT " + ALLIANCE_KEY + " as _id," + ALLIANCE_KEY + "," + ALLIANCE_NAME + " FROM " + ALLIANCES_TABLE + " WHERE " + ALLIANCE_KEY + " =? " + " ORDER BY " + ALLIANCE_NAME + " ASC", new String[]{key});
+
+        Alliance returnAlliance = new Alliance();
+
+        while (alliance.moveToNext()) {
+            returnAlliance.setName(alliance.getString(alliance.getColumnIndexOrThrow((DBHelper.ALLIANCE_NAME))));
+            returnAlliance.setKey(alliance.getString(alliance.getColumnIndexOrThrow((DBHelper.ALLIANCE_KEY))));
+
+        }
+
+        alliance.close();
+
+        return returnAlliance;
+
     }
 
     public Package getPackage(String key) {
@@ -462,7 +491,21 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Topic getTopic(String key) {
-        return null;
+
+        Cursor topic = this.getReadableDatabase().rawQuery("SELECT " + TOPIC_KEY + " as _id," + TOPIC_KEY + "," + TOPIC_NAME + " FROM " + TOPICS_TABLE + " WHERE " + TOPIC_KEY + " =? " + " ORDER BY " + TOPIC_NAME + " ASC", new String[]{key});
+
+        Topic returnTopic = new Topic();
+
+        while (topic.moveToNext()) {
+            returnTopic.setName(topic.getString(topic.getColumnIndexOrThrow((DBHelper.TOPIC_NAME))));
+            returnTopic.setKey(topic.getString(topic.getColumnIndexOrThrow((DBHelper.TOPIC_KEY))));
+
+        }
+
+        topic.close();
+
+        return returnTopic;
+
     }
 
     public Topic getGlobalTopic(String key) {

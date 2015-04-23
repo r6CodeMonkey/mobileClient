@@ -1,5 +1,7 @@
 package oddymobstar.message.in;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,9 +19,17 @@ public class GridMessage {
 
     public GridMessage(JSONObject grid) {
         this.grid = grid;
+
+        try{
+            create();
+        }catch(JSONException jse){
+            Log.d(this.getClass().getName(), "json exception " + jse.getMessage());
+
+        }
+
     }
 
-    public void create() throws JSONException {
+    private void create() throws JSONException {
 
 
         utm = grid.getString(InCoreMessage.GRID_UTM);

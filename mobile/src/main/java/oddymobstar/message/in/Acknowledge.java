@@ -1,5 +1,7 @@
 package oddymobstar.message.in;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,6 +20,7 @@ public class Acknowledge {
     private String utm;
     private String subUtm;
 
+
     private JSONObject acknowledge;
 
 
@@ -25,9 +28,17 @@ public class Acknowledge {
 
         this.acknowledge = acknowledge;
 
+        try{
+            create();
+        }catch(JSONException jse){
+            Log.d(this.getClass().getName(), "json exception "+jse.getMessage());
+        }
+
+
+
     }
 
-    public void create() throws JSONException {
+    private void create() throws JSONException {
 
 
         uid = acknowledge.getString(InCoreMessage.UID);
@@ -68,6 +79,7 @@ public class Acknowledge {
     public String getSubUtm() {
         return subUtm;
     }
+
 
 
 }

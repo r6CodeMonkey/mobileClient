@@ -21,14 +21,18 @@ public class PostButtons extends RelativeLayout {
 
         inflater.inflate(R.layout.post_buttons, this, true);
 
-        Button tv = (Button) findViewById(R.id.cancel);
+        if(!this.isInEditMode()) {
 
-        tv.setTypeface(DemoActivity.getFont());
+            Button tv = (Button) findViewById(R.id.cancel);
 
-        tv = (Button) findViewById(R.id.post);
+            tv.setTypeface(DemoActivity.getFont());
+
+            tv = (Button) findViewById(R.id.post);
 
 
-        tv.setTypeface(DemoActivity.getFont());
+            tv.setTypeface(DemoActivity.getFont());
+
+        }
 
 
     }

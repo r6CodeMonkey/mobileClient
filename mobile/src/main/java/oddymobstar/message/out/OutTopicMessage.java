@@ -28,8 +28,14 @@ public class OutTopicMessage extends OutCoreMessage {
         json.put(TCONT, msg);
         json.put(TSTAT, status);
 
+        post = type.equals(PUBLISH);
+
 
         message.getJSONObject(CORE_OBJECT).put(TOPIC, json);
 
+    }
+
+    public String getContent() throws JSONException{
+        return message.getJSONObject(CORE_OBJECT).getJSONObject(TOPIC).getString(TCONT);
     }
 }

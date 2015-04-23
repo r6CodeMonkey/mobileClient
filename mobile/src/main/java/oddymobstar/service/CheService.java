@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import oddymobstar.activity.DemoActivity;
+import oddymobstar.core.Message;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.in.Acknowledge;
 import oddymobstar.message.in.InCoreMessage;
@@ -133,8 +134,8 @@ public class CheService extends IntentService {
         super("CheService");
     }
 
-    public void setCreateHandler(DemoActivity.CreateHandler createHandler){
-       dbHelper.setCreateHandler(createHandler);
+    public void setMessageHandler(DemoActivity.MessageHandler messageHandler){
+       dbHelper.setMessageHandler(messageHandler);
     }
 
 
@@ -312,7 +313,6 @@ public class CheService extends IntentService {
                         if (!coreMessage.getJsonObject().isNull(InCoreMessage.ACKNOWLEDGE)) {
 
                             ack = new Acknowledge(coreMessage.getJsonObject().getJSONObject(InCoreMessage.ACKNOWLEDGE));
-                            ack.create();
 
                             /*
                             acknowledges either tell us of a fail (we can log it etc) or tell us of a success and generally a UUID.
@@ -443,6 +443,9 @@ public class CheService extends IntentService {
         try {
 
             messageHandler.getSentAcks().put(coreMessage.getMessage().getJSONObject(OutCoreMessage.CORE_OBJECT).getString(OutCoreMessage.ACK_ID), coreMessage);
+            if(coreMessage.isPost()){
+                messageHandler.getSentPosts().put(coreMessage.getMessage().getJSONObject(OutCoreMessage.CORE_OBJECT).getString(OutCoreMessage.ACK_ID), coreMessage);
+            }
             dOut.writeUTF(coreMessage.getMessage().toString());
 
 

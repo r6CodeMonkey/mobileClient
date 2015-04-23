@@ -1,5 +1,7 @@
 package oddymobstar.message.in;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,19 +14,29 @@ public class InAllianceMessage {
     private String aid;
     private String amid;
     private String message;
+    private String type;
 
     private JSONObject alliance;
 
     public InAllianceMessage(JSONObject alliance) {
         this.alliance = alliance;
+
+        try{
+            create();
+        }catch(JSONException jse){
+            Log.d(this.getClass().getName(), "json exception " + jse.getMessage());
+        }
+
+
     }
 
-    public void create() throws JSONException {
+    private void create() throws JSONException {
 
 
         aid = alliance.getString(InCoreMessage.AID);
         amid = alliance.getString(InCoreMessage.AMID);
         message = alliance.getString(InCoreMessage.MSG);
+        type = alliance.getString(InCoreMessage.TYPE);
 
     }
 
@@ -35,6 +47,8 @@ public class InAllianceMessage {
     public String getAmid() {
         return amid;
     }
+
+    public String getType(){ return type;}
 
     public String getMessage() {
         return message;

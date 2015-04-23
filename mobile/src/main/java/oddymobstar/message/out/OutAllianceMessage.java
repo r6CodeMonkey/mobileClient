@@ -29,9 +29,15 @@ public class OutAllianceMessage extends OutCoreMessage {
         json.put(ASTAT, status);
         json.put(ANAME, alliance.getName());
 
+        post = type.equals(PUBLISH);
+
         //also need lat long etc.
 
         message.getJSONObject(CORE_OBJECT).put(ALLIANCE, json);
 
+    }
+
+    public String getContent() throws JSONException{
+        return message.getJSONObject(CORE_OBJECT).getJSONObject(ALLIANCE).getString(ACONTENT);
     }
 }

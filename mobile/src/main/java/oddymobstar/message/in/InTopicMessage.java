@@ -1,5 +1,7 @@
 package oddymobstar.message.in;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,9 +22,15 @@ public class InTopicMessage {
     public InTopicMessage(JSONObject topic) {
 
         this.topic = topic;
+
+        try{
+            create();
+        }catch(JSONException jse){
+            Log.d(this.getClass().getName(), "json exception " + jse.getMessage());
+        }
     }
 
-    public void create() throws JSONException {
+    private void create() throws JSONException {
 
         tid = topic.getString(InCoreMessage.TID);
         this.message = topic.getString(InCoreMessage.MSG);
