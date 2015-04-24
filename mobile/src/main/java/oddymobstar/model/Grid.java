@@ -1,14 +1,16 @@
-package oddymobstar.core;
+package oddymobstar.model;
 
 /**
  * Created by root on 25/02/15.
  */
-public class Topic {
+public class Grid {
 
     private String key = "";
     private String name = "";
 
-    public Topic() {
+    //
+
+    public Grid() {
 
     }
 

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusable="false"
+    android:orientation="vertical" >
+
+
+    <Button
+        android:id="@+id/alliance_invite"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:onClick="allianceInvite"
+        android:textColor="@android:color/holo_orange_dark"
+        android:shadowColor="#ffffff"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="1"
+        android:text="@string/fa_user_plus"
+        android:textSize="36sp"
+        android:layout_toStartOf="@+id/message_coverage" />
+
+
+    <Button
+        android:id="@+id/message_coverage"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:onClick="messageCoverage"
+        android:textColor="@android:color/holo_green_light"
+        android:shadowColor="#ffffff"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="1"
+        android:text="@string/fa_globe"
+        android:textSize="36sp"
+        android:layout_toStartOf="@+id/message_delete" />
+
+    <Button
+        android:id="@+id/message_delete"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:onClick="deleteMessages"
+        android:textColor="@android:color/holo_red_dark"
+        android:shadowColor="#ffffff"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="1"
+        android:text="@string/fa_trash"
+        android:textSize="36sp" />
+
+
+
+</RelativeLayout>

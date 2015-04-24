@@ -15,7 +15,7 @@ import oddymobstar.activity.DemoActivity;
 import oddymobstar.adapter.CoreAdapter;
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
-import oddymobstar.util.CreateView;
+import oddymobstar.util.widget.CreateView;
 
 /**
  * Created by root on 14/04/15.
@@ -27,8 +27,6 @@ public class ListFragment extends android.support.v4.app.ListFragment {
       can contain...Alliances or Topics.
      */
     public static final int MY_ALLIANCES = 0;
-    public static final int MY_TOPICS = 1;
-    public static final int GLOBAL_TOPICS = 2;
 
 
     private int type = MY_ALLIANCES;
@@ -116,6 +114,9 @@ public class ListFragment extends android.support.v4.app.ListFragment {
         Button button = (Button) view.findViewById(R.id.list_create);
         button.setTypeface(DemoActivity.getFont());
 
+        lv.setFastScrollEnabled(true);
+        lv.setFastScrollAlwaysVisible(true);
+
         return view;
     }
 
@@ -124,10 +125,6 @@ public class ListFragment extends android.support.v4.app.ListFragment {
         switch (type) {
             case MY_ALLIANCES:
                 return dbHelper.getAlliances();
-            case MY_TOPICS:
-                return dbHelper.getTopics();
-            case GLOBAL_TOPICS:
-                return dbHelper.getGlobalTopics();
         }
         return null;
     }
@@ -144,12 +141,6 @@ public class ListFragment extends android.support.v4.app.ListFragment {
             switch (type) {
                 case MY_ALLIANCES:
                     adapter.changeCursor(dbHelper.getAlliances());
-                    break;
-                case MY_TOPICS:
-                    adapter.changeCursor(dbHelper.getTopics());
-                    break;
-                case GLOBAL_TOPICS:
-                    adapter.changeCursor(dbHelper.getGlobalTopics());
                     break;
             }
 

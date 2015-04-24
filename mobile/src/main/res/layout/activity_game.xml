@@ -4,19 +4,19 @@
     android:layout_height="match_parent">
 
 
-<fragment
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/map"
-    tools:context=".GameActivity"
-    android:name="com.google.android.gms.maps.SupportMapFragment">
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/map"
+        tools:context=".GameActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment">
 
-    <FrameLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/chat_fragment"
-    android:background="@android:color/transparent"/>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/chat_fragment"
+            android:background="@android:color/transparent" />
 
-</fragment>
-    </RelativeLayout>
+    </fragment>
+</RelativeLayout>
 

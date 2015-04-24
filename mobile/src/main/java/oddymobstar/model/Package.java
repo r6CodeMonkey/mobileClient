@@ -1,4 +1,4 @@
-package oddymobstar.core;
+package oddymobstar.model;
 
 /**
  * Created by root on 25/02/15.

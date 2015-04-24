@@ -28,12 +28,11 @@ public class Acknowledge {
 
         this.acknowledge = acknowledge;
 
-        try{
+        try {
             create();
-        }catch(JSONException jse){
-            Log.d(this.getClass().getName(), "json exception "+jse.getMessage());
+        } catch (JSONException jse) {
+            Log.d(this.getClass().getName(), "json exception " + jse.getMessage());
         }
-
 
 
     }
@@ -79,7 +78,6 @@ public class Acknowledge {
     public String getSubUtm() {
         return subUtm;
     }
-
 
 
 }

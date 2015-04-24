@@ -3,11 +3,16 @@ package oddymobstar.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.SectionIndexer;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
@@ -16,11 +21,15 @@ import oddymobstar.fragment.ListFragment;
 /**
  * Created by root on 27/02/15.
  */
-public class CoreAdapter extends CursorAdapter {
+public class CoreAdapter extends CursorAdapter implements SectionIndexer {
 
     private Context context;
     private int layout = R.layout.core_list_item;
     private int source;
+
+    private SparseIntArray sectionMap = new SparseIntArray();
+    private SparseIntArray positionMap = new SparseIntArray();
+
 
     public CoreAdapter(Context context, Cursor cursor, boolean autoRequery, int source) {
         super(context, cursor, autoRequery);
@@ -46,17 +55,78 @@ public class CoreAdapter extends CursorAdapter {
 
         switch (source) {
 
-            case ListFragment.MY_TOPICS:
-                tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_NAME)));
-                break;
-            case ListFragment.GLOBAL_TOPICS:
-                tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.TOPIC_NAME)));
-                break;
             case ListFragment.MY_ALLIANCES:
-                tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_KEY)) + " - " + cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME)));
+                tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME)));
                 break;
         }
 
 
     }
+
+    /*
+      fast index scroller
+     */
+
+    @Override
+    public int getPositionForSection(int sectionIndex) {
+        // TODO Auto-generated method stub
+        if (sectionMap.indexOfKey(sectionIndex) != -1) {
+            return sectionMap.get(sectionIndex);
+        } else {
+            return 0;
+        }
+
+    }
+
+    @Override
+    public int getSectionForPosition(int position) {
+        // TODO Auto-generated method stub
+        if (positionMap.indexOfKey(position) != -1) {
+
+            return positionMap.get(position);
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public Object[] getSections() {
+
+        Cursor c = this.getCursor();
+
+        List<String> sections = new ArrayList<>();
+
+        int sectionCounter = 0;
+
+        String previous = "";
+        String current = "";
+        int startPosition = 0;
+        c.moveToFirst();
+        while (c.moveToNext()) {
+
+            try {
+                current = c.getString(c.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME))
+                        .substring(0, 1);
+            } catch (Exception e) {
+            }
+
+            positionMap.put(c.getPosition(), sectionCounter);
+
+            if (!previous.trim().isEmpty() && !current.trim().isEmpty()
+                    && !previous.equals(current)) {
+                sections.add(previous);
+                sectionMap.put(sectionCounter, startPosition);
+                startPosition = c.getPosition();
+                sectionCounter++;
+            }
+
+            previous = current;
+        }
+        c.moveToFirst();
+        String[] t = new String[sections.size()];
+        // TODO Auto-generated method stub
+        return sections.toArray(t);
+    }
+
+
 }

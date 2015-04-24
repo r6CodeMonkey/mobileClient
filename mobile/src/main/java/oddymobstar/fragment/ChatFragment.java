@@ -1,26 +1,17 @@
 package oddymobstar.fragment;
 
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 
-import oddymobstar.activity.DemoActivity;
 import oddymobstar.adapter.ChatAdapter;
 import oddymobstar.crazycourier.R;
-import oddymobstar.database.DBHelper;
-import oddymobstar.util.ChatPost;
+import oddymobstar.util.widget.ChatPost;
 
 /**
  * Created by root on 04/04/15.
@@ -40,7 +31,7 @@ public class ChatFragment extends Fragment {
         this.chat = chat;
     }
 
-    public String getKey(){
+    public String getKey() {
         return key;
     }
 
@@ -62,11 +53,6 @@ public class ChatFragment extends Fragment {
         chatPost = (ChatPost) view.findViewById(R.id.chat_post);
 
 
-        if(!view.isInEditMode()) {
-            Button deletePosts = (Button) view.findViewById(R.id.delete_posts);
-            deletePosts.setTypeface(DemoActivity.getFont());
-        }
-
         lv.setDivider(null);
         lv.setDividerHeight(0);
 
@@ -77,11 +63,10 @@ public class ChatFragment extends Fragment {
 
     }
 
-    public void refreshAdapter(Cursor cursor){
+    public void refreshAdapter(Cursor cursor) {
 
         adapter.changeCursor(cursor);
     }
-
 
 
     public void cancelPost() {
@@ -91,8 +76,6 @@ public class ChatFragment extends Fragment {
     public String getPost() {
         return chatPost.getPost();
     }
-
-
 
 
 }

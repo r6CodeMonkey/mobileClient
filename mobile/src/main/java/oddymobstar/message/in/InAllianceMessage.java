@@ -21,9 +21,9 @@ public class InAllianceMessage {
     public InAllianceMessage(JSONObject alliance) {
         this.alliance = alliance;
 
-        try{
+        try {
             create();
-        }catch(JSONException jse){
+        } catch (JSONException jse) {
             Log.d(this.getClass().getName(), "json exception " + jse.getMessage());
         }
 
@@ -48,7 +48,9 @@ public class InAllianceMessage {
         return amid;
     }
 
-    public String getType(){ return type;}
+    public String getType() {
+        return type;
+    }
 
     public String getMessage() {
         return message;

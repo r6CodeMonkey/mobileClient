@@ -1,7 +1,4 @@
-package oddymobstar.core;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+package oddymobstar.model;
 
 import java.sql.Timestamp;
 
@@ -51,7 +48,9 @@ public class Message {
         this.myMessage = myMessage;
     }
 
-    public void setAuthor(String author){this.author = author;}
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 
     public long getTime() {
         return time;
@@ -73,7 +72,9 @@ public class Message {
         return messageKey;
     }
 
-    public String getAuthor(){return author;}
+    public String getAuthor() {
+        return author;
+    }
 
     public boolean isMyMessage() {
         return myMessage.equals("Y");

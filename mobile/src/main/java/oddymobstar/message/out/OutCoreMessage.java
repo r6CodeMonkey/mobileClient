@@ -42,17 +42,6 @@ public class OutCoreMessage {
     public static final String UTM = "utm";
     public static final String SUBUTM = "subutm";
     public static final String PACKAGE = "package";
-    public static final String TOPIC = "topic";
-    public static final String TCONT = "tcont";
-    public static final String TACT = "tact";
-    public static final String TNAME = "tname";
-    public static final String TUID = "tuid";
-    public static final String TSTAT = "tstat";
-    //override the zones we are registering to or sending to
-    public static final String TLAT = "tlat";
-    public static final String TLONG = "tlong";
-    //action
-    public static final String TOPIC_GET = "get";
 
 
     public OutCoreMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException {
@@ -68,7 +57,9 @@ public class OutCoreMessage {
 
     }
 
-    public boolean isPost(){ return post; }
+    public boolean isPost() {
+        return post;
+    }
 
 
     public JSONObject getMessage() {

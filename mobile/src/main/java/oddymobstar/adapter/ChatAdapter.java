@@ -16,7 +16,7 @@ import java.util.Date;
 
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
-import oddymobstar.util.ChatBubble;
+import oddymobstar.util.widget.ChatBubble;
 
 /**
  * Created by root on 03/04/15.
@@ -40,7 +40,7 @@ public class ChatAdapter extends CursorAdapter {
 
         String myMessage = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.MY_MESSAGE));
 
-        if(myMessage.equals("Y")) {
+        if (myMessage.equals("Y")) {
 
             TextView tv = (TextView) v.findViewById(R.id.message);
             tv.setTextColor(Color.BLACK);
@@ -58,7 +58,6 @@ public class ChatAdapter extends CursorAdapter {
             params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
             params.gravity = Gravity.LEFT;
             tv.setLayoutParams(params);
-
 
 
             tv = (TextView) v.findViewById(R.id.datetime);
@@ -79,7 +78,7 @@ public class ChatAdapter extends CursorAdapter {
 
             chatBubble.setLayoutParams(params);
             chatBubble.setGravity(Gravity.LEFT);
-        }else{
+        } else {
             TextView tv = (TextView) v.findViewById(R.id.message);
             tv.setTextColor(Color.WHITE);
             tv.setGravity(Gravity.RIGHT);
@@ -90,7 +89,7 @@ public class ChatAdapter extends CursorAdapter {
             tv.setLayoutParams(params);
 
 
-            tv =(TextView) v.findViewById(R.id.from);
+            tv = (TextView) v.findViewById(R.id.from);
             tv.setTextColor(Color.WHITE);
             tv.setGravity(Gravity.LEFT);
 
@@ -98,7 +97,7 @@ public class ChatAdapter extends CursorAdapter {
             params.gravity = Gravity.LEFT;
             tv.setLayoutParams(params);
 
-            tv =(TextView) v.findViewById(R.id.datetime);
+            tv = (TextView) v.findViewById(R.id.datetime);
             tv.setTextColor(Color.WHITE);
             tv.setGravity(Gravity.LEFT);
 

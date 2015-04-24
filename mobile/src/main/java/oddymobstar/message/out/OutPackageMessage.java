@@ -15,7 +15,7 @@ public class OutPackageMessage extends OutCoreMessage {
 
     }
 
-    public void setPackage(oddymobstar.core.Package pack) {
+    public void setPackage(oddymobstar.model.Package pack) {
 
     }
 }

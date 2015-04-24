@@ -20,9 +20,9 @@ public class GridMessage {
     public GridMessage(JSONObject grid) {
         this.grid = grid;
 
-        try{
+        try {
             create();
-        }catch(JSONException jse){
+        } catch (JSONException jse) {
             Log.d(this.getClass().getName(), "json exception " + jse.getMessage());
 
         }

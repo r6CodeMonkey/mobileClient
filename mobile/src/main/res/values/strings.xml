@@ -6,6 +6,8 @@
     <string name="fa_cancel">&#xf00d;</string>
     <string name="fa_send">&#xf1d8;</string>
     <string name="fa_trash">&#xf1f8;</string>
+    <string name="fa_globe">&#xf0ac;</string>
+    <string name="fa_user_plus">&#xf234;</string>
 
 
 </resources>

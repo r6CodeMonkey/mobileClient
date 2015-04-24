@@ -27,10 +27,7 @@ public class InCoreMessage {
     public static final String GRID_UTM = "utm";
     public static final String SUB_UTM = "subutm";
     public final static String TOPIC = "topic";
-    public final static String TID = "tid";
-    public final static String TNAME = "tname";
     public final static String MSG = "msg";
-    public final static String FILTER = "filter";
     public final static String POST = "post";
     public final static String TIME = "time";
     public final static String TYPE = "type";

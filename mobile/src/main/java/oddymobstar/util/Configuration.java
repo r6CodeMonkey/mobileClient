@@ -6,8 +6,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import oddymobstar.core.Config;
 import oddymobstar.database.DBHelper;
+import oddymobstar.model.Config;
 
 /**
  * Created by root on 27/02/15.

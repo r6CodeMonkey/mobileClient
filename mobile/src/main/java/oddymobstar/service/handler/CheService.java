@@ -1,4 +1,4 @@
-package oddymobstar.service;
+package oddymobstar.service.handler;
 
 import android.app.IntentService;
 import android.content.ComponentName;
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import oddymobstar.activity.DemoActivity;
-import oddymobstar.core.Message;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.in.Acknowledge;
 import oddymobstar.message.in.InCoreMessage;
@@ -49,7 +48,7 @@ public class CheService extends IntentService {
 
     private DBHelper dbHelper = new DBHelper(this);
 
-    private ServiceMessageHandler messageHandler;
+    private MessageService messageHandler;
 
 
     private Thread write;
@@ -134,8 +133,8 @@ public class CheService extends IntentService {
         super("CheService");
     }
 
-    public void setMessageHandler(DemoActivity.MessageHandler messageHandler){
-       dbHelper.setMessageHandler(messageHandler);
+    public void setMessageHandler(DemoActivity.MessageHandler messageHandler) {
+        dbHelper.setMessageHandler(messageHandler);
     }
 
 
@@ -146,7 +145,7 @@ public class CheService extends IntentService {
         //also need to have timeout / reconnect etc.
         configuration = new Configuration(dbHelper.getConfigs());
 
-        messageHandler = new ServiceMessageHandler(dbHelper, configuration);
+        messageHandler = new MessageService(dbHelper, configuration);
 
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -306,7 +305,7 @@ public class CheService extends IntentService {
                         Log.d("message received", "message received " + coreMessage.getJsonObject().toString());
                         //at this point we could have more than 1 core message here.
 
-                        OutCoreMessage ackSent = null;
+
                         Acknowledge ack = null;
 
                         //what are we?
@@ -342,14 +341,12 @@ public class CheService extends IntentService {
 
                                     }
                                 }
-                                //match to our acknowledge sent list...and this will hold the relevant action required.
-                                ackSent = messageHandler.getSentAcks().get(ack.getAckId());
 
                             }
 
                         }
 
-                        messageHandler.handleMessage(coreMessage, ackSent, ack);
+                        messageHandler.handleMessage(coreMessage, ack);
 
                     }
 
@@ -443,7 +440,7 @@ public class CheService extends IntentService {
         try {
 
             messageHandler.getSentAcks().put(coreMessage.getMessage().getJSONObject(OutCoreMessage.CORE_OBJECT).getString(OutCoreMessage.ACK_ID), coreMessage);
-            if(coreMessage.isPost()){
+            if (coreMessage.isPost()) {
                 messageHandler.getSentPosts().put(coreMessage.getMessage().getJSONObject(OutCoreMessage.CORE_OBJECT).getString(OutCoreMessage.ACK_ID), coreMessage);
             }
             dOut.writeUTF(coreMessage.getMessage().toString());

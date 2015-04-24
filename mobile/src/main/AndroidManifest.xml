@@ -21,7 +21,7 @@
 
         <service
             android:enabled="true"
-            android:name="oddymobstar.service.CheService">
+            android:name="oddymobstar.service.handler.CheService">
             <uses-permission android:name="android.permission.INTERNET" />
         </service>
 

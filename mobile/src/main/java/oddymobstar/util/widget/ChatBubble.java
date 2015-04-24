@@ -1,4 +1,4 @@
-package oddymobstar.util;
+package oddymobstar.util.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -25,9 +25,9 @@ public class ChatBubble extends LinearLayout {
 
         View view = inflater.inflate(R.layout.chat_bubble, this, true);
 
-        author = (TextView)view.findViewById(R.id.from);
-        message = (TextView)view.findViewById(R.id.message);
-        dateTime = (TextView)view.findViewById(R.id.datetime);
+        author = (TextView) view.findViewById(R.id.from);
+        message = (TextView) view.findViewById(R.id.message);
+        dateTime = (TextView) view.findViewById(R.id.datetime);
 
 
     }

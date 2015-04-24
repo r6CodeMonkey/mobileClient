@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
 
-   <oddymobstar.util.ChatBubble
+    <oddymobstar.util.widget.ChatBubble
         android:id="@+id/message_bubble"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"

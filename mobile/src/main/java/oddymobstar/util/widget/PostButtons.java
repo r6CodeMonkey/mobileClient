@@ -1,4 +1,4 @@
-package oddymobstar.util;
+package oddymobstar.util.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -21,7 +21,7 @@ public class PostButtons extends RelativeLayout {
 
         inflater.inflate(R.layout.post_buttons, this, true);
 
-        if(!this.isInEditMode()) {
+        if (!this.isInEditMode()) {
 
             Button tv = (Button) findViewById(R.id.cancel);
 

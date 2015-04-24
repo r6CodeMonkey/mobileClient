@@ -9,14 +9,8 @@
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_weight="0.8"
         android:stackFromBottom="true"
         android:transcriptMode="alwaysScroll"
-        android:layout_height="wrap_content" />
-
-    <oddymobstar.util.widget.CreateView
-        android:id="@+id/create_view"
-        android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
 

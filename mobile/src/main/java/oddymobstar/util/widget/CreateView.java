@@ -1,4 +1,4 @@
-package oddymobstar.util;
+package oddymobstar.util.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;

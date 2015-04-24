@@ -13,6 +13,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginRight="5dp"
         android:layout_marginLeft="10dp"
+        android:textSize="18dp"
         android:layout_weight="0.8"
         android:hint="Enter message"
         android:maxLength="300"
@@ -21,11 +22,10 @@
         android:background="@android:color/white"
         android:layout_height="100dp" />
 
-    <oddymobstar.util.PostButtons
+    <oddymobstar.util.widget.PostButtons
         android:layout_width="50dp"
         android:layout_height="110dp"
-        android:layout_weight="0.2"/>
+        android:layout_weight="0.2" />
 
 
-
-    </LinearLayout>
+</LinearLayout>

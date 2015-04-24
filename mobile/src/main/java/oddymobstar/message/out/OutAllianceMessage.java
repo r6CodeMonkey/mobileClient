@@ -5,7 +5,7 @@ import com.google.android.gms.maps.model.LatLng;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import oddymobstar.core.Alliance;
+import oddymobstar.model.Alliance;
 
 /**
  * Created by root on 26/02/15.
@@ -37,7 +37,7 @@ public class OutAllianceMessage extends OutCoreMessage {
 
     }
 
-    public String getContent() throws JSONException{
+    public String getContent() throws JSONException {
         return message.getJSONObject(CORE_OBJECT).getJSONObject(ALLIANCE).getString(ACONTENT);
     }
 }
