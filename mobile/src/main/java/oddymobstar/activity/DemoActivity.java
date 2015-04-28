@@ -3,6 +3,7 @@ package oddymobstar.activity;
 
 import android.app.ActionBar;
 import android.app.ActivityManager;
+import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,13 +42,18 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONException;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import oddymobstar.connect.ConnectivityHandler;
+import oddymobstar.connect.manager.BluetoothManager;
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
 import oddymobstar.fragment.ChatFragment;
 import oddymobstar.fragment.ConfigurationFragment;
+import oddymobstar.fragment.DeviceFragment;
 import oddymobstar.fragment.ListFragment;
 import oddymobstar.message.out.OutAllianceMessage;
 import oddymobstar.message.out.OutCoreMessage;
@@ -55,6 +62,7 @@ import oddymobstar.model.Message;
 import oddymobstar.service.handler.CheService;
 import oddymobstar.util.Configuration;
 import oddymobstar.util.UUIDGenerator;
+import oddymobstar.util.widget.ConnectivityDialog;
 
 public class DemoActivity extends FragmentActivity {
 
@@ -79,10 +87,19 @@ public class DemoActivity extends FragmentActivity {
 
     private View actionBar;
 
+    private static final String BLUETOOTH_UUID = "39159dac-ead1-47ad-9975-ec8390df6f7d";
+
+    private boolean isClient = false;
+
+    private BroadcastReceiver bluetoothReceiver;
+
 
     private ChatFragment chatFrag = new ChatFragment();
     private ListFragment listFrag = new ListFragment();
+    private DeviceFragment deviceFragment = new DeviceFragment();
     private ConfigurationFragment confFrag = new ConfigurationFragment();
+
+    private ConnectivityHandler connectivityHandler;
 
     public class MessageHandler extends Handler {
 
@@ -110,6 +127,65 @@ public class DemoActivity extends FragmentActivity {
 
         }
 
+        public void handleInvite(final String key, final String title){
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+            android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+
+            chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
+
+            transaction.replace(R.id.chat_fragment, chatFrag);
+            transaction.addToBackStack(null);
+            transaction.commit();
+                }
+            });
+
+            }
+
+
+    }
+
+    public class DeviceDiscovery {
+
+        private BluetoothManager bluetoothManager;
+
+
+        public DeviceDiscovery(Context context) {
+
+            bluetoothManager = new BluetoothManager(context, connectivityHandler, dbHelper, uuidGenerator, cheService, configuration, chatFrag.getKey(), currentLatLng);
+
+        }
+
+        public void addDevice(BluetoothDevice device) {
+            bluetoothManager.addDevice(device);
+            deviceFragment.refreshAdapter(device.getName());
+        }
+
+        public BluetoothManager getBluetoothManager() {
+            return bluetoothManager;
+        }
+
+
+        public void onDiscover() {
+            bluetoothManager.setIsRunning(true);
+            //we launch..
+            android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+            List<String> deviceKeys = new ArrayList<>();
+            for (BluetoothDevice device : bluetoothManager.getDevices()) {
+                deviceKeys.add(device.getName());
+            }
+
+            deviceFragment = bluetoothManager.onDiscover(isClient);
+
+            deviceFragment.show(transaction, "dialog");
+
+            isClient = false;
+        }
+
 
     }
 
@@ -132,7 +208,8 @@ public class DemoActivity extends FragmentActivity {
             switch (listFrag.getType()) {
                 case ListFragment.MY_ALLIANCES:
                     key = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_KEY));
-                    chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key);
+                    String title = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME));
+                    chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
 
                     transaction.replace(R.id.chat_fragment, chatFrag);
                     transaction.addToBackStack(null);
@@ -162,24 +239,7 @@ public class DemoActivity extends FragmentActivity {
 
         }
     };
-/*
 
-    private AdapterView.OnItemClickListener listClickListener = new AdapterView.OnItemClickListener(){
-        public void onItemClick(AdapterView<?> listView, View v, int position, long id){
-             //need to launch dialog for item selected, need to know if its global or alliance
-
-        }
-    };
-
-    private DialogInterface.OnClickListener ll = new DialogInterface.OnClickListener(){
-
-        public void onClick(DialogInterface dialog, int value) {
-            show
-        }
-
-    };
-
-*/
 
     private Thread locationUpdates;
     // private Thread service;
@@ -211,6 +271,8 @@ public class DemoActivity extends FragmentActivity {
         if (!dbHelper.hasPreLoad()) {
             dbHelper.addBaseConfiguration();
         }
+        //we need one too...no shit.
+        dbHelper.setMessageHandler(new MessageHandler());
 
         font = Typeface.createFromAsset(
                 this.getAssets(), "fontawesome-webfont.ttf");
@@ -234,6 +296,7 @@ public class DemoActivity extends FragmentActivity {
 
         intent = new Intent(this, CheService.class);
         serviceIntent = new Intent(this, CheService.class);
+        connectivityHandler = new ConnectivityHandler(this, BLUETOOTH_UUID);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter(MESSAGE_INTENT));
 
@@ -287,7 +350,37 @@ public class DemoActivity extends FragmentActivity {
 
         super.onBackPressed();
 
+
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        /*
+        to confirm they all use this....quite likely really as we have to make a request to turn shit on...
+        also need to ensure other things dont also call it..
+         */
+        switch (connectivityHandler.getMode()) {
+            case ConnectivityDialog.BLUETOOTH:
+
+                bluetoothReceiver = connectivityHandler.getBluetooth().getReceiver();
+                registerReceiver(bluetoothReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+
+                connectivityHandler.getBluetooth().handle(requestCode, resultCode, data);
+                if (resultCode == connectivityHandler.getBluetooth().DISCOVERABLE_SECONDS) {
+                    connectivityHandler.getBluetooth().getProgress(new DeviceDiscovery(this)).show();
+                }
+                break;
+            case ConnectivityDialog.WIFI:
+                connectivityHandler.getWifi().handle(requestCode, resultCode, data);
+                break;
+            case ConnectivityDialog.NFC:
+                connectivityHandler.getNfc().handle(requestCode, resultCode, data);
+                break;
+        }
+
+    }
+
 
     private void removeFragments() {
 
@@ -312,6 +405,7 @@ public class DemoActivity extends FragmentActivity {
         } catch (Exception e) {
 
         }
+
 
         transaction.commit();
 
@@ -359,7 +453,12 @@ public class DemoActivity extends FragmentActivity {
                 transaction.addToBackStack(null);
                 transaction.commit();
 
+                break;
 
+            case R.id.connect:
+                //same mechanism for discovery.
+                isClient = true;
+                allianceInvite(null);
                 break;
 
         }
@@ -379,17 +478,6 @@ public class DemoActivity extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
-
-     /*   if(service == null){
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    startService(serviceIntent);
-                }
-            });
-
-            service.start();
-        } */
 
         if (locationUpdates == null) {
             locationUpdates = new Thread(new Runnable() {
@@ -432,6 +520,13 @@ public class DemoActivity extends FragmentActivity {
 
     public void allianceInvite(View view) {
 
+        FragmentTransaction transaction = getSupportFragmentManager()
+                .beginTransaction();
+
+        ConnectivityDialog connectivityDialog = ConnectivityDialog.newInstance(connectivityHandler, isClient);
+
+        connectivityDialog.show(transaction, "dialog");
+
     }
 
 
@@ -462,9 +557,6 @@ public class DemoActivity extends FragmentActivity {
         } catch (JSONException jse) {
 
         }
-
-        //delete this..
-        Toast.makeText(this, chatFrag.getPost(), Toast.LENGTH_SHORT).show();
 
         cancelPost(null);
 
@@ -513,21 +605,6 @@ public class DemoActivity extends FragmentActivity {
 
     }
 
-    /**
-     * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
-     * installed) and the map has not already been instantiated.. This will ensure that we only ever
-     * call {@link #setUpMap()} once when {@link #mMap} is not null.
-     * <p/>
-     * If it isn't installed {@link com.google.android.gms.maps.SupportMapFragment} (and
-     * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
-     * install/update the Google Play services APK on their device.
-     * <p/>
-     * A user can return to this FragmentActivity after following the prompt and correctly
-     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
-     * have been completely destroyed during this process (it is likely that it would only be
-     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
-     * method in {@link #onResume()} to guarantee that it will be called.
-     */
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
@@ -605,6 +682,14 @@ public class DemoActivity extends FragmentActivity {
     public void onPause() {
         super.onPause();
 
+        if (bluetoothReceiver != null) {
+            try {
+                unregisterReceiver(bluetoothReceiver);
+            } catch (Exception e) {
+                //its probably not registered..
+            }
+        }
+
        /* if (cheService != null) {
             unbindService(serviceConnection);
         }*/
@@ -631,6 +716,14 @@ public class DemoActivity extends FragmentActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
 
         editor.commit();
+
+        if (bluetoothReceiver != null) {
+            try {
+                unregisterReceiver(bluetoothReceiver);
+            } catch (Exception e) {
+                //probably no longer registerd..
+            }
+        }
 
 
         if (dbHelper != null) {
@@ -679,23 +772,6 @@ public class DemoActivity extends FragmentActivity {
             //we need to execute the method we are interested in.  note if we time out then
             locationManager.removeUpdates(this);
 
-            //bind again if its down.  see if this imrpves things.  long term can send a message back to it rather than this.
-        /*    if (cheService == null) {
-                bindService(intent, serviceConnection, BIND_AUTO_CREATE);
-            }
-
-            //lets send our location
-            if (cheService != null) {
-                try {
-                    CoreMessage coreMessage = new CoreMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), CoreMessage.PLAYER);
-
-                    cheService.writeToSocket(coreMessage);
-                } catch (JSONException jse) {
-
-                } catch (NoSuchAlgorithmException nsae) {
-
-                }
-            } */
 
         }
 

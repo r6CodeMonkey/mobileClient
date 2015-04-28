@@ -24,10 +24,11 @@ public class OutAllianceMessage extends OutCoreMessage {
         JSONObject json = new JSONObject();
 
         json.put(AID, alliance.getKey());
-        json.put(ACONTENT, msg);
-        json.put(ATYPE, type);
-        json.put(ASTAT, status);
-        json.put(ANAME, alliance.getName());
+        json.put(MSG, msg);
+        json.put(TYPE, type);
+        json.put(STAT, status);
+        json.put(AMID, "");  //not required...just for consistency.
+        json.put(NAME, alliance.getName());
 
         post = type.equals(PUBLISH);
 
@@ -38,6 +39,6 @@ public class OutAllianceMessage extends OutCoreMessage {
     }
 
     public String getContent() throws JSONException {
-        return message.getJSONObject(CORE_OBJECT).getJSONObject(ALLIANCE).getString(ACONTENT);
+        return message.getJSONObject(CORE_OBJECT).getJSONObject(ALLIANCE).getString(MSG);
     }
 }

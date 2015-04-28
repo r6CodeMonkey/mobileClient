@@ -60,8 +60,8 @@ public class AcknowledgeService implements MessageInterface {
 
                 Alliance alliance = new Alliance();
                 alliance.setKey(acknowledge.getOid());
-                alliance.setName(ackSent.getMessage().getJSONObject(OutCoreMessage.CORE_OBJECT).getJSONObject(OutAllianceMessage.ALLIANCE).getString(OutAllianceMessage.ANAME));
-                dbHelper.addAlliance(alliance);
+                alliance.setName(ackSent.getMessage().getJSONObject(OutCoreMessage.CORE_OBJECT).getJSONObject(OutAllianceMessage.ALLIANCE).getString(OutAllianceMessage.NAME));
+                dbHelper.addAlliance(alliance, false);
 
             } else if (ackSent instanceof OutPackageMessage) {
 

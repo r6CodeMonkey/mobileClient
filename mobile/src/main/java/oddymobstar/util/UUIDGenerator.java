@@ -19,4 +19,8 @@ public class UUIDGenerator {
         return (MessageDigest.getInstance(algorithm).digest((UUID.randomUUID().toString() + System.currentTimeMillis()).toString().getBytes())).toString();
     }
 
+    public String generateBluetoothUUID() throws NoSuchAlgorithmException {
+        return (MessageDigest.getInstance(algorithm).digest("bluetooth connection client basically needs its own UUID so this will be ".getBytes())).toString();
+    }
+
 }

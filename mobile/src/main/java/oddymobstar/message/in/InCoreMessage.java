@@ -31,6 +31,7 @@ public class InCoreMessage {
     public final static String POST = "post";
     public final static String TIME = "time";
     public final static String TYPE = "type";
+    public static final String ANAME = "aname";
 
 
     protected JSONObject jsonObject;

@@ -5,6 +5,10 @@
         android:title="Alliances">
     </item>
     <item
+        android:id="@+id/connect"
+        android:title="Join">
+    </item>
+    <item
         android:id="@+id/configuration"
         android:title="Configuration"></item>
 

@@ -15,6 +15,7 @@ public class InAllianceMessage {
     private String amid;
     private String message;
     private String type;
+    private String name;
 
     private JSONObject alliance;
 
@@ -37,6 +38,7 @@ public class InAllianceMessage {
         amid = alliance.getString(InCoreMessage.AMID);
         message = alliance.getString(InCoreMessage.MSG);
         type = alliance.getString(InCoreMessage.TYPE);
+        name = alliance.getString(InCoreMessage.ANAME);
 
     }
 
@@ -54,5 +56,9 @@ public class InAllianceMessage {
 
     public String getMessage() {
         return message;
+    }
+
+    public String getName() {
+        return name;
     }
 }

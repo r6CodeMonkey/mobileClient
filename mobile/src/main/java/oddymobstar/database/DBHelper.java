@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.model.Alliance;
@@ -160,10 +159,6 @@ public class DBHelper extends SQLiteOpenHelper {
      */
 
 
-    /*
-    add methods
-     */
-
     public void addMessage(Message message) {
 
         SQLiteDatabase db = this.getWritableDatabase();
@@ -177,9 +172,6 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(MESSAGE_AUTHOR, message.getAuthor());
         values.put(MY_MESSAGE, message.isMyMessage() ? "Y" : "N");
 
-        Log.d("adding message", "values are " + message.getMessageKey() + ", " + message.getMessage() + ", " + message.getTimeStamp() + " ," + message.getMessageType());
-
-
         db.insert(MESSAGE_TABLE, null, values);
 
         messageHandler.handleChat(message.getMessageType());
@@ -191,7 +183,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
 
-        //values.put(CONFIG_ID, config.getId());
         values.put(CONFIG_NAME, config.getName());
         values.put(CONFIG_VALUE, config.getValue());
 
@@ -217,7 +208,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public void addAlliance(Alliance alliance) {
+    public void addAlliance(Alliance alliance, boolean invite) {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -228,7 +219,13 @@ public class DBHelper extends SQLiteOpenHelper {
 
         db.insert(ALLIANCES_TABLE, null, values);
 
-        messageHandler.handleList();
+        if (messageHandler != null) {
+            if(invite){
+                messageHandler.handleInvite(alliance.getKey(), alliance.getName());
+            }else {
+                messageHandler.handleList();
+            }
+        }
 
 
     }

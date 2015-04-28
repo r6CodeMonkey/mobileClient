@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+
 
 import oddymobstar.adapter.ChatAdapter;
 import oddymobstar.crazycourier.R;
@@ -20,6 +22,7 @@ public class ChatFragment extends Fragment {
 
     private Cursor chat;
     private String key;
+    private String title;
 
     private ChatPost chatPost;
 
@@ -28,16 +31,16 @@ public class ChatFragment extends Fragment {
 
     public ChatFragment() {
         setRetainInstance(true);
-        this.chat = chat;
     }
 
     public String getKey() {
         return key;
     }
 
-    public void setCursor(Cursor chat, String key) {
+    public void setCursor(Cursor chat, String key, String title) {
         this.key = key;
         this.chat = chat;
+        this.title = title;
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,6 +54,9 @@ public class ChatFragment extends Fragment {
         ListView lv = (ListView) view.findViewById(R.id.list);
 
         chatPost = (ChatPost) view.findViewById(R.id.chat_post);
+
+        TextView tv = (TextView)view.findViewById(R.id.chat_title);
+        tv.setText(title);
 
 
         lv.setDivider(null);
