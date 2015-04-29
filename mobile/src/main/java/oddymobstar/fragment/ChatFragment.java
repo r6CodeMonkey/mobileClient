@@ -10,7 +10,6 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-
 import oddymobstar.adapter.ChatAdapter;
 import oddymobstar.crazycourier.R;
 import oddymobstar.util.widget.ChatPost;
@@ -55,7 +54,7 @@ public class ChatFragment extends Fragment {
 
         chatPost = (ChatPost) view.findViewById(R.id.chat_post);
 
-        TextView tv = (TextView)view.findViewById(R.id.chat_title);
+        TextView tv = (TextView) view.findViewById(R.id.chat_title);
         tv.setText(title);
 
 

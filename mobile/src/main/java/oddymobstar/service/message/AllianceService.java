@@ -1,11 +1,15 @@
 package oddymobstar.service.message;
 
+import android.util.Log;
+
 import org.json.JSONException;
 
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.in.InAllianceMessage;
 import oddymobstar.message.in.InCoreMessage;
 import oddymobstar.message.out.OutAllianceMessage;
+import oddymobstar.model.Alliance;
+import oddymobstar.model.AllianceMember;
 import oddymobstar.model.Message;
 
 /**
@@ -22,6 +26,9 @@ public class AllianceService implements MessageInterface {
     @Override
     public void handle(InCoreMessage coreMessage) throws JSONException {
 
+        Log.d("in alliance thread", "in alliance thread 1");
+
+
         long time = coreMessage.getJsonObject().getLong(InCoreMessage.TIME);
 
         InAllianceMessage allianceMessage = new InAllianceMessage(coreMessage.getJsonObject().getJSONObject(InCoreMessage.ALLIANCE));
@@ -35,10 +42,17 @@ public class AllianceService implements MessageInterface {
 
         dbHelper.addMessage(message);
 
+        Log.d("in alliance thread", "in alliance thread");
+
         //need to actually fix this up....next ticket.
         switch (allianceMessage.getType()) {
             case OutAllianceMessage.JOIN:
-                dbHelper.addAllianceMember();
+
+
+                Alliance alliance = new Alliance();
+                alliance.setKey(allianceMessage.getAid());
+
+                dbHelper.addAllianceMember(new AllianceMember(alliance, allianceMessage));
                 break;
             case OutAllianceMessage.LEAVE:
                 dbHelper.deleteAllianceMember();

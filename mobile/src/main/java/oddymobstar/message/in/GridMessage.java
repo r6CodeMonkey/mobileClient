@@ -32,7 +32,7 @@ public class GridMessage {
     private void create() throws JSONException {
 
 
-        utm = grid.getString(InCoreMessage.GRID_UTM);
+        utm = grid.getString(InCoreMessage.UTM);
         subUtm = grid.getString(InCoreMessage.SUB_UTM);
         this.message = grid.getString(InCoreMessage.MSG);
     }

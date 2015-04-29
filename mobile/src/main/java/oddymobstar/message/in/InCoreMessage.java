@@ -24,7 +24,6 @@ public class InCoreMessage {
     public final static String AID = "aid";
     public final static String AMID = "amid";
     public static final String GRID = "grid";
-    public static final String GRID_UTM = "utm";
     public static final String SUB_UTM = "subutm";
     public final static String TOPIC = "topic";
     public final static String MSG = "msg";
@@ -32,6 +31,8 @@ public class InCoreMessage {
     public final static String TIME = "time";
     public final static String TYPE = "type";
     public static final String ANAME = "aname";
+    public static final String LATITUDE = "lat";
+    public static final String LONGITUDE = "long";
 
 
     protected JSONObject jsonObject;

@@ -58,6 +58,7 @@ import oddymobstar.fragment.ListFragment;
 import oddymobstar.message.out.OutAllianceMessage;
 import oddymobstar.message.out.OutCoreMessage;
 import oddymobstar.model.Alliance;
+import oddymobstar.model.AllianceMember;
 import oddymobstar.model.Message;
 import oddymobstar.service.handler.CheService;
 import oddymobstar.util.Configuration;
@@ -103,6 +104,9 @@ public class DemoActivity extends FragmentActivity {
 
     public class MessageHandler extends Handler {
 
+        private Marker marker;
+
+
         public void handleList() {
             if (listFrag != null) {
                 runOnUiThread(new Runnable() {
@@ -127,25 +131,51 @@ public class DemoActivity extends FragmentActivity {
 
         }
 
-        public void handleInvite(final String key, final String title){
+        public void handleInvite(final String key, final String title) {
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-            android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                    android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
 
-            chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
+                    chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
 
-            transaction.replace(R.id.chat_fragment, chatFrag);
-            transaction.addToBackStack(null);
-            transaction.commit();
+                    transaction.replace(R.id.chat_fragment, chatFrag);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
                 }
             });
 
+        }
+
+        public void handleAllianceMember(final AllianceMember allianceMember) {
+
+
+            Log.d("adding marker", "marker " + allianceMember.getKey() + " lat long is " + allianceMember.getLatLng().toString());
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    marker = mMap.addMarker(new MarkerOptions().position(allianceMember.getLatLng()).title(allianceMember.getKey()));
+
+                    CameraPosition cameraPosition = new CameraPosition.Builder()
+                            .target(allianceMember.getLatLng())
+                            .tilt(mMap.getCameraPosition().tilt)
+                            .bearing(mMap.getCameraPosition().bearing)
+                            .zoom(mMap.getCameraPosition().zoom)
+                            .build();
+
+                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                }
+
+            });
+
+            if (marker != null) {
+                markerMap.put(allianceMember.getKey(), marker);
             }
 
-
+        }
     }
 
     public class DeviceDiscovery {

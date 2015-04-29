@@ -10,6 +10,8 @@
         android:id="@+id/chat_title"
         android:layout_width="fill_parent"
         android:gravity="center"
+        android:textSize="32dp"
+        android:textColor="@android:color/holo_orange_dark"
         android:background="@android:color/background_dark"
         android:layout_height="wrap_content" />
 

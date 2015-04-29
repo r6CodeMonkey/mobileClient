@@ -16,6 +16,11 @@ public class InAllianceMessage {
     private String message;
     private String type;
     private String name;
+    private String utm;
+    private String subUtm;
+    private double latitude;
+    private double longitude;
+
 
     private JSONObject alliance;
 
@@ -38,7 +43,17 @@ public class InAllianceMessage {
         amid = alliance.getString(InCoreMessage.AMID);
         message = alliance.getString(InCoreMessage.MSG);
         type = alliance.getString(InCoreMessage.TYPE);
-        name = alliance.getString(InCoreMessage.ANAME);
+        utm = alliance.getString(InCoreMessage.UTM);
+        subUtm = alliance.getString(InCoreMessage.SUB_UTM);
+        latitude = alliance.getDouble(InCoreMessage.LATITUDE);
+        longitude = alliance.getDouble(InCoreMessage.LONGITUDE);
+
+        try {
+            name = alliance.getString(InCoreMessage.ANAME);
+        } catch (Exception e) {
+            //we dont always set this its used for invite....need to refactor..
+        }
+
 
     }
 
@@ -60,5 +75,21 @@ public class InAllianceMessage {
 
     public String getName() {
         return name;
+    }
+
+    public String getUtm() {
+        return utm;
+    }
+
+    public String getSubUtm() {
+        return subUtm;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
     }
 }

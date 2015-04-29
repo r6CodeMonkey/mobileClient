@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.model.Alliance;
+import oddymobstar.model.AllianceMember;
 import oddymobstar.model.Config;
 import oddymobstar.model.Grid;
 import oddymobstar.model.Message;
@@ -71,9 +72,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_CONFIG = "CREATE TABLE " + CONFIG_TABLE + " (" + CONFIG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + CONFIG_NAME + " VARCHAR2(30)," + CONFIG_VALUE + " VARCHAR2(30))";
     private static final String CREATE_GRIDS = "CREATE TABLE " + GRIDS_TABLE + " (" + GRID_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10))";
-    private static final String CREATE_GRID_INFO = "CREATE TABLE " + GRID_INFO_TABLE + " (" + GRID_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + INFO_TYPE + " VARCHAR2(30), " + INFO_KEY + " VARCHAR2(30), " + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER)";
+    private static final String CREATE_GRID_INFO = "CREATE TABLE " + GRID_INFO_TABLE + " (" + GRID_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + INFO_TYPE + " VARCHAR2(30), " + INFO_KEY + " VARCHAR2(30), " + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER, " + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10))";
     private static final String CREATE_ALLIANCES = "CREATE TABLE " + ALLIANCES_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + ALLIANCE_NAME + " VARCHAR2(30))";
-    private static final String CREATE_ALLIANCE_MEMBERS = "CREATE TABLE " + ALLIANCE_MEMBERS_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200)," + PLAYER_KEY + " VARCHAR2(200)," + PLAYER_NAME + " VARCHAR2(30)," + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER)";
+    private static final String CREATE_ALLIANCE_MEMBERS = "CREATE TABLE " + ALLIANCE_MEMBERS_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200)," + PLAYER_KEY + " VARCHAR2(200)," + PLAYER_NAME + " VARCHAR2(30)," + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER, " + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10))";
     private static final String CREATE_PACKAGES = "CREATE TABLE " + PACKAGES_TABLE + " (" + PACKAGE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + PACKAGE_NAME + " VARCHAR2(30))";  //need to flesh this out later
     private static final String CREATE_MESSAGES = "CREATE TABLE " + MESSAGE_TABLE + "(" + MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + MESSAGE_CONTENT + " VARCHAR2(300), " + MESSAGE_KEY + " VARCHAR2(200)," + MESSAGE_TYPE + " CHAR(1), " + MESSAGE_TIME + " INTEGER," + MY_MESSAGE + " CHAR(1)," + MESSAGE_AUTHOR + " VARCHAR2(200) )";
 
@@ -174,7 +175,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
         db.insert(MESSAGE_TABLE, null, values);
 
-        messageHandler.handleChat(message.getMessageType());
+        if (messageHandler != null) {
+            messageHandler.handleChat(message.getMessageType());
+        }
     }
 
     public void addConfig(Config config) {
@@ -220,9 +223,9 @@ public class DBHelper extends SQLiteOpenHelper {
         db.insert(ALLIANCES_TABLE, null, values);
 
         if (messageHandler != null) {
-            if(invite){
+            if (invite) {
                 messageHandler.handleInvite(alliance.getKey(), alliance.getName());
-            }else {
+            } else {
                 messageHandler.handleList();
             }
         }
@@ -230,8 +233,26 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public void addAllianceMember() {
+    public void addAllianceMember(AllianceMember allianceMember) {
 
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(ALLIANCE_KEY, allianceMember.getAlliance().getKey());
+        values.put(PLAYER_KEY, allianceMember.getKey());
+        values.put(PLAYER_NAME, allianceMember.getName());
+        values.put(LATITUDE, allianceMember.getLatitude());
+        values.put(LONGITUDE, allianceMember.getLongitude());
+        values.put(UTM, allianceMember.getUtm());
+        values.put(SUBUTM, allianceMember.getSubUtm());
+
+        db.insert(ALLIANCE_MEMBERS_TABLE, null, values);
+
+        if (messageHandler != null) {
+            messageHandler.handleAllianceMember(allianceMember);
+        }
     }
 
 
