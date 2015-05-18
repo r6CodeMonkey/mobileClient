@@ -33,6 +33,9 @@ public class InCoreMessage {
     public static final String ANAME = "aname";
     public static final String LATITUDE = "lat";
     public static final String LONGITUDE = "long";
+    public static final String SPEED = "speed";
+    public static final String ALTITUDE = "altitude";
+    public static final String KEY = "key";
 
 
     protected JSONObject jsonObject;

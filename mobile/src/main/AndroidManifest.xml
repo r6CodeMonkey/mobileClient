@@ -15,6 +15,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="BluetoothDevice.ACTION_FOUND" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -22,7 +23,6 @@
         <service
             android:enabled="true"
             android:name="oddymobstar.service.handler.CheService">
-            <uses-permission android:name="android.permission.INTERNET" />
         </service>
 
 

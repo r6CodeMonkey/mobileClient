@@ -1,6 +1,10 @@
 package oddymobstar.model;
 
+import android.database.Cursor;
+
 import java.sql.Timestamp;
+
+import oddymobstar.database.DBHelper;
 
 /**
  * Created by root on 08/04/15.
@@ -8,7 +12,6 @@ import java.sql.Timestamp;
 public class Message {
 
     public static final String ALLIANCE_MESSAGE = "A";
-    public static final String TOPIC_MESSAGE = "T";
 
 
     private long id;
@@ -21,6 +24,15 @@ public class Message {
 
     public Message() {
 
+    }
+
+    public Message(Cursor message) {
+        setId(message.getInt(message.getColumnIndexOrThrow(DBHelper.MESSAGE_ID)));
+        setTime(message.getLong(message.getColumnIndexOrThrow(DBHelper.MESSAGE_TIME)));
+        setMessage(message.getString(message.getColumnIndexOrThrow(DBHelper.MESSAGE_CONTENT)));
+        setMessageKey(message.getString(message.getColumnIndexOrThrow(DBHelper.MESSAGE_KEY)));
+        setMyMessage(message.getString(message.getColumnIndexOrThrow(DBHelper.MY_MESSAGE)));
+        setAuthor(message.getString(message.getColumnIndexOrThrow(DBHelper.MESSAGE_AUTHOR)));
     }
 
 

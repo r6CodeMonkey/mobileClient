@@ -43,10 +43,15 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String SUBUTM = "subutm";
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";
+    public static final String SPEED = "speed";
+    public static final String ALTITUDE = "altitude";
 
     public static final String CONFIG_ID = "config_id";
     public static final String CONFIG_NAME = "config_name";
     public static final String CONFIG_VALUE = "config_value";
+    public static final String CONFIG_MARKUP = "config_markup";
+    public static final String CONFIG_TYPE = "config_type";
+    public static final String CONFIG_VISIBLE = "config_visible";
 
 
     public static final String GRID_KEY = "grid_key";
@@ -70,11 +75,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String MESSAGE_AUTHOR = "message_author";
 
 
-    private static final String CREATE_CONFIG = "CREATE TABLE " + CONFIG_TABLE + " (" + CONFIG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + CONFIG_NAME + " VARCHAR2(30)," + CONFIG_VALUE + " VARCHAR2(30))";
+    private static final String CREATE_CONFIG = "CREATE TABLE " + CONFIG_TABLE + " (" + CONFIG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + CONFIG_NAME + " VARCHAR2(30)," + CONFIG_VALUE + " VARCHAR2(30), " + CONFIG_MARKUP + " VARCHAR2(50)," + CONFIG_TYPE + " CHAR(1), " + CONFIG_VISIBLE + " CHAR(1))";
     private static final String CREATE_GRIDS = "CREATE TABLE " + GRIDS_TABLE + " (" + GRID_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10))";
     private static final String CREATE_GRID_INFO = "CREATE TABLE " + GRID_INFO_TABLE + " (" + GRID_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + INFO_TYPE + " VARCHAR2(30), " + INFO_KEY + " VARCHAR2(30), " + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER, " + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10))";
     private static final String CREATE_ALLIANCES = "CREATE TABLE " + ALLIANCES_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + ALLIANCE_NAME + " VARCHAR2(30))";
-    private static final String CREATE_ALLIANCE_MEMBERS = "CREATE TABLE " + ALLIANCE_MEMBERS_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200)," + PLAYER_KEY + " VARCHAR2(200)," + PLAYER_NAME + " VARCHAR2(30)," + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER, " + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10))";
+    private static final String CREATE_ALLIANCE_MEMBERS = "CREATE TABLE " + ALLIANCE_MEMBERS_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200)," + PLAYER_KEY + " VARCHAR2(200)," + PLAYER_NAME + " VARCHAR2(30)," + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER, " + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10)," + SPEED + " NUMBER," + ALTITUDE + " NUMBER)";
     private static final String CREATE_PACKAGES = "CREATE TABLE " + PACKAGES_TABLE + " (" + PACKAGE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + PACKAGE_NAME + " VARCHAR2(30))";  //need to flesh this out later
     private static final String CREATE_MESSAGES = "CREATE TABLE " + MESSAGE_TABLE + "(" + MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + MESSAGE_CONTENT + " VARCHAR2(300), " + MESSAGE_KEY + " VARCHAR2(200)," + MESSAGE_TYPE + " CHAR(1), " + MESSAGE_TIME + " INTEGER," + MY_MESSAGE + " CHAR(1)," + MESSAGE_AUTHOR + " VARCHAR2(200) )";
 
@@ -127,21 +132,23 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     public void addBaseConfiguration() {
-        Config config = new Config(Configuration.PORT, "8085");
+        Config config = new Config(Configuration.PORT, "8085", "Port", Config.BASE, false);
         addConfig(config);
-        config = new Config(Configuration.URL, "82.23.41.68");
+        config = new Config(Configuration.URL, "82.23.41.68", "URL", Config.BASE, false);
         addConfig(config);
-        config = new Config(Configuration.UUID_ALGORITHM, "MD5");
+        config = new Config(Configuration.UUID_ALGORITHM, "MD5", "Unique Identifier Alogrithm", Config.BASE, true);
         addConfig(config);
-        config = new Config(Configuration.SSL_ALGORITHM, "");
+        config = new Config(Configuration.SSL_ALGORITHM, "", "Encryption Alogrithm", Config.BASE, true);
         addConfig(config);
-        config = new Config(Configuration.PLAYER_KEY, "");
+        config = new Config(Configuration.PLAYER_KEY, "", "Unique Identifier", Config.BASE, true);
         addConfig(config);
-        config = new Config(Configuration.CURRENT_UTM, "");
+        config = new Config(Configuration.CURRENT_UTM, "", "Universal Transverse Mercator (UTM)", Config.BASE, true);
         addConfig(config);
-        config = new Config(Configuration.CURRENT_SUBUTM, "");
+        config = new Config(Configuration.CURRENT_SUBUTM, "", "Custom SubUTM grid", Config.BASE, true);
         addConfig(config);
-        config = new Config(Configuration.GPS_UPDATE_INTERVAL, String.valueOf(DemoActivity.TWO_MINUTES));
+        config = new Config(Configuration.GPS_UPDATE_INTERVAL, String.valueOf(DemoActivity.TWO_MINUTES), "GPS Update Interval", Config.USER, true);
+        addConfig(config);
+        config = new Config(Configuration.GPS_UPDATE_INTERVAL, String.valueOf(DemoActivity.TWO_MINUTES), "GPS Update Interval", Config.USER, true);
         addConfig(config);
 
     }
@@ -188,6 +195,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
         values.put(CONFIG_NAME, config.getName());
         values.put(CONFIG_VALUE, config.getValue());
+        values.put(CONFIG_MARKUP, config.getMarkup());
+        values.put(CONFIG_TYPE, config.getType());
+        values.put(CONFIG_VISIBLE, config.isVisible() ? "Y" : "N");
 
 
         db.insert(CONFIG_TABLE, null, values);
@@ -201,6 +211,8 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         values.put(GRID_KEY, grid.getKey());
+        values.put(UTM, grid.getUtm());
+        values.put(SUBUTM, grid.getSubUtm());
 
         db.insert(GRIDS_TABLE, null, values);
 
@@ -245,13 +257,15 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put(PLAYER_NAME, allianceMember.getName());
         values.put(LATITUDE, allianceMember.getLatitude());
         values.put(LONGITUDE, allianceMember.getLongitude());
+        values.put(SPEED, allianceMember.getSpeed());
+        values.put(ALTITUDE, allianceMember.getAltitude());
         values.put(UTM, allianceMember.getUtm());
         values.put(SUBUTM, allianceMember.getSubUtm());
 
         db.insert(ALLIANCE_MEMBERS_TABLE, null, values);
 
         if (messageHandler != null) {
-            messageHandler.handleAllianceMember(allianceMember);
+            messageHandler.handleAllianceMember(allianceMember, true);
         }
     }
 
@@ -329,11 +343,38 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        boolean changedUTM = false;
+        boolean changedSubUTM = false;
+
+        Config oldValues = getConfig(config.getName());
+
+        if (config.getName().equals(Configuration.CURRENT_UTM)) {
+            //check if we have changed...
+            if (!oldValues.getValue().equals(config.getValue())) {
+                changedUTM = true;
+            }
+
+        }
+
+        if (config.getName().equals(Configuration.CURRENT_SUBUTM)) {
+            if (!oldValues.getValue().equals(config.getValue())) {
+                changedSubUTM = true;
+            }
+
+        }
+
         values.put(CONFIG_VALUE, config.getValue());
 
         db.update(CONFIG_TABLE, values, CONFIG_ID + " = ?", new String[]{String.valueOf(config.getId())});
 
 
+        if (messageHandler != null) {
+            if (changedUTM) {
+                messageHandler.handleUTMChange(config.getValue());
+            } else if (changedSubUTM) {
+                messageHandler.handleSubUTMChange(config.getValue());
+            }
+        }
     }
 
     public void updateGridItem() {
@@ -350,7 +391,26 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public void updateAllianceMember() {
+    public void updateAllianceMember(AllianceMember allianceMember) {
+
+        //this will come from grids...
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(PLAYER_NAME, allianceMember.getName());
+        values.put(LATITUDE, allianceMember.getLatitude());
+        values.put(LONGITUDE, allianceMember.getLongitude());
+        values.put(SPEED, allianceMember.getSpeed());
+        values.put(ALTITUDE, allianceMember.getAltitude());
+        values.put(UTM, allianceMember.getUtm());
+        values.put(SUBUTM, allianceMember.getSubUtm());
+
+        db.update(ALLIANCE_MEMBERS_TABLE, values, PLAYER_KEY + "=?", new String[]{allianceMember.getKey()});
+
+        if (messageHandler != null) {
+            messageHandler.handleAllianceMember(allianceMember, false);
+        }
 
     }
 
@@ -369,12 +429,15 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getConfigs() {
-        return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + " FROM " + CONFIG_TABLE + " ORDER BY " + CONFIG_NAME + " ASC", null);
+        return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + "," + CONFIG_MARKUP + "," + CONFIG_VISIBLE + "," + CONFIG_TYPE + " FROM " + CONFIG_TABLE + " ORDER BY " + CONFIG_NAME + " ASC", null);
     }
 
+    public Cursor getConfigs(int type) {
+        return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + "," + CONFIG_MARKUP + "," + CONFIG_VISIBLE + "," + CONFIG_TYPE + " FROM " + CONFIG_TABLE + " WHERE " + CONFIG_TYPE + " =? AND "+CONFIG_VISIBLE+" = 'Y' ORDER BY " + CONFIG_NAME + " ASC", new String[]{String.valueOf(type)});
+    }
 
     public Cursor getGrids() {
-        return this.getReadableDatabase().rawQuery("SELECT " + GRID_KEY + " as _id," + GRID_KEY + "," + UTM + "," + SUBUTM + " FROM " + GRIDS_TABLE + " ORDER BY " + ALLIANCE_NAME + " ASC", null);
+        return this.getReadableDatabase().rawQuery("SELECT " + GRID_KEY + " as _id," + GRID_KEY + "," + UTM + "," + SUBUTM + " FROM " + GRIDS_TABLE + " ORDER BY " + UTM + " ASC", null);
     }
 
     public Cursor getGridItems() {
@@ -390,7 +453,11 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public Cursor getAllianceMembers() {
-        return null;
+        return this.getReadableDatabase().rawQuery("SELECT " + PLAYER_KEY + " as _id," + PLAYER_KEY + "," + PLAYER_NAME + "," + SPEED + "," + ALTITUDE + "," + LATITUDE + "," + LONGITUDE + "," + UTM + "," + SUBUTM + " FROM " + ALLIANCE_MEMBERS_TABLE, null);
+    }
+
+    public Cursor getAllianceMembers(String allianceKey) {
+        return this.getReadableDatabase().rawQuery("SELECT " + PLAYER_KEY + " as _id," + PLAYER_KEY + "," + PLAYER_NAME + "," + SPEED + "," + ALTITUDE + "," + LATITUDE + "," + LONGITUDE + "," + UTM + "," + SUBUTM + " FROM " + ALLIANCE_MEMBERS_TABLE + " WHERE " + ALLIANCE_KEY + " =?", new String[]{allianceKey});
     }
 
 
@@ -406,11 +473,11 @@ public class DBHelper extends SQLiteOpenHelper {
 
         Cursor alliance = this.getReadableDatabase().rawQuery("SELECT " + ALLIANCE_KEY + " as _id," + ALLIANCE_KEY + "," + ALLIANCE_NAME + " FROM " + ALLIANCES_TABLE + " WHERE " + ALLIANCE_KEY + " =? " + " ORDER BY " + ALLIANCE_NAME + " ASC", new String[]{key});
 
-        Alliance returnAlliance = new Alliance();
+        Alliance returnAlliance = null;
 
         while (alliance.moveToNext()) {
-            returnAlliance.setName(alliance.getString(alliance.getColumnIndexOrThrow((DBHelper.ALLIANCE_NAME))));
-            returnAlliance.setKey(alliance.getString(alliance.getColumnIndexOrThrow((DBHelper.ALLIANCE_KEY))));
+
+            returnAlliance = new Alliance(alliance);
 
         }
 
@@ -426,7 +493,17 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     public Config getConfig(String key) {
-        return null;
+
+        Cursor config = this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + "," + CONFIG_MARKUP + "," + CONFIG_TYPE + "," + CONFIG_VISIBLE + " FROM " + CONFIG_TABLE + " WHERE " + CONFIG_NAME + " = ?" + " ORDER BY " + CONFIG_NAME + " ASC", new String[]{key});
+
+        Config returnConfig = null;
+
+        while (config.moveToNext()) {
+            returnConfig = new Config(config);
+        }
+        config.close();
+
+        return returnConfig;
     }
 
     /*

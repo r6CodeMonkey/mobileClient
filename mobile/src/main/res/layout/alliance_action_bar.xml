@@ -3,8 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="false"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
+    <Button
+        android:id="@+id/message_chat"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:onClick="showChat"
+        android:textColor="@android:color/holo_blue_light"
+        android:shadowColor="#ffffff"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="1"
+        android:text="@string/fa_wechat"
+        android:layout_toStartOf="@+id/alliance_invite"
+        android:textSize="36sp" />
 
     <Button
         android:id="@+id/alliance_invite"
@@ -54,7 +69,6 @@
         android:shadowRadius="1"
         android:text="@string/fa_trash"
         android:textSize="36sp" />
-
 
 
 </RelativeLayout>

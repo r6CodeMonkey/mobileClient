@@ -6,11 +6,11 @@ import java.util.Map;
 
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.in.Acknowledge;
-import oddymobstar.message.in.GridMessage;
 import oddymobstar.message.in.InCoreMessage;
 import oddymobstar.message.out.OutCoreMessage;
 import oddymobstar.service.message.AcknowledgeService;
 import oddymobstar.service.message.AllianceService;
+import oddymobstar.service.message.GridService;
 import oddymobstar.util.Configuration;
 
 /**
@@ -23,6 +23,7 @@ public class MessageService {
     //handlers
     private AcknowledgeService acknowledgeService;
     private AllianceService allianceService;
+    private GridService gridService;
 
 
     public MessageService(DBHelper dbHelper, Configuration configuration) {
@@ -30,6 +31,7 @@ public class MessageService {
 
         acknowledgeService = new AcknowledgeService(configuration, dbHelper);
         allianceService = new AllianceService(dbHelper);
+        gridService = new GridService(dbHelper);
 
     }
 
@@ -52,7 +54,7 @@ public class MessageService {
 
         } else if (!coreMessage.getJsonObject().isNull(InCoreMessage.GRID)) {
 
-            GridMessage gridMessage = new GridMessage(coreMessage.getJsonObject().getJSONObject(InCoreMessage.GRID));
+            gridService.handle(coreMessage);
 
         } else if (!coreMessage.getJsonObject().isNull(InCoreMessage.ALLIANCE)) {
 

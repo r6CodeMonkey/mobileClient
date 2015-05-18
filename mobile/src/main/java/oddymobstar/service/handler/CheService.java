@@ -14,8 +14,6 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import org.json.JSONException;
 
 import java.io.DataInputStream;
@@ -89,7 +87,7 @@ public class CheService extends IntentService {
             //  callBack.setLocationUpdated(location);
             uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
             try {
-                OutCoreMessage coreMessage = new OutCoreMessage(new LatLng(location.getLatitude(), location.getLongitude()), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), OutCoreMessage.PLAYER);
+                OutCoreMessage coreMessage = new OutCoreMessage(location, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), OutCoreMessage.PLAYER);
                 writeToSocket(coreMessage);
 
             } catch (NoSuchAlgorithmException nsae) {
@@ -498,6 +496,8 @@ public class CheService extends IntentService {
         } catch (IOException e) {
             //crashed.
             Log.d("socket error", "socket " + e.toString());
+
+
         }
 
     }

@@ -1,7 +1,5 @@
 package oddymobstar.message.in;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,16 +22,10 @@ public class Acknowledge {
     private JSONObject acknowledge;
 
 
-    public Acknowledge(JSONObject acknowledge) {
+    public Acknowledge(JSONObject acknowledge) throws JSONException {
 
         this.acknowledge = acknowledge;
-
-        try {
-            create();
-        } catch (JSONException jse) {
-            Log.d(this.getClass().getName(), "json exception " + jse.getMessage());
-        }
-
+        create();
 
     }
 

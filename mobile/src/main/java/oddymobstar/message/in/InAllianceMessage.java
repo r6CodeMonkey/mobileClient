@@ -1,7 +1,5 @@
 package oddymobstar.message.in;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,14 +22,10 @@ public class InAllianceMessage {
 
     private JSONObject alliance;
 
-    public InAllianceMessage(JSONObject alliance) {
+    public InAllianceMessage(JSONObject alliance) throws JSONException {
         this.alliance = alliance;
 
-        try {
-            create();
-        } catch (JSONException jse) {
-            Log.d(this.getClass().getName(), "json exception " + jse.getMessage());
-        }
+        create();
 
 
     }
@@ -43,17 +37,25 @@ public class InAllianceMessage {
         amid = alliance.getString(InCoreMessage.AMID);
         message = alliance.getString(InCoreMessage.MSG);
         type = alliance.getString(InCoreMessage.TYPE);
-        utm = alliance.getString(InCoreMessage.UTM);
-        subUtm = alliance.getString(InCoreMessage.SUB_UTM);
-        latitude = alliance.getDouble(InCoreMessage.LATITUDE);
-        longitude = alliance.getDouble(InCoreMessage.LONGITUDE);
 
         try {
-            name = alliance.getString(InCoreMessage.ANAME);
+            //these are not sent in invite
+            utm = alliance.getString(InCoreMessage.UTM);
+            subUtm = alliance.getString(InCoreMessage.SUB_UTM);
+            latitude = alliance.getDouble(InCoreMessage.LATITUDE);
+            longitude = alliance.getDouble(InCoreMessage.LONGITUDE);
+
         } catch (Exception e) {
-            //we dont always set this its used for invite....need to refactor..
         }
 
+
+        try {
+            //and this is only set in invite mode.
+            name = alliance.getString(InCoreMessage.ANAME);
+
+        } catch (Exception e) {
+
+        }
 
     }
 

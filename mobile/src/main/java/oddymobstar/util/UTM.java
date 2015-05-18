@@ -1,19 +1,54 @@
 package oddymobstar.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Created by root on 25/02/15.
  */
 public class UTM {
 
-    /*
-    probably not required, other than perhaps for usage on maps.
+    private int utmLong;
+    private String utmLat = "";
 
-    ie we may want to show the grid boundaries etc.  in order to do this, we need to be able to convert
-    each grids start end points (lat and long).  so its really a deconverter.
+    public UTM(String utm) {
 
-    no reason to map items back and forth etc.
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(utm);
 
-     */
+        while (matcher.find()) {
+            utmLong = Integer.valueOf(matcher.group());
+        }
+
+        pattern = Pattern.compile("[A-Z]");
+        matcher = pattern.matcher(utm);
+
+        while (matcher.find()) {
+            utmLat = matcher.group();
+        }
+
+
+    }
+
+
+    public int getUtmLong() {
+        return utmLong;
+    }
+
+    public String getUtmLat() {
+        return utmLat;
+    }
+
+
+    public static void main(String[] args) {
+
+        UTM utm = new UTM("E31");
+
+        System.out.println(utm.getUtmLat());
+        System.out.println(utm.getUtmLong());
+
+
+    }
 
 
 }

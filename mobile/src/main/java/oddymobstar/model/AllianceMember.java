@@ -1,7 +1,11 @@
 package oddymobstar.model;
 
+import android.database.Cursor;
+
 import com.google.android.gms.maps.model.LatLng;
 
+import oddymobstar.database.DBHelper;
+import oddymobstar.message.in.GridMessage;
 import oddymobstar.message.in.InAllianceMessage;
 
 /**
@@ -15,6 +19,8 @@ public class AllianceMember {
     private String subUtm;
     private double latitude;
     private double longitude;
+    private double speed;
+    private double altitude;
 
     private Alliance alliance;
 
@@ -28,6 +34,30 @@ public class AllianceMember {
         setLongitude(allianceMessage.getLongitude());
         setSubUtm(allianceMessage.getSubUtm());
 
+    }
+
+    public AllianceMember(GridMessage gridMessage) {
+
+
+        setKey(gridMessage.getKey());
+        setUtm(gridMessage.getUtm());
+        setLatitude(gridMessage.getLatitude());
+        setLongitude(gridMessage.getLongitude());
+        setSubUtm(gridMessage.getSubUtm());
+        setSpeed(gridMessage.getSpeed());
+        setAltitude(gridMessage.getAltitude());
+
+    }
+
+    public AllianceMember(Cursor cursor) {
+        setKey(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.PLAYER_KEY)));
+        setUtm(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.UTM)));
+        setSubUtm(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.SUBUTM)));
+        setLatitude(cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.LATITUDE)));
+        setLongitude(cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.LONGITUDE)));
+        setName(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.PLAYER_NAME)));
+        setSpeed(cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.SPEED)));
+        setAltitude(cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.ALTITUDE)));
     }
 
 
@@ -47,6 +77,13 @@ public class AllianceMember {
         this.subUtm = subUtm;
     }
 
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+
+    public void setAltitude(double altitude) {
+        this.altitude = altitude;
+    }
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
@@ -86,5 +123,13 @@ public class AllianceMember {
 
     public String getSubUtm() {
         return subUtm;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public double getAltitude() {
+        return altitude;
     }
 }

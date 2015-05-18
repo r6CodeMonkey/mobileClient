@@ -2,12 +2,10 @@
 
     <item
         android:id="@+id/alliances"
-        android:title="Alliances">
-    </item>
+        android:title="Alliances"></item>
     <item
         android:id="@+id/connect"
-        android:title="Join">
-    </item>
+        android:title="Join"></item>
     <item
         android:id="@+id/configuration"
         android:title="Configuration"></item>

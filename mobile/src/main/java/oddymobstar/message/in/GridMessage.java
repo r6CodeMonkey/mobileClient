@@ -1,7 +1,5 @@
 package oddymobstar.message.in;
 
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,22 +8,26 @@ import org.json.JSONObject;
  */
 public class GridMessage {
 
+    public static final String PLAYER = "player";
+    public static final String PACKAGE = "package";
+
 
     private String utm;
     private String subUtm;
+    private String key;
+    private String type;
+    private double latitude;
+    private double longitude;
+    private double speed;
+    private double altitude;
     private String message;
 
     private JSONObject grid;
 
-    public GridMessage(JSONObject grid) {
+    public GridMessage(JSONObject grid) throws JSONException {
         this.grid = grid;
 
-        try {
-            create();
-        } catch (JSONException jse) {
-            Log.d(this.getClass().getName(), "json exception " + jse.getMessage());
-
-        }
+        create();
 
     }
 
@@ -34,7 +36,15 @@ public class GridMessage {
 
         utm = grid.getString(InCoreMessage.UTM);
         subUtm = grid.getString(InCoreMessage.SUB_UTM);
-        this.message = grid.getString(InCoreMessage.MSG);
+        message = grid.getString(InCoreMessage.MSG);
+        key = grid.getString(InCoreMessage.KEY);
+        type = grid.getString(InCoreMessage.TYPE);
+        latitude = grid.getDouble(InCoreMessage.LATITUDE);
+        longitude = grid.getDouble(InCoreMessage.LONGITUDE);
+        speed = grid.getDouble(InCoreMessage.SPEED);
+        altitude = grid.getDouble(InCoreMessage.ALTITUDE);
+
+
     }
 
     public String getUtm() {
@@ -47,6 +57,30 @@ public class GridMessage {
 
     public String getMessage() {
         return message;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public double getAltitude() {
+        return altitude;
     }
 
 }

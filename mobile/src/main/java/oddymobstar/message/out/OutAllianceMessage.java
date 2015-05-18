@@ -1,6 +1,6 @@
 package oddymobstar.message.out;
 
-import com.google.android.gms.maps.model.LatLng;
+import android.location.Location;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,8 +13,8 @@ import oddymobstar.model.Alliance;
 public class OutAllianceMessage extends OutCoreMessage {
 
 
-    public OutAllianceMessage(LatLng latLng, String uid, String ackId) throws JSONException {
-        super(latLng, uid, ackId, ALLIANCE);
+    public OutAllianceMessage(Location location, String uid, String ackId) throws JSONException {
+        super(location, uid, ackId, ALLIANCE);
 
 
     }

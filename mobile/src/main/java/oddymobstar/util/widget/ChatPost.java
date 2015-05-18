@@ -33,6 +33,10 @@ public class ChatPost extends LinearLayout {
     }
 
 
+    public boolean isPostValid() {
+        return post != null;
+    }
+
     public String getPost() {
 
         return post.getText().toString();

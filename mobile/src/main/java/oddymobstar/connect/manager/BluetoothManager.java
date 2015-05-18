@@ -3,10 +3,9 @@ package oddymobstar.connect.manager;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.location.Location;
 import android.view.View;
 import android.widget.AdapterView;
-
-import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
 
@@ -42,7 +41,7 @@ public class BluetoothManager {
     private DBHelper dbHelper;
     private CheService cheService;
     private String key;
-    private LatLng latLng;  //i dont need this perse....but message does
+    private Location location;  //i dont need this perse....but message does
     private Configuration configuration;
     private Context context;
     private UUIDGenerator uuidGenerator;
@@ -58,7 +57,7 @@ public class BluetoothManager {
 
 
             try {
-                allianceMessage = new OutAllianceMessage(latLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                allianceMessage = new OutAllianceMessage(location, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
                 allianceMessage.setAlliance(dbHelper.getAlliance(key), OutCoreMessage.INVITE, OutCoreMessage.GLOBAL, "Invitation to Join");
                 connectivityHandler.getBluetooth().setMessage(allianceMessage.getMessage().toString().getBytes());
             } catch (JSONException jse) {
@@ -112,13 +111,13 @@ public class BluetoothManager {
 
 
     public BluetoothManager(Context context, ConnectivityHandler connectivityHandler, DBHelper dbHelper, UUIDGenerator uuidGenerator,
-                            CheService cheService, Configuration configuration, String key, LatLng latLng) {
+                            CheService cheService, Configuration configuration, String key, Location location) {
         this.context = context;
         this.connectivityHandler = connectivityHandler;
         this.cheService = cheService;
         this.dbHelper = dbHelper;
         this.key = key;
-        this.latLng = latLng;
+        this.location = location;
         this.configuration = configuration;
         this.uuidGenerator = uuidGenerator;
     }
@@ -185,7 +184,7 @@ public class BluetoothManager {
 
         //this is where we contact che service with message...
         try {
-            OutAllianceMessage allianceMessage = new OutAllianceMessage(latLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+            OutAllianceMessage allianceMessage = new OutAllianceMessage(location, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
             Alliance alliance = new Alliance();
             alliance.setKey(message.getAid());
             alliance.setName(message.getName());

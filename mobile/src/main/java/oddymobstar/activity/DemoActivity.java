@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Toast;
@@ -38,6 +39,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 
 import org.json.JSONException;
 
@@ -59,15 +62,19 @@ import oddymobstar.message.out.OutAllianceMessage;
 import oddymobstar.message.out.OutCoreMessage;
 import oddymobstar.model.Alliance;
 import oddymobstar.model.AllianceMember;
+import oddymobstar.model.Config;
 import oddymobstar.model.Message;
 import oddymobstar.service.handler.CheService;
 import oddymobstar.util.Configuration;
+import oddymobstar.util.SubUTM;
+import oddymobstar.util.UTM;
+import oddymobstar.util.UTMGridCreator;
 import oddymobstar.util.UUIDGenerator;
 import oddymobstar.util.widget.ConnectivityDialog;
 
 public class DemoActivity extends FragmentActivity {
 
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+    private GoogleMap map; // Might be null if Google Play services APK is not available.
     private LocationManager locationManager;
     private android.os.Handler handler = new android.os.Handler();
 
@@ -94,6 +101,9 @@ public class DemoActivity extends FragmentActivity {
 
     private BroadcastReceiver bluetoothReceiver;
 
+    private Polygon myUTM;
+    private Polygon mySubUTM;
+
 
     private ChatFragment chatFrag = new ChatFragment();
     private ListFragment listFrag = new ListFragment();
@@ -101,6 +111,18 @@ public class DemoActivity extends FragmentActivity {
     private ConfigurationFragment confFrag = new ConfigurationFragment();
 
     private ConnectivityHandler connectivityHandler;
+
+
+    private Thread locationUpdates;
+    // private Thread service;
+
+    private Location currentLocation;
+
+    private Map<String, Marker> markerMap = new HashMap<>();
+
+    //db helper can test this out.  and fix up the map to work.  is a start.
+    //also need to set up base configs.
+    private DBHelper dbHelper = new DBHelper(this);
 
     public class MessageHandler extends Handler {
 
@@ -119,8 +141,62 @@ public class DemoActivity extends FragmentActivity {
             }
         }
 
+
+        public void handleUTMChange(String utm) {
+
+
+            final PolygonOptions options = UTMGridCreator.getUTMGrid(new UTM(utm)).strokeColor(getResources().getColor(android.R.color.holo_purple));
+            runOnUiThread(new Runnable() {
+
+
+                @Override
+                public void run() {
+
+                    if (myUTM != null) {
+                        myUTM.remove();
+                    }
+
+                    myUTM = map.addPolygon(options);
+
+                }
+            });
+        }
+
+        public void handleSubUTMChange(String subUtm) {
+
+            configuration = new Configuration(dbHelper.getConfigs());
+
+            //timing can cause this to fail...its no biggy its not likely required in end model.
+            UTM utm = null;
+            SubUTM subUTM = null;
+
+            try {
+                utm = new UTM(configuration.getConfig(Configuration.CURRENT_UTM).getValue());
+                //seem to get problems with this for some reason...ie integer = "".  could be data has not updated etc.
+                subUTM = new SubUTM(subUtm);
+            } catch (Exception e) {
+                Log.d("error on utm", "error " + e.getMessage());
+            }
+
+            if (utm != null && subUTM != null) {
+                PolygonOptions utmOption = UTMGridCreator.getUTMGrid(utm);
+                final PolygonOptions options = UTMGridCreator.getSubUTMGrid(subUTM, utmOption).strokeColor(getResources().getColor(android.R.color.holo_orange_dark));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (mySubUTM != null) {
+                            mySubUTM.remove();
+                        }
+                        mySubUTM = map.addPolygon(options);
+                    }
+                });
+            }
+
+        }
+
         public void handleChat(final String type) {
-            if (chatFrag != null) {
+            if (chatFrag != null && chatFrag.isVisible()) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -149,23 +225,32 @@ public class DemoActivity extends FragmentActivity {
 
         }
 
-        public void handleAllianceMember(final AllianceMember allianceMember) {
+        public void handleAllianceMember(final AllianceMember allianceMember, final boolean zoomTo) {
 
 
             Log.d("adding marker", "marker " + allianceMember.getKey() + " lat long is " + allianceMember.getLatLng().toString());
+
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    marker = mMap.addMarker(new MarkerOptions().position(allianceMember.getLatLng()).title(allianceMember.getKey()));
 
-                    CameraPosition cameraPosition = new CameraPosition.Builder()
-                            .target(allianceMember.getLatLng())
-                            .tilt(mMap.getCameraPosition().tilt)
-                            .bearing(mMap.getCameraPosition().bearing)
-                            .zoom(mMap.getCameraPosition().zoom)
-                            .build();
+                    if (markerMap.containsKey(allianceMember.getKey())) {
+                        markerMap.get(allianceMember.getKey()).remove();
+                    }
 
-                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    marker = map.addMarker(new MarkerOptions().position(allianceMember.getLatLng()).title(allianceMember.getKey()));
+
+                    if (zoomTo) {
+                        CameraPosition cameraPosition = new CameraPosition.Builder()
+                                .target(allianceMember.getLatLng())
+                                .tilt(map.getCameraPosition().tilt)
+                                .bearing(map.getCameraPosition().bearing)
+                                .zoom(map.getCameraPosition().zoom)
+                                .build();
+
+                        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    }
 
                 }
 
@@ -185,7 +270,7 @@ public class DemoActivity extends FragmentActivity {
 
         public DeviceDiscovery(Context context) {
 
-            bluetoothManager = new BluetoothManager(context, connectivityHandler, dbHelper, uuidGenerator, cheService, configuration, chatFrag.getKey(), currentLatLng);
+            bluetoothManager = new BluetoothManager(context, connectivityHandler, dbHelper, uuidGenerator, cheService, configuration, chatFrag.getKey(), currentLocation);
 
         }
 
@@ -241,8 +326,6 @@ public class DemoActivity extends FragmentActivity {
                     String title = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME));
                     chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
 
-                    transaction.replace(R.id.chat_fragment, chatFrag);
-                    transaction.addToBackStack(null);
                     break;
 
             }
@@ -271,18 +354,6 @@ public class DemoActivity extends FragmentActivity {
     };
 
 
-    private Thread locationUpdates;
-    // private Thread service;
-
-    private LatLng currentLatLng = new LatLng(0, 0);  //it does use saved prefs now
-
-    private Map<String, Marker> markerMap = new HashMap<>();
-
-    //db helper can test this out.  and fix up the map to work.  is a start.
-    //also need to set up base configs.
-    private DBHelper dbHelper = new DBHelper(this);
-
-
     private void messageHandler(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
@@ -296,7 +367,7 @@ public class DemoActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        setUpMapIfNeeded();
+
 
         if (!dbHelper.hasPreLoad()) {
             dbHelper.addBaseConfiguration();
@@ -317,6 +388,9 @@ public class DemoActivity extends FragmentActivity {
         b.setTypeface(font);
 
         b = (Button) actionBar.findViewById(R.id.alliance_invite);
+        b.setTypeface(font);
+
+        b = (Button) actionBar.findViewById(R.id.message_chat);
         b.setTypeface(font);
 
         //get messages in.
@@ -348,6 +422,8 @@ public class DemoActivity extends FragmentActivity {
 
         //and we need to bind to it.
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+
+        setUpMapIfNeeded();
 
 
     }
@@ -466,7 +542,7 @@ public class DemoActivity extends FragmentActivity {
             case R.id.configuration:
 
 
-                confFrag.init(dbHelper.getConfigs());
+                confFrag.init(dbHelper.getConfigs(Config.BASE), dbHelper.getConfigs(Config.USER), dbHelper.getConfigs(Config.SYSTEM));
 
 
                 transaction.replace(R.id.chat_fragment, confFrag);
@@ -548,6 +624,30 @@ public class DemoActivity extends FragmentActivity {
          */
     }
 
+    public void showChat(View view) {
+
+        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        if (chatFrag.isVisible()) {
+            try {
+                transaction.remove(chatFrag);
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
+            } catch (Exception e) {
+
+            }
+        } else {
+            chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, chatFrag.getKey()), chatFrag.getKey(), chatFrag.getTitle());
+            transaction.replace(R.id.chat_fragment, chatFrag);
+            transaction.addToBackStack(null);
+
+        }
+        transaction.commit();
+    }
+
     public void allianceInvite(View view) {
 
         FragmentTransaction transaction = getSupportFragmentManager()
@@ -567,29 +667,34 @@ public class DemoActivity extends FragmentActivity {
          */
         ///what is our chat type?  we find out we instantiate the message then it should run....
         //probably need to spend time making service write messages to db
-        try {
+        if (chatFrag.isChatFragValid()) {
+            try {
 
-            OutCoreMessage coreMessage = null;
+                OutCoreMessage coreMessage = null;
 
-            switch (listFrag.getType()) {
-                case ListFragment.MY_ALLIANCES:
-                    //create a message for the alliance....
-                    coreMessage = new OutAllianceMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
-                    ((OutAllianceMessage) coreMessage).setAlliance(dbHelper.getAlliance(chatFrag.getKey()), OutCoreMessage.PUBLISH, OutCoreMessage.GLOBAL, chatFrag.getPost());
-                    break;
+                switch (listFrag.getType()) {
+                    case ListFragment.MY_ALLIANCES:
+                        //create a message for the alliance....
+                        coreMessage = new OutAllianceMessage(currentLocation, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                        ((OutAllianceMessage) coreMessage).setAlliance(dbHelper.getAlliance(chatFrag.getKey()), OutCoreMessage.PUBLISH, OutCoreMessage.GLOBAL, chatFrag.getPost());
+                        break;
+
+                }
+
+                cheService.writeToSocket(coreMessage);
+
+            } catch (NoSuchAlgorithmException nse) {
+
+            } catch (JSONException jse) {
 
             }
 
-            cheService.writeToSocket(coreMessage);
-
-        } catch (NoSuchAlgorithmException nse) {
-
-        } catch (JSONException jse) {
-
+            cancelPost(null);
+        } else {
+            //find out if this every works!
+            removeFragments();
+            showChat(null);
         }
-
-        cancelPost(null);
-
 
     }
 
@@ -614,7 +719,7 @@ public class DemoActivity extends FragmentActivity {
                         alliance.setName(createText);
 
 
-                        OutAllianceMessage allianceMessage = new OutAllianceMessage(currentLatLng, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                        OutAllianceMessage allianceMessage = new OutAllianceMessage(currentLocation, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
                         allianceMessage.setAlliance(alliance, OutAllianceMessage.CREATE, OutAllianceMessage.GLOBAL, "");
 
                         cheService.writeToSocket(allianceMessage);
@@ -637,13 +742,13 @@ public class DemoActivity extends FragmentActivity {
 
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
-        if (mMap == null) {
+        if (map == null) {
             // Try to obtain the map from the SupportMapFragment.
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+            map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                     .getMap();
 
             // Check if we were successful in obtaining the map.
-            if (mMap != null) {
+            if (map != null) {
                 setUpMap();
             }
         }
@@ -680,7 +785,8 @@ public class DemoActivity extends FragmentActivity {
         float zoom = sharedPreferences.getFloat("zoom", 10.0f);
         float tilt = sharedPreferences.getFloat("tilt", 0.0f);
         float bearing = sharedPreferences.getFloat("bearing", 0.0f);
-        currentLatLng = new LatLng(Double.parseDouble(sharedPreferences.getString("latitude", "0.0")),
+
+        LatLng currentLatLng = new LatLng(Double.parseDouble(sharedPreferences.getString("latitude", "0.0")),
                 Double.parseDouble(sharedPreferences.getString("longitude", "0.0")));
 
 
@@ -693,7 +799,7 @@ public class DemoActivity extends FragmentActivity {
          */
 
 
-        markerMap.put("Me", mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
+        markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
 
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -703,7 +809,41 @@ public class DemoActivity extends FragmentActivity {
                 .zoom(zoom)
                 .build();
 
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+
+        if (myUTM != null) {
+            myUTM.remove();
+        }
+
+        if (mySubUTM != null) {
+            mySubUTM.remove();
+        }
+
+        if (!configuration.getConfig(Configuration.CURRENT_UTM).getValue().trim().isEmpty()) {
+            PolygonOptions utmOptions = UTMGridCreator.getUTMGrid(new UTM(configuration.getConfig(Configuration.CURRENT_UTM).getValue())).strokeColor(getResources().getColor(android.R.color.holo_purple));
+            myUTM = map.addPolygon(utmOptions);
+
+            PolygonOptions subUtmOptions = UTMGridCreator.getSubUTMGrid(new SubUTM(configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue()), utmOptions).strokeColor(getResources().getColor(android.R.color.holo_orange_dark));
+            mySubUTM = map.addPolygon(subUtmOptions);
+
+        }
+
+
+        //we now need to add any of our alliance members in...
+        Cursor allianceMembers = dbHelper.getAllianceMembers();
+
+        while (allianceMembers.moveToNext()) {
+            AllianceMember allianceMember = new AllianceMember(allianceMembers);
+
+            if (markerMap.containsKey(allianceMember.getKey())) {
+                markerMap.get(allianceMember.getKey()).remove();
+            }
+            markerMap.put(allianceMember.getKey(), map.addMarker(new MarkerOptions().position(new LatLng(allianceMember.getLatitude(), allianceMember.getLongitude())).title(allianceMember.getKey())));
+
+        }
+
+        allianceMembers.close();
 
 
     }
@@ -720,10 +860,6 @@ public class DemoActivity extends FragmentActivity {
             }
         }
 
-       /* if (cheService != null) {
-            unbindService(serviceConnection);
-        }*/
-
     }
 
     public void onDestroy() {
@@ -737,11 +873,11 @@ public class DemoActivity extends FragmentActivity {
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putString("latitude", String.valueOf(currentLatLng.latitude));
-        editor.putString("longitude", String.valueOf(currentLatLng.longitude));
-        editor.putFloat("zoom", mMap.getCameraPosition().zoom);
-        editor.putFloat("bearing", mMap.getCameraPosition().bearing);
-        editor.putFloat("tilt", mMap.getCameraPosition().tilt);
+        editor.putString("latitude", String.valueOf(currentLocation.getLatitude()));
+        editor.putString("longitude", String.valueOf(currentLocation.getLongitude()));
+        editor.putFloat("zoom", map.getCameraPosition().zoom);
+        editor.putFloat("bearing", map.getCameraPosition().bearing);
+        editor.putFloat("tilt", map.getCameraPosition().tilt);
 
         LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
 
@@ -782,25 +918,25 @@ public class DemoActivity extends FragmentActivity {
             // TODO Auto-generated method stub
             //  callBack.setLocationUpdated(location);
 
-            currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            currentLocation = location;
+
+            Log.d("location changed", "location changed");
+            LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
             if (markerMap.containsKey("Me")) {
                 markerMap.get("Me").remove();
-                markerMap.put("Me", mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
             }
+            markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
 
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(currentLatLng)
-                    .tilt(mMap.getCameraPosition().tilt)
-                    .bearing(mMap.getCameraPosition().bearing)
-                    .zoom(mMap.getCameraPosition().zoom)
+                    .tilt(map.getCameraPosition().tilt)
+                    .bearing(map.getCameraPosition().bearing)
+                    .zoom(map.getCameraPosition().zoom)
                     .build();
 
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-            //we need to execute the method we are interested in.  note if we time out then
-            locationManager.removeUpdates(this);
+            map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 
         }

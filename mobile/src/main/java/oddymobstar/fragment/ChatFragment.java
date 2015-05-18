@@ -82,5 +82,18 @@ public class ChatFragment extends Fragment {
         return chatPost.getPost();
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public boolean isChatFragValid() {
+
+        if (chatPost == null) {
+            return false;
+        } else {
+            return chatPost.isPostValid();
+        }
+
+    }
 
 }

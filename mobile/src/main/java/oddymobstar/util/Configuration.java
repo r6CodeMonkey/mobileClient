@@ -28,7 +28,15 @@ public class Configuration implements Serializable {
     public final static String CURRENT_UTM = "CURRENT_UTM";
     public final static String CURRENT_SUBUTM = "CURRENT_SUBUTM";
 
+    //need to actuall glamourize this so its in minutes, not milliseconds.
     public final static String GPS_UPDATE_INTERVAL = "GPS_UPDATE_INTERVAL";
+
+    //technically we do not need these in the database...but we may add them.
+    //also need mappers to control the values....some are checkboxes.  but we need to store settings
+    public final static String SERVER_LOCATION_HIDE = "LOCATION_HIDE";
+    public final static String RESET_SOCKET = "RESET_SOCKET";
+    public final static String CLEAR_BACKLOGUE = "CLEAR_BACKLOG";
+
 
     //Need last server contact.   public final static String CURRENT_SUBUTM = "CURRENT_SUBUTM";
     /*
@@ -42,9 +50,7 @@ public class Configuration implements Serializable {
           load whatever configs we have.  we need to add in some base ones on the create method.
          */
         while (cursor.moveToNext()) {
-            Config config = new Config(cursor.getInt(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_VALUE)));
+            Config config = new Config(cursor);
             configs.put(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)), config);
         }
 

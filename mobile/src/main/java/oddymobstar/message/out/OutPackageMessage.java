@@ -1,6 +1,6 @@
 package oddymobstar.message.out;
 
-import com.google.android.gms.maps.model.LatLng;
+import android.location.Location;
 
 import org.json.JSONException;
 
@@ -10,8 +10,8 @@ import org.json.JSONException;
 public class OutPackageMessage extends OutCoreMessage {
 
 
-    public OutPackageMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException {
-        super(latLng, uid, ackId, PACKAGE);
+    public OutPackageMessage(Location location, String uid, String ackId, String type) throws JSONException {
+        super(location, uid, ackId, PACKAGE);
 
     }
 

@@ -1,6 +1,6 @@
 package oddymobstar.message.out;
 
-import com.google.android.gms.maps.model.LatLng;
+import android.location.Location;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,14 +20,14 @@ public class OutCoreMessage {
     public static final String TYPE = "type";
     public static final String LONG = "long";
     public static final String LAT = "lat";
+    public static final String SPEED = "speed";
+    public static final String ALTITUDE = "altitude";
     public static final String ACK_ID = "ackid";
     public static final String ALLIANCE = "alliance";
     public static final String AID = "aid";
     public static final String STAT = "stat";
     public static final String MSG = "msg";
     //override the zones we want to send the information to
-    public static final String ALAT = "along";
-    public static final String ALONG = "alat";
     public static final String NAME = "aname";
     public final static String AMID = "amid";
     //types of message
@@ -45,13 +45,15 @@ public class OutCoreMessage {
     public static final String PACKAGE = "package";
 
 
-    public OutCoreMessage(LatLng latLng, String uid, String ackId, String type) throws JSONException {
+    public OutCoreMessage(Location location, String uid, String ackId, String type) throws JSONException {
 
         JSONObject core = new JSONObject();
         core.put(UID, uid);
         core.put(TYPE, type);
-        core.put(LAT, latLng.latitude);
-        core.put(LONG, latLng.longitude);
+        core.put(LAT, location.getLatitude());
+        core.put(LONG, location.getLongitude());
+        core.put(ALTITUDE, location.getAltitude());
+        core.put(SPEED, location.getSpeed());
         core.put(ACK_ID, ackId);
 
         message.put(CORE_OBJECT, core);
