@@ -122,4 +122,17 @@ public class UTMGridCreator {
     }
 
 
+    public static LatLng getCentreUTM(List<LatLng> options){
+        //given above.  we need point1 lat + 1/2 lat degrees + point1 long + 1/2 long degrees
+
+        return new LatLng(options.get(0).latitude+(LAT_DEGREES/2), options.get(0).longitude+(LONG_DEGREES/2));
+    }
+
+    public static LatLng getCentreSubUTM(List<LatLng> options){
+        //given above.  we need point1 lat + 1/2 lat degrees + point1 long + 1/2 long degrees
+
+        return new LatLng(options.get(0).latitude+(LAT_SUB_DEG/2), options.get(0).longitude+(LONG_SUB_DEG/2));
+    }
+
+
 }

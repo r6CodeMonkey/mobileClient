@@ -1,6 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:background="@android:color/background_dark"
+    android:background="@android:color/holo_green_dark"
     android:layout_height="110dp">
 
 
@@ -13,7 +13,7 @@
         android:layout_marginTop="5dp"
         android:textSize="30dp"
         android:onClick="sendPost"
-        android:textColor="@android:color/holo_green_dark"
+        android:textColor="@android:color/white"
         android:text="@string/fa_send" />
 
     <Button
@@ -26,7 +26,7 @@
         android:layout_marginBottom="5dp"
         android:textSize="36dp"
         android:onClick="cancelPost"
-        android:textColor="@android:color/holo_red_dark"
+        android:textColor="@android:color/white"
         android:text="@string/fa_cancel" />
 
 </RelativeLayout>

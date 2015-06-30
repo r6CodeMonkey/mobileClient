@@ -1,5 +1,7 @@
 package oddymobstar.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +14,22 @@ public class SubUTM {
     private String subLatString = "";
     private int subLatInt;
     private int subUtmLong;
+
+    private static List<String> subUtmList = new ArrayList<>();
+
+
+    public static void createSubUtms(){
+        for (int indexCounter = 1; indexCounter <= 8; indexCounter++) {
+            for (String val : UTMGridCreator.latValues) {
+                for (int i = 0; i < 60; i++) {
+                    subUtmList.add(indexCounter + val + i);
+                }
+            }
+        }
+
+    }
+
+    public static List<String> getSubUtmList(){return subUtmList;}
 
     public SubUTM(String subUtm) {
 

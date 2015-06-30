@@ -1,4 +1,4 @@
-package oddymobstar.connect.handler;
+package oddymobstar.connect.bluetooth.handler;
 
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -16,8 +16,8 @@ import java.util.Set;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.connect.ConnectivityInterface;
-import oddymobstar.connect.client.BluetoothClient;
-import oddymobstar.connect.server.BluetoothServer;
+import oddymobstar.connect.bluetooth.client.BluetoothClient;
+import oddymobstar.connect.bluetooth.server.BluetoothServer;
 
 /**
  * Created by root on 25/04/15.
@@ -112,7 +112,6 @@ public class Bluetooth implements ConnectivityInterface {
     @Override
     public void disable() {
 
-        Log.d("calling disable ", "disable");
 
         //step 1: kill of the
         if (server != null) {
@@ -132,7 +131,6 @@ public class Bluetooth implements ConnectivityInterface {
             Method removeBondMethod = btDeviceInstance.getMethod("removeBond");
             for (BluetoothDevice device : deviceDiscovery.getBluetoothManager().getSelectedDevices()) {
 
-                Log.d("calling disable ", "unpair " + device.getName());
 
                 removeBondMethod.invoke(device);
             }
@@ -145,7 +143,6 @@ public class Bluetooth implements ConnectivityInterface {
 
     public void unpair(BluetoothDevice device) {
 
-        Log.d("calling unpair ", "unpair " + device.getName());
         try {
             Class<?> btDeviceInstance = Class.forName(BluetoothDevice.class.getCanonicalName());
 
@@ -153,7 +150,6 @@ public class Bluetooth implements ConnectivityInterface {
             removeBondMethod.invoke(device);
 
         } catch (Exception e) {
-            Log.d("i should have upaired", "but instead it errored " + e.toString());
         }
 
 
@@ -182,7 +178,9 @@ public class Bluetooth implements ConnectivityInterface {
                 Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 
                 for (BluetoothDevice device : pairedDevices) {
-                    devices.add(device);
+                    if(!devices.contains(device)) {
+                        devices.add(device);
+                    }
                 }
 
                 if (bluetoothAdapter.isDiscovering()) {
@@ -190,8 +188,6 @@ public class Bluetooth implements ConnectivityInterface {
                 }
 
                 bluetoothAdapter.startDiscovery();
-            } else {
-                //its a cancel so dont go discover.
             }
 
 

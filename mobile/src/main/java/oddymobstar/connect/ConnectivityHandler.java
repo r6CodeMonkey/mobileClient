@@ -4,10 +4,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.nfc.NfcManager;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
-import oddymobstar.connect.handler.Bluetooth;
-import oddymobstar.connect.handler.NFC;
-import oddymobstar.connect.handler.Wifi;
+import oddymobstar.activity.DemoActivity;
+import oddymobstar.connect.bluetooth.handler.Bluetooth;
+import oddymobstar.connect.nfc.NFC;
 import oddymobstar.util.widget.ConnectivityDialog;
 
 /**
@@ -19,12 +20,10 @@ public class ConnectivityHandler {
 
     private Bluetooth bluetooth;
     private NFC nfc;
-    private Wifi wifi;
 
     private String mode;
 
     private String uuid;
-    private byte[] message;
 
     public ConnectivityHandler(FragmentActivity activity, String uuid) {
         this.activity = activity;
@@ -32,7 +31,10 @@ public class ConnectivityHandler {
 
     }
 
+
     public void handle(String mode) {
+
+        this.mode = mode;
 
         switch (mode) {
             case ConnectivityDialog.BLUETOOTH:
@@ -40,12 +42,14 @@ public class ConnectivityHandler {
                 bluetooth.enable();
                 break;
             case ConnectivityDialog.NFC:
+                nfc = new NFC(activity);
+                nfc.enable();
                 break;
             case ConnectivityDialog.WIFI:
                 break;
         }
 
-        this.mode = mode;
+
     }
 
     public String getMode() {
@@ -54,10 +58,6 @@ public class ConnectivityHandler {
 
     public NFC getNfc() {
         return nfc;
-    }
-
-    public Wifi getWifi() {
-        return wifi;
     }
 
     public Bluetooth getBluetooth() {

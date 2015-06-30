@@ -1,4 +1,4 @@
-package oddymobstar.connect.server;
+package oddymobstar.connect.bluetooth.server;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import oddymobstar.activity.DemoActivity;
-import oddymobstar.connect.socket.BluetoothSocketThread;
+import oddymobstar.connect.bluetooth.socket.BluetoothSocketThread;
 
 /**
  * Created by root on 26/04/15.

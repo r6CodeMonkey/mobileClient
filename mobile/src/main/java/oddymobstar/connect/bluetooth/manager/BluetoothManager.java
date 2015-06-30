@@ -1,4 +1,4 @@
-package oddymobstar.connect.manager;
+package oddymobstar.connect.bluetooth.manager;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -136,9 +136,6 @@ public class BluetoothManager {
         return selectedDevices;
     }
 
-    public List<BluetoothDevice> getDevices() {
-        return devices;
-    }
 
     public String getDeviceName() {
         return deviceName;
@@ -149,7 +146,7 @@ public class BluetoothManager {
         return isRunning;
     }
 
-    public void addDevice(BluetoothDevice device) {
+    public boolean addDevice(BluetoothDevice device) {
         boolean add = true;
         for (BluetoothDevice d : devices) {
             if (d.getAddress().equals(device.getAddress())) {
@@ -161,6 +158,8 @@ public class BluetoothManager {
             selectedControl.put(device.getName(), Boolean.FALSE);
 
         }
+
+        return add;
     }
 
     public void setIsRunning(boolean isRunning) {

@@ -1,4 +1,4 @@
-package oddymobstar.connect.socket;
+package oddymobstar.connect.bluetooth.socket;
 
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;

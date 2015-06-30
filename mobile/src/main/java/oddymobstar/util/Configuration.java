@@ -34,8 +34,9 @@ public class Configuration implements Serializable {
     //technically we do not need these in the database...but we may add them.
     //also need mappers to control the values....some are checkboxes.  but we need to store settings
     public final static String SERVER_LOCATION_HIDE = "LOCATION_HIDE";
+
     public final static String RESET_SOCKET = "RESET_SOCKET";
-    public final static String CLEAR_BACKLOGUE = "CLEAR_BACKLOG";
+    public final static String CLEAR_BACKLOG = "CLEAR_BACKLOG";
 
 
     //Need last server contact.   public final static String CURRENT_SUBUTM = "CURRENT_SUBUTM";

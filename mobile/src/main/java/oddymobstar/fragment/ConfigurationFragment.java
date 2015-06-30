@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
+import oddymobstar.activity.DemoActivity;
 import oddymobstar.adapter.ConfigurationAdapter;
 import oddymobstar.crazycourier.R;
 
@@ -17,17 +18,17 @@ import oddymobstar.crazycourier.R;
 public class ConfigurationFragment extends Fragment {
 
 
-    private Cursor baseConfigs;
-    private Cursor userConfigs;
+     private Cursor userConfigs;
     private Cursor systemConfigs;
 
+    private DemoActivity.ConfigurationHandler configurationHandler;
 
     public ConfigurationFragment() {
 
     }
 
-    public void init(Cursor baseConfigs, Cursor userConfigs, Cursor systemConfigs) {
-        this.baseConfigs = baseConfigs;
+    public void init(DemoActivity.ConfigurationHandler configurationHandler,  Cursor userConfigs, Cursor systemConfigs) {
+        this.configurationHandler = configurationHandler;
         this.userConfigs = userConfigs;
         this.systemConfigs = systemConfigs;
 
@@ -43,7 +44,15 @@ public class ConfigurationFragment extends Fragment {
         final ExpandableListView lv = (ExpandableListView) view
                 .findViewById(R.id.expandableListView1);
 
-        lv.setAdapter(new ConfigurationAdapter(getActivity(), baseConfigs, userConfigs, systemConfigs));
+        lv.setAdapter(new ConfigurationAdapter(getActivity(), configurationHandler, userConfigs, systemConfigs));
+
+        //shouldnt hard code but not adding more yet so who cares. it static at mo.
+        lv.expandGroup(0);
+        lv.expandGroup(1);
+
+        //dont think this is working....needs to be card not fragment?  need to review card perhaps
+        //card can be loaded via transaction manager.  i doubt it.
+        view.setElevation(12);
 
 
         return view;

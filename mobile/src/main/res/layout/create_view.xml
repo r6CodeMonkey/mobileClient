@@ -1,7 +1,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
     android:layout_width="fill_parent"
-    android:background="@android:color/background_dark"
+    app:borderWidth="0dp"
+    android:background="@android:color/holo_red_dark"
     android:layout_height="wrap_content">
 
 
@@ -11,13 +13,13 @@
         android:maxLength="30"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
-        android:layout_marginLeft="5dp"
+        android:layout_marginLeft="10dp"
         android:layout_weight="0.8"
         android:textSize="18dp"
         android:hint="Type to create"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:background="@android:color/white"
-        android:layout_height="wrap_content" />
+        android:layout_height="40dp" />
 
     <Button
         android:id="@+id/list_create"
@@ -28,7 +30,7 @@
         android:layout_height="50dp"
         android:textSize="30dp"
         android:onClick="createButton"
-        android:textColor="@android:color/holo_green_dark"
+        android:textColor="@android:color/white"
         android:text="@string/fa_send" />
 
 </LinearLayout>

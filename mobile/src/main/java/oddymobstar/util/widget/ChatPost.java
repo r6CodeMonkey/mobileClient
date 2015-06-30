@@ -47,4 +47,5 @@ public class ChatPost extends LinearLayout {
         post.setText("");
     }
 
+
 }

@@ -3,12 +3,16 @@ package oddymobstar.fragment;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
+import android.widget.GridView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import oddymobstar.activity.DemoActivity;
@@ -20,7 +24,7 @@ import oddymobstar.util.widget.CreateView;
 /**
  * Created by root on 14/04/15.
  */
-public class ListFragment extends android.support.v4.app.ListFragment {
+public class GridFragment extends Fragment {
 
 
     /*
@@ -35,8 +39,11 @@ public class ListFragment extends android.support.v4.app.ListFragment {
     private AdapterView.OnItemClickListener onClickListener = null;
     private CursorAdapter adapter = null;
     private DBHelper dbHelper;
+    private GridView gridView;
 
-    private CreateView createView;
+    private CreateView hiddenCreateView;
+
+
 
     private class LoadCursors extends AsyncTask<String, Void, String> {
 
@@ -57,7 +64,7 @@ public class ListFragment extends android.support.v4.app.ListFragment {
         protected void onPostExecute(String result) {
 
             adapter = getCursorAdapter(type, cursor);
-            setListAdapter(adapter);
+            gridView.setAdapter(adapter);
 
         }
 
@@ -72,7 +79,7 @@ public class ListFragment extends android.support.v4.app.ListFragment {
     }
 
 
-    public ListFragment() {
+    public GridFragment() {
         setRetainInstance(true);
     }
 
@@ -92,30 +99,32 @@ public class ListFragment extends android.support.v4.app.ListFragment {
 
         View view = inflater.inflate(R.layout.list_fragment, container, false);
 
-        createView = (CreateView) view.findViewById(R.id.create_view);
 
         if (dbHelper == null) {
             dbHelper = DBHelper.getInstance(getActivity());
         }
 
-        new LoadCursors().execute("");
 
-        setListAdapter(adapter);
 
-        ListView lv = (ListView) view.findViewById(android.R.id.list);
-        lv.setOnItemClickListener(onClickListener);
+        gridView = (GridView) view.findViewById(R.id.grid_view);
+        gridView.setOnItemClickListener(onClickListener);
 
-        lv.setFastScrollEnabled(true);
-        lv.setFastScrollAlwaysVisible(true);
+      //  gridView.setFastScrollEnabled(true);
+      //  gridView.setFastScrollAlwaysVisible(true);
 
-        lv.setDivider(null);
-        lv.setDividerHeight(0);
+        gridView.setAdapter(adapter);
 
-        Button button = (Button) view.findViewById(R.id.list_create);
+        hiddenCreateView = (CreateView) view.findViewById(R.id.create_alliance);
+        hiddenCreateView.setVisibility(View.GONE);
+        hiddenCreateView.setElevation(16);
+
+        Button button = (Button) hiddenCreateView.findViewById(R.id.list_create);
         button.setTypeface(DemoActivity.getFont());
 
-        lv.setFastScrollEnabled(true);
-        lv.setFastScrollAlwaysVisible(true);
+
+
+        new LoadCursors().execute("");
+
 
         return view;
     }
@@ -148,22 +157,14 @@ public class ListFragment extends android.support.v4.app.ListFragment {
         }
     }
 
-
-    @Override
-    public void onListItemClick(ListView arg0, View arg1, int arg2, long arg3) {
-        onClickListener.onItemClick(arg0, arg1, arg2, arg3);
+    public ListAdapter getListAdapter(){
+        return gridView.getAdapter();
     }
 
-    public String getCreateText() {
-        return createView.getCreateText();
-    }
 
-    public void clear() {
-        createView.clear();
-    }
 
     public void clearAdapter() {
-        setListAdapter(null);
+        gridView.setAdapter(null);
         adapter = null;
     }
 
@@ -176,5 +177,7 @@ public class ListFragment extends android.support.v4.app.ListFragment {
 
         }
     }
+
+    public CreateView getHiddenCreateView(){return hiddenCreateView;}
 
 }

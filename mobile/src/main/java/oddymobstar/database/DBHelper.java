@@ -5,6 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+
+import java.io.ByteArrayOutputStream;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.model.Alliance;
@@ -13,6 +16,7 @@ import oddymobstar.model.Config;
 import oddymobstar.model.Grid;
 import oddymobstar.model.Message;
 import oddymobstar.model.Package;
+import oddymobstar.model.UserImage;
 import oddymobstar.util.Configuration;
 
 /**
@@ -34,6 +38,10 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String PACKAGES_TABLE = "PACKAGES";
     public static final String MESSAGE_TABLE = "MESSAGES";
 
+    public static final String IMAGE_TABLE = "USER_IMAGES";
+
+    //"+CONFIG_USER_IMAGE+" BLOB
+
 
     /*
   key names
@@ -52,6 +60,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String CONFIG_MARKUP = "config_markup";
     public static final String CONFIG_TYPE = "config_type";
     public static final String CONFIG_VISIBLE = "config_visible";
+
+
+    public static final String USER_IMAGE_KEY = "user_key";
+    public static final String USER_IMAGE = "user_image";
+
 
 
     public static final String GRID_KEY = "grid_key";
@@ -82,6 +95,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String CREATE_ALLIANCE_MEMBERS = "CREATE TABLE " + ALLIANCE_MEMBERS_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200)," + PLAYER_KEY + " VARCHAR2(200)," + PLAYER_NAME + " VARCHAR2(30)," + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER, " + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10)," + SPEED + " NUMBER," + ALTITUDE + " NUMBER)";
     private static final String CREATE_PACKAGES = "CREATE TABLE " + PACKAGES_TABLE + " (" + PACKAGE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + PACKAGE_NAME + " VARCHAR2(30))";  //need to flesh this out later
     private static final String CREATE_MESSAGES = "CREATE TABLE " + MESSAGE_TABLE + "(" + MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + MESSAGE_CONTENT + " VARCHAR2(300), " + MESSAGE_KEY + " VARCHAR2(200)," + MESSAGE_TYPE + " CHAR(1), " + MESSAGE_TIME + " INTEGER," + MY_MESSAGE + " CHAR(1)," + MESSAGE_AUTHOR + " VARCHAR2(200) )";
+    private static final String CREATE_USER_IMAGES = "CREATE TABLE "+IMAGE_TABLE+"("+USER_IMAGE_KEY+" VARCHAR2(200),"+USER_IMAGE+" BLOB)";
 
 
     private DemoActivity.MessageHandler messageHandler;
@@ -121,13 +135,14 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_ALLIANCE_MEMBERS);
         db.execSQL(CREATE_PACKAGES);
         db.execSQL(CREATE_MESSAGES);
+        db.execSQL(CREATE_USER_IMAGES);
 
 
     }
 
     public void test() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL(CREATE_MESSAGES);
+        db.execSQL(CREATE_USER_IMAGES);
     }
 
 
@@ -142,13 +157,17 @@ public class DBHelper extends SQLiteOpenHelper {
         addConfig(config);
         config = new Config(Configuration.PLAYER_KEY, "", "Unique Identifier", Config.BASE, true);
         addConfig(config);
-        config = new Config(Configuration.CURRENT_UTM, "", "Universal Transverse Mercator (UTM)", Config.BASE, true);
+        config = new Config(Configuration.CURRENT_UTM, "", "Universal Transverse Mercator", Config.BASE, true);
         addConfig(config);
         config = new Config(Configuration.CURRENT_SUBUTM, "", "Custom SubUTM grid", Config.BASE, true);
         addConfig(config);
         config = new Config(Configuration.GPS_UPDATE_INTERVAL, String.valueOf(DemoActivity.TWO_MINUTES), "GPS Update Interval", Config.USER, true);
         addConfig(config);
-        config = new Config(Configuration.GPS_UPDATE_INTERVAL, String.valueOf(DemoActivity.TWO_MINUTES), "GPS Update Interval", Config.USER, true);
+        config = new Config(Configuration.SERVER_LOCATION_HIDE, "N", "Hide Me", Config.USER, true);
+        addConfig(config);
+        config = new Config(Configuration.CLEAR_BACKLOG, "N", "Clear Message Backlog", Config.SYSTEM, true);
+        addConfig(config);
+        config = new Config(Configuration.RESET_SOCKET, "N", "Reset Connections", Config.SYSTEM, true);
         addConfig(config);
 
     }
@@ -166,6 +185,23 @@ public class DBHelper extends SQLiteOpenHelper {
 
      */
 
+
+    public void addUserImage(UserImage userImage){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(USER_IMAGE_KEY, userImage.getUserImageKey());
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        userImage.getUserImage().compress(Bitmap.CompressFormat.JPEG, 100, bos);
+        byte[] array = bos.toByteArray();
+        values.put(USER_IMAGE, array);
+
+
+        db.insert(IMAGE_TABLE, null, values);
+
+
+    }
 
     public void addMessage(Message message) {
 
@@ -339,6 +375,22 @@ public class DBHelper extends SQLiteOpenHelper {
     update methods...no point updating a grid.  most will simply updte user dfined names etc.
      */
 
+    public void updateUserImage(UserImage userImage){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        userImage.getUserImage().compress(Bitmap.CompressFormat.JPEG, 100, bos);
+        byte[] array = bos.toByteArray();
+        values.put(USER_IMAGE, array);
+
+
+        db.update(IMAGE_TABLE, values, USER_IMAGE_KEY + "=?", new String[]{userImage.getUserImageKey()});
+
+
+    }
+
     public void updateConfig(Config config) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -432,6 +484,11 @@ public class DBHelper extends SQLiteOpenHelper {
         return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + "," + CONFIG_MARKUP + "," + CONFIG_VISIBLE + "," + CONFIG_TYPE + " FROM " + CONFIG_TABLE + " ORDER BY " + CONFIG_NAME + " ASC", null);
     }
 
+    public Cursor getUserImages(){
+        return this.getReadableDatabase().rawQuery("SELECT " + USER_IMAGE_KEY + " as _id," + USER_IMAGE_KEY + "," + USER_IMAGE +" FROM "+USER_IMAGE + " ORDER BY " + USER_IMAGE_KEY + " ASC", null);
+
+    }
+
     public Cursor getConfigs(int type) {
         return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + "," + CONFIG_MARKUP + "," + CONFIG_VISIBLE + "," + CONFIG_TYPE + " FROM " + CONFIG_TABLE + " WHERE " + CONFIG_TYPE + " =? AND "+CONFIG_VISIBLE+" = 'Y' ORDER BY " + CONFIG_NAME + " ASC", new String[]{String.valueOf(type)});
     }
@@ -491,6 +548,20 @@ public class DBHelper extends SQLiteOpenHelper {
         return null;
     }
 
+
+    public UserImage getUserImage(String key){
+
+        Cursor userImage = this.getReadableDatabase().rawQuery("SELECT " + USER_IMAGE_KEY + " as _id," + USER_IMAGE_KEY + "," + USER_IMAGE + " FROM " + IMAGE_TABLE + " WHERE " + USER_IMAGE_KEY + " = ?" + " ORDER BY " + USER_IMAGE_KEY + " ASC", new String[]{key});
+
+        UserImage returnUserImage = null;
+
+        while (userImage.moveToNext()){
+            returnUserImage = new UserImage(userImage);
+        }
+        userImage.close();
+
+        return returnUserImage;
+    }
 
     public Config getConfig(String key) {
 

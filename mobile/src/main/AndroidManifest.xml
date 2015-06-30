@@ -5,19 +5,46 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/che"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:label="@string/app_name">
         <activity
             android:name="oddymobstar.activity.DemoActivity"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_game">
+
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="BluetoothDevice.ACTION_FOUND" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.TECH_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <meta-data android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <meta-data android:name="android.nfc.action.TAG_DISCOVERED"
+                    android:resource="@xml/nfc_tech_filter" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/com.oddymobstar.android.beam"/>
+            </intent-filter>
+
         </activity>
 
         <service

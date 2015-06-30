@@ -6,10 +6,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import oddymobstar.activity.DemoActivity;
 import oddymobstar.adapter.ChatAdapter;
 import oddymobstar.crazycourier.R;
 import oddymobstar.util.widget.ChatPost;
@@ -23,7 +25,8 @@ public class ChatFragment extends Fragment {
     private String key;
     private String title;
 
-    private ChatPost chatPost;
+    private ChatPost hiddenChatPost;
+
 
     private CursorAdapter adapter = null;
 
@@ -52,10 +55,16 @@ public class ChatFragment extends Fragment {
 
         ListView lv = (ListView) view.findViewById(R.id.list);
 
-        chatPost = (ChatPost) view.findViewById(R.id.chat_post);
+        hiddenChatPost = (ChatPost) view.findViewById(R.id.chat_post);
 
-        TextView tv = (TextView) view.findViewById(R.id.chat_title);
-        tv.setText(title);
+        hiddenChatPost.setVisibility(View.GONE);
+        hiddenChatPost.setElevation(16);
+
+        Button button = (Button) hiddenChatPost.findViewById(R.id.post);
+        button.setTypeface(DemoActivity.getFont());
+
+        button = (Button) hiddenChatPost.findViewById(R.id.cancel);
+        button.setTypeface(DemoActivity.getFont());
 
 
         lv.setDivider(null);
@@ -74,26 +83,12 @@ public class ChatFragment extends Fragment {
     }
 
 
-    public void cancelPost() {
-        chatPost.cancelPost();
-    }
-
-    public String getPost() {
-        return chatPost.getPost();
-    }
-
     public String getTitle() {
         return title;
     }
 
-    public boolean isChatFragValid() {
+    public ChatPost getHiddenChatPost(){return hiddenChatPost;}
 
-        if (chatPost == null) {
-            return false;
-        } else {
-            return chatPost.isPostValid();
-        }
 
-    }
 
 }

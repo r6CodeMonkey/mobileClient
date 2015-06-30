@@ -149,20 +149,7 @@ public class CheService extends IntentService {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         demoLocationListener = new DemoLocationListener(locationManager);
 
-        locationUpdates = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, demoLocationListener);
-                    }
-                });
-
-            }
-        });
-
-        locationUpdates.start();
+        initLocationUpdates();
 
         if (connect == null) {
             //st up our socket.
@@ -365,6 +352,55 @@ public class CheService extends IntentService {
 
     }
 
+
+    public void clearBacklog(){
+        this.messageBuffer.clear();
+    }
+
+
+    public void resetConnection(){
+        connect = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                reConnect();
+            }
+        });
+
+        connect.start();
+    }
+
+
+    public void resetLocationUpdates(){
+
+        configuration = new Configuration(dbHelper.getConfigs());
+
+        if(locationUpdates.isAlive()){
+            locationUpdates.interrupt();
+            locationUpdates = null;
+        }
+
+        initLocationUpdates();
+    }
+
+    private void initLocationUpdates(){
+        locationUpdates = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, demoLocationListener);
+                    }
+                });
+
+            }
+        });
+
+        locationUpdates.start();
+    }
+
+
+
     private void reConnect() {
 
         Log.d("reconnect", "reconnect called");
@@ -430,6 +466,8 @@ public class CheService extends IntentService {
 
 
     }
+
+
 
 
     public void writeToSocket(final OutCoreMessage coreMessage) {

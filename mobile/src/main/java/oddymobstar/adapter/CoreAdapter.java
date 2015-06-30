@@ -16,7 +16,7 @@ import java.util.List;
 
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
-import oddymobstar.fragment.ListFragment;
+import oddymobstar.fragment.GridFragment;
 
 /**
  * Created by root on 27/02/15.
@@ -44,6 +44,13 @@ public class CoreAdapter extends CursorAdapter implements SectionIndexer {
         LayoutInflater inflator = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 
         View v = inflator.inflate(layout, null);
+
+      /*  CardView cardView = (CardView)v.findViewById(R.id.card_view);
+        cardView.setRadius(4);
+        cardView.setMaxCardElevation(16);
+*/
+
+
         bindView(v, context, cursor);
         return v;
     }
@@ -55,7 +62,7 @@ public class CoreAdapter extends CursorAdapter implements SectionIndexer {
 
         switch (source) {
 
-            case ListFragment.MY_ALLIANCES:
+            case GridFragment.MY_ALLIANCES:
                 tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME)));
                 break;
         }

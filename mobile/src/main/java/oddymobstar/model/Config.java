@@ -1,6 +1,10 @@
 package oddymobstar.model;
 
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import java.sql.Blob;
 
 import oddymobstar.database.DBHelper;
 
@@ -71,6 +75,7 @@ public class Config {
         this.visible = visible;
     }
 
+
     public int getId() {
         return id;
     }
@@ -94,4 +99,6 @@ public class Config {
     public boolean isVisible() {
         return visible;
     }
+
+
 }

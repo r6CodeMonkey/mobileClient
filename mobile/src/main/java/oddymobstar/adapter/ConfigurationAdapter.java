@@ -11,6 +11,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import oddymobstar.activity.DemoActivity;
 import oddymobstar.crazycourier.R;
 
 
@@ -23,31 +24,25 @@ public class ConfigurationAdapter extends BaseExpandableListAdapter {
 
     private List<String> groups = new ArrayList<>();
 
-    public static final int BASE_CONFIGS = 0;
-    public static final int USER_CONFIGS = 1;
-    public static final int SYS_CONFIGS = 2;
+    public static final int USER_CONFIGS = 0;
+    public static final int SYS_CONFIGS = 1;
 
 
-    private Cursor baseConfigs;
     private Cursor userConfigs;
     private Cursor systemConfigs;
 
-    private BaseConfigurationAdapter baseConfigurationAdapter;
     private UserConfigurationAdapter userConfigurationAdapter;
     private SystemConfigurationAdapter systemConfigurationAdapter;
 
-    public ConfigurationAdapter(Context context, Cursor baseConfigs, Cursor userConfigs, Cursor systemConfigs) {
+    public ConfigurationAdapter(Context context, DemoActivity.ConfigurationHandler configurationHandler, Cursor userConfigs, Cursor systemConfigs) {
         this.context = context;
 
-        this.baseConfigs = baseConfigs;
         this.userConfigs = userConfigs;
         this.systemConfigs = systemConfigs;
 
-        this.baseConfigurationAdapter = new BaseConfigurationAdapter(context, baseConfigs, true);
-        this.userConfigurationAdapter = new UserConfigurationAdapter(context, userConfigs, true);
-        this.systemConfigurationAdapter = new SystemConfigurationAdapter(context, systemConfigs, true);
+        this.userConfigurationAdapter = new UserConfigurationAdapter(context, userConfigs, true, configurationHandler);
+        this.systemConfigurationAdapter = new SystemConfigurationAdapter(context, systemConfigs, true, configurationHandler);
 
-        groups.add("Base Configuration");
         groups.add("User Configuration");
         groups.add("System Configuration");
 
@@ -62,8 +57,6 @@ public class ConfigurationAdapter extends BaseExpandableListAdapter {
     public int getChildrenCount(int groupPosition) {
 
         switch (groupPosition) {
-            case BASE_CONFIGS:
-                return baseConfigs.getCount();
             case USER_CONFIGS:
                 return userConfigs.getCount();
             case SYS_CONFIGS:
@@ -115,10 +108,6 @@ public class ConfigurationAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
         switch (groupPosition) {
-            case BASE_CONFIGS:
-                baseConfigs.moveToPosition(childPosition);
-                convertView = baseConfigurationAdapter.newView(context, baseConfigs, parent);
-                break;
             case USER_CONFIGS:
                 userConfigs.moveToPosition(childPosition);
                 convertView = userConfigurationAdapter.newView(context, userConfigs, parent);
