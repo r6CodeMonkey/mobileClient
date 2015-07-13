@@ -34,6 +34,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -60,6 +61,7 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -81,6 +83,7 @@ import oddymobstar.fragment.DeviceFragment;
 import oddymobstar.fragment.GridFragment;
 import oddymobstar.message.out.OutAllianceMessage;
 import oddymobstar.message.out.OutCoreMessage;
+import oddymobstar.message.out.OutImageMessage;
 import oddymobstar.model.Alliance;
 import oddymobstar.model.AllianceMember;
 import oddymobstar.model.Config;
@@ -773,16 +776,36 @@ public class DemoActivity extends AppCompatActivity {
                     Bitmap bitmap = BitmapFactory.decodeStream(stream);
                     stream.close();
                     bitmap = Bitmap.createScaledBitmap(bitmap, 236, 354, false);
-                    Log.d("bitmap size is", "size "+bitmap.getRowBytes() * bitmap.getHeight());
+                    Log.d("bitmap size is", "size " + bitmap.getRowBytes() * bitmap.getHeight());
                     userImageView.setImageBitmap(bitmap);
+                    byte[] imageArray;
                     if(userImage == null){
                         userImage = new UserImage();
                         userImage.setUserImageKey(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
                         userImage.setUserImage(bitmap);
-                        dbHelper.addUserImage(userImage);
+                        imageArray =dbHelper.addUserImage(userImage);
                     }else{
                         userImage.setUserImage(bitmap);
-                        dbHelper.updateUserImage(userImage);
+                        imageArray = dbHelper.updateUserImage(userImage);
+                    }
+
+                    try{
+                        final OutImageMessage outImageMessage =  new OutImageMessage(currentLocation, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                        outImageMessage.setImage(Base64.encodeToString(imageArray, Base64.DEFAULT));
+
+                        new Thread((new Runnable() {
+                            @Override
+                            public void run() {
+                                cheService.writeToSocket(outImageMessage);
+                            }
+                        })).start();
+
+
+
+                    }catch(JSONException jse){
+
+                    }catch(NoSuchAlgorithmException nsae){
+
                     }
 
 
@@ -1264,15 +1287,21 @@ public class DemoActivity extends AppCompatActivity {
         bsically its
          */
 
-        Bitmap bitmap = userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
+        if (userImage != null) {
+            if (userImage.getUserImage() != null) {
+                Bitmap bitmap = userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
 
-        int w = bitmap.getWidth();
+                int w = bitmap.getWidth();
 
 
-        Bitmap roundBitmap =  RoundedImageView.getCroppedBitmap(bitmap, w);
+                Bitmap roundBitmap = RoundedImageView.getCroppedBitmap(bitmap, w);
 
 
-        markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
+                markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
+            }
+        }else{
+            markerMap.put("Me",map.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
+        }
 
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -1693,6 +1722,10 @@ public class DemoActivity extends AppCompatActivity {
                 markerMap.get("Me").remove();
             }
 
+            if(userImage != null) {
+                if (userImage.getUserImage() != null) {
+
+
             Bitmap bitmap = userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
 
             int w = bitmap.getWidth();
@@ -1703,6 +1736,10 @@ public class DemoActivity extends AppCompatActivity {
             //236 - 354
             markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
 
+                }
+            }else{
+                markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
+            }
 
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(currentLatLng)

@@ -186,7 +186,7 @@ public class DBHelper extends SQLiteOpenHelper {
      */
 
 
-    public void addUserImage(UserImage userImage){
+    public byte[] addUserImage(UserImage userImage){
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -199,6 +199,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         db.insert(IMAGE_TABLE, null, values);
+
+        return array;
 
 
     }
@@ -375,7 +377,7 @@ public class DBHelper extends SQLiteOpenHelper {
     update methods...no point updating a grid.  most will simply updte user dfined names etc.
      */
 
-    public void updateUserImage(UserImage userImage){
+    public byte[] updateUserImage(UserImage userImage){
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -387,6 +389,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
         db.update(IMAGE_TABLE, values, USER_IMAGE_KEY + "=?", new String[]{userImage.getUserImageKey()});
+
+        return array;
 
 
     }

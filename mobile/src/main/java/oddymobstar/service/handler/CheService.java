@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import oddymobstar.activity.DemoActivity;
+import oddymobstar.adapter.SystemConfigurationAdapter;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.in.Acknowledge;
 import oddymobstar.message.in.InCoreMessage;
@@ -479,7 +480,8 @@ public class CheService extends IntentService {
             if (coreMessage.isPost()) {
                 messageHandler.getSentPosts().put(coreMessage.getMessage().getJSONObject(OutCoreMessage.CORE_OBJECT).getString(OutCoreMessage.ACK_ID), coreMessage);
             }
-            dOut.writeUTF(coreMessage.getMessage().toString());
+
+            dOut.write(coreMessage.getMessage().toString().getBytes("UTF-8"));
 
 
         } catch (Exception e) {

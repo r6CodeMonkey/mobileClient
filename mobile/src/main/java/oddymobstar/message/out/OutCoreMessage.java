@@ -24,6 +24,8 @@ public class OutCoreMessage {
     public static final String ALTITUDE = "altitude";
     public static final String ACK_ID = "ackid";
     public static final String ALLIANCE = "alliance";
+    public static final String IMAGE = "image";
+
     public static final String AID = "aid";
     public static final String STAT = "stat";
     public static final String MSG = "msg";
