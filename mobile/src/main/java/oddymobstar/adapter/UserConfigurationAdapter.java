@@ -3,6 +3,7 @@ package oddymobstar.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,6 +74,8 @@ public class UserConfigurationAdapter extends CursorAdapter {
 
                     TextView tv = (TextView) seekBarView.findViewById(R.id.core_item_name);
                     tv.setText(tv.getText().toString().split("-")[0].trim() + " - " + this.progress + " Seconds");
+                    //so just need to make this work....
+              //      Log.d("on progress changed", "progress has changed "+progress+" "+this.progress);
 
                 }
 
@@ -115,7 +118,7 @@ public class UserConfigurationAdapter extends CursorAdapter {
             tv.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_MARKUP)) + " - " + millseconds/1000+ " Seconds");
 
             SeekBar pg = (SeekBar)view.findViewById(R.id.seekBar);
-            pg.setProgress(((millseconds/1000)%60)-1);
+             pg.setProgress(((millseconds/1000)/60)-1);
 
         }
 

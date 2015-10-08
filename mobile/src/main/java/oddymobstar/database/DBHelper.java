@@ -149,7 +149,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void addBaseConfiguration() {
         Config config = new Config(Configuration.PORT, "8085", "Port", Config.BASE, false);
         addConfig(config);
-        config = new Config(Configuration.URL, "82.23.41.68", "URL", Config.BASE, false);
+        config = new Config(Configuration.URL, "86.30.69.23", "URL", Config.BASE, false);
         addConfig(config);
         config = new Config(Configuration.UUID_ALGORITHM, "MD5", "Unique Identifier Alogrithm", Config.BASE, true);
         addConfig(config);

@@ -36,6 +36,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -81,6 +82,8 @@ import oddymobstar.fragment.ChatFragment;
 import oddymobstar.fragment.ConfigurationFragment;
 import oddymobstar.fragment.DeviceFragment;
 import oddymobstar.fragment.GridFragment;
+import oddymobstar.fragment.GridViewFragment;
+import oddymobstar.graphics.GridGLSurfaceView;
 import oddymobstar.message.out.OutAllianceMessage;
 import oddymobstar.message.out.OutCoreMessage;
 import oddymobstar.message.out.OutImageMessage;
@@ -138,6 +141,7 @@ public class DemoActivity extends AppCompatActivity {
     private GridFragment gridFrag = new GridFragment();
     private DeviceFragment deviceFragment = new DeviceFragment();
     private ConfigurationFragment confFrag = new ConfigurationFragment();
+    private GridViewFragment gridViewFragment = new GridViewFragment();
     private GridDialog gridDialog;
     private ConnectivityHandler connectivityHandler;
     /*
@@ -258,6 +262,8 @@ public class DemoActivity extends AppCompatActivity {
 
     }
 
+
+
     private void setUpMaterials() {
         navDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navDrawer.setElevation(16.0f);
@@ -271,7 +277,21 @@ public class DemoActivity extends AppCompatActivity {
                 navToolbar,
                 R.string.drawer_open,
                 R.string.drawer_close
-        );
+        ){
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+
+                invalidateOptionsMenu();
+            }
+        };
 
 
         navDrawer.setDrawerListener(navToggle);
@@ -350,7 +370,6 @@ public class DemoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-
         if (!dbHelper.hasPreLoad()) {
             dbHelper.addBaseConfiguration();
         }
@@ -404,6 +423,7 @@ public class DemoActivity extends AppCompatActivity {
 
         setUpMapIfNeeded();
 
+        getSupportFragmentManager().beginTransaction().add(R.id.grid_view_fragment, gridViewFragment).addToBackStack(null).commit();
 
     }
 
@@ -444,7 +464,7 @@ public class DemoActivity extends AppCompatActivity {
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
-             }
+            }
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -756,7 +776,9 @@ public class DemoActivity extends AppCompatActivity {
     public void onBackPressed() {
 
         super.onBackPressed();
-        removeFragments();
+        removeFragments(true);
+
+
 
 
     }
@@ -859,7 +881,7 @@ public class DemoActivity extends AppCompatActivity {
 
     }
 
-    private void removeFragments() {
+    private void removeFragments(boolean backPressed) {
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
@@ -896,6 +918,21 @@ public class DemoActivity extends AppCompatActivity {
         } catch (Exception e) {
 
         }
+       if(!backPressed) {
+           try {
+               transaction.remove(gridViewFragment);
+           } catch (Exception e) {
+
+           }
+       }else{
+           try{
+              if(!gridViewFragment.isAdded()) {
+                  transaction.replace(R.id.grid_view_fragment, gridViewFragment);
+              }
+           }catch (Exception e){
+
+           }
+       }
 
         try{
             floatingActionButton.setVisibility(View.INVISIBLE);
@@ -934,7 +971,7 @@ public class DemoActivity extends AppCompatActivity {
             return true;
         }
 
-        removeFragments();
+        removeFragments(false);
 
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -1023,8 +1060,17 @@ public class DemoActivity extends AppCompatActivity {
                 floatingActionButton.setVisibility(View.VISIBLE);
                 fabMode = GRID_FAB;
 
+
                 animateToGrid(myUTM, UTM_ZOOM);
                 navDrawer.closeDrawer(navigationView);
+
+                try{
+                        transaction.add(R.id.grid_view_fragment, gridViewFragment);
+                }catch (Exception e){
+
+                }
+
+                transaction.commit();
                 break;
 
             case R.id.sub_utm:
@@ -1039,8 +1085,19 @@ public class DemoActivity extends AppCompatActivity {
                 floatingActionButton.setVisibility(View.VISIBLE);
                 fabMode = GRID_FAB;
 
+
+
                 navDrawer.closeDrawer(navigationView);
-                animateToGrid(mySubUTM,SUB_UTM_ZOOM);
+                animateToGrid(mySubUTM, SUB_UTM_ZOOM);
+
+                try{
+                        transaction.replace(R.id.grid_view_fragment, gridViewFragment);
+                }catch (Exception e){
+
+                }
+
+                transaction.commit();
+
                 break;
 
             case R.id.encrypt:
@@ -1092,7 +1149,7 @@ public class DemoActivity extends AppCompatActivity {
     public void deleteMessages(View view) {
         //grab the chat frag id...
         dbHelper.deleteMessages(chatFrag.getKey());
-        removeFragments();
+        removeFragments(false);
     }
 
     public void messageCoverage(View view) {
@@ -1190,7 +1247,7 @@ public class DemoActivity extends AppCompatActivity {
             cancelPost(null);
         } else {
              //find out if this every works! it was not cause of my bug
-            removeFragments();
+            removeFragments(false);
         }
 
     }
@@ -1668,7 +1725,7 @@ public class DemoActivity extends AppCompatActivity {
             basically if they select an item we launch chat frag with an ID...
              */
             Cursor cursor = (Cursor) gridFrag.getListAdapter().getItem(position);
-            removeFragments();
+            removeFragments(false);
 
             android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
