@@ -85,7 +85,7 @@ import oddymobstar.model.Message;
 import oddymobstar.model.UserImage;
 import oddymobstar.service.handler.CheService;
 import oddymobstar.util.Configuration;
-import oddymobstar.util.RoundedImageView;
+import oddymobstar.util.graphics.RoundedImageView;
 import oddymobstar.util.SubUTM;
 import oddymobstar.util.UTM;
 import oddymobstar.util.UTMGridCreator;

@@ -2,8 +2,8 @@ package oddymobstar.graphics.programs;
 
 import android.content.Context;
 
-import oddymobstar.util.RawResourceLoader;
-import oddymobstar.util.ShaderHelper;
+import oddymobstar.util.graphics.opengles.RawResourceLoader;
+import oddymobstar.util.graphics.opengles.ShaderHelper;
 
 import static android.opengl.GLES20.glUseProgram;
 
@@ -13,14 +13,15 @@ import static android.opengl.GLES20.glUseProgram;
 public abstract class ShaderProgram implements ProgramInterface {
 
 
-    protected static final String A_COLOR = "a_Color";
+    protected static final String U_COLOR = "u_Color";
     protected static final String A_POSITION = "a_Position";
     protected static final String U_MATRIX = "u_Matrix";
+
 
     protected static final String U_TEXTURE_UNIT = "u_TextureUnit";
     protected static final String A_TEXTURE_COORDINATES = "a_TextureCoordinates";
 
-    protected int aPositionLocation, aColorLocation, aTextureCoordinatesLocation, uTextureUnitLocation, uMatrixLocation;
+    protected int aPositionLocation, uColorLocation, aTextureCoordinatesLocation, uTextureUnitLocation, uMatrixLocation;
 
 
     protected int program;
@@ -40,7 +41,7 @@ public abstract class ShaderProgram implements ProgramInterface {
     }
 
     public int getColorAttributeLocation() {
-        return aColorLocation;
+        return uColorLocation;
     }
 
     public int getaTextureCoordinatesAttributeLocation() {

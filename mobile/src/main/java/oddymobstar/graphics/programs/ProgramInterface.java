@@ -8,4 +8,6 @@ public interface ProgramInterface {
     public void setUniforms(float[] matrix);
 
     public void setUniforms(float[] matrix, int textureId);
+
+    public void setUniforms(float[] matrix, float r, float g, float b);
 }

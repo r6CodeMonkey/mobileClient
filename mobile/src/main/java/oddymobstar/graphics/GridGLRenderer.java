@@ -11,8 +11,8 @@ import oddymobstar.graphics.model.Mallet;
 import oddymobstar.graphics.model.Table;
 import oddymobstar.graphics.programs.ColorShaderProgram;
 import oddymobstar.graphics.programs.TextureShaderProgram;
-import oddymobstar.util.MatrixHelper;
-import oddymobstar.util.TextureHelper;
+import oddymobstar.util.graphics.opengles.MatrixHelper;
+import oddymobstar.util.graphics.opengles.TextureHelper;
 
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES20.glClear;
@@ -54,7 +54,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
 
         table = new Table();
-        mallet = new Mallet();
+        mallet = new Mallet(0.08f,0.15f,32);
 
         textureShaderProgram = new TextureShaderProgram(context);
         colorShaderProgram = new ColorShaderProgram(context);

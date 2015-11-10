@@ -1,4 +1,4 @@
-package oddymobstar.util;
+package oddymobstar.util.graphics.opengles;
 
 import android.util.Log;
 

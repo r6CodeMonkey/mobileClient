@@ -1,4 +1,4 @@
-package oddymobstar.util;
+package oddymobstar.util.graphics.opengles;
 
 /**
  * Created by timmytime on 12/10/15.
