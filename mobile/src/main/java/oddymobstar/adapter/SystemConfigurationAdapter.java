@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CursorAdapter;
-import android.widget.TextView;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.crazycourier.R;
@@ -37,7 +36,7 @@ public class SystemConfigurationAdapter extends CursorAdapter {
 
         CheckBox cb = (CheckBox) v.findViewById(R.id.core_item_name);
 
-        if(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)).equals(Configuration.CLEAR_BACKLOG)){
+        if (cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)).equals(Configuration.CLEAR_BACKLOG)) {
             cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -49,12 +48,12 @@ public class SystemConfigurationAdapter extends CursorAdapter {
                 }
             });
 
-        }else if(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)).equals(Configuration.RESET_SOCKET)){
+        } else if (cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_NAME)).equals(Configuration.RESET_SOCKET)) {
             cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if(isChecked){
-                       configurationHandler.handleResetConnection();
+                    if (isChecked) {
+                        configurationHandler.handleResetConnection();
                     }
 
                 }
@@ -74,7 +73,6 @@ public class SystemConfigurationAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
 
         CheckBox cb = (CheckBox) view.findViewById(R.id.core_item_name);
-
 
 
         cb.setText(cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.CONFIG_MARKUP)));

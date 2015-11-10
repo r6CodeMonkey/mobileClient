@@ -8,7 +8,7 @@ import org.json.JSONObject;
 /**
  * Created by timmytime on 13/07/15.
  */
-public class OutImageMessage extends OutCoreMessage  {
+public class OutImageMessage extends OutCoreMessage {
 
     public OutImageMessage(Location location, String uid, String ackId) throws JSONException {
         super(location, uid, ackId, IMAGE);

@@ -3,32 +3,25 @@ package oddymobstar.graphics;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import oddymobstar.crazycourier.R;
-import oddymobstar.util.RawResourceLoader;
-import oddymobstar.util.ShaderHelper;
+import oddymobstar.graphics.model.Mallet;
+import oddymobstar.graphics.model.Table;
+import oddymobstar.graphics.programs.ColorShaderProgram;
+import oddymobstar.graphics.programs.TextureShaderProgram;
+import oddymobstar.util.MatrixHelper;
+import oddymobstar.util.TextureHelper;
 
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
-import static android.opengl.GLES20.GL_FLOAT;
-import static android.opengl.GLES20.GL_FRAGMENT_SHADER;
-import static android.opengl.GLES20.GL_LINES;
-import static android.opengl.GLES20.GL_POINTS;
-import static android.opengl.GLES20.GL_TRIANGLE_FAN;
-import static android.opengl.GLES20.GL_VERTEX_SHADER;
 import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
-import static android.opengl.GLES20.glDrawArrays;
-import static android.opengl.GLES20.glEnableVertexAttribArray;
-import static android.opengl.GLES20.glGetAttribLocation;
-import static android.opengl.GLES20.glUseProgram;
-import static android.opengl.GLES20.glVertexAttribPointer;
 import static android.opengl.GLES20.glViewport;
+import static android.opengl.Matrix.multiplyMM;
+import static android.opengl.Matrix.rotateM;
+import static android.opengl.Matrix.setIdentityM;
+import static android.opengl.Matrix.translateM;
 
 
 /**
@@ -38,55 +31,20 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
     private Context context;
 
-    //shaders info
-    private String vertexShaderCode, fragmentShaderCode;
-    private static final String A_COLOR = "a_Color";
-    private static final String A_POSITION = "a_Position";
-    private int aPositionLocation, aColorLocation;
+    private final float[] projectionMatrix = new float[16];
+    private final float[] modelMatrix = new float[16];
 
-    private static final int POSITION_COMPONENT_COUNT = 2;  //3 if xyz of course..
-    private static final int COLOR_COMPONENT_COUNT = 3;  //4 if rgba
-    private static final int BYTES_PER_FLOAT = 4;
-    private static final int STRIDE = (POSITION_COMPONENT_COUNT + COLOR_COMPONENT_COUNT) * BYTES_PER_FLOAT;
-    private FloatBuffer vertexData;
-    private int programId;
+    private Table table;
+    private Mallet mallet;
+
+    private TextureShaderProgram textureShaderProgram;
+    private ColorShaderProgram colorShaderProgram;
+
+    private int texture;
+
 
     public GridGLRenderer(Context context) {
         this.context = context;
-
-        float[] tableVertices = {
-                //triangle fan now x,y,r,g,b,
-                0f, 0f, 1f, 1f, 1f,
-                -0.5f,0f,0.9f,0.9f,0.9f,
-                -0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
-                0f,-0.5f,0.9f,0.9f,0.9f,
-                0.5f, -0.5f, 0.7f, 0.7f, 0.7f,
-                0.5f,0f,0.9f,0.9f,0.9f,
-                0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
-                0f,0.5f,0.9f,0.9f,0.9f,
-                -0.5f, 0.5f, 0.7f, 0.7f, 0.7f,
-                -0.5f,0f,0.9f,0.9f,0.9f,
-
-                //line 1
-                -0.5f, 0f, 1f, 0f, 0f,
-                0.5f, 0f, 1f, 0f, 0f,
-                //mallets
-                0f, -0.25f, 0f, 0f, 1f,
-                0f, 0.25f, 1f, 0f, 0f
-        };
-
-        vertexData = ByteBuffer
-                .allocateDirect(tableVertices.length * BYTES_PER_FLOAT)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer();
-
-
-        vertexData.put(tableVertices);
-
-        //grab shaders
-        vertexShaderCode = RawResourceLoader.readRawResource(context, R.raw.vertext_shader);
-        fragmentShaderCode = RawResourceLoader.readRawResource(context, R.raw.fragment_shader);
-
     }
 
     @Override
@@ -94,44 +52,31 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-        int vertexShaderId = ShaderHelper.compileShader(GL_VERTEX_SHADER, vertexShaderCode);
-        int fragmentShaderId = ShaderHelper.compileShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-        boolean valid = false;
+        table = new Table();
+        mallet = new Mallet();
 
-        if (vertexShaderId != 0 && fragmentShaderId != 0) {
-            //if they are zero its broken.
-            programId = ShaderHelper.linkProgram(vertexShaderId, fragmentShaderId);
+        textureShaderProgram = new TextureShaderProgram(context);
+        colorShaderProgram = new ColorShaderProgram(context);
 
-            if (programId != 0) {
-                valid = ShaderHelper.validateProgram(programId);
-            }
-
-        }
-
-        if (valid) {
-            glUseProgram(programId);
-            aColorLocation = glGetAttribLocation(programId, A_COLOR);
-            aPositionLocation = glGetAttribLocation(programId, A_POSITION);
-
-            vertexData.position(0);
-            glVertexAttribPointer(aPositionLocation, POSITION_COMPONENT_COUNT, GL_FLOAT, false, STRIDE, vertexData);
-            glEnableVertexAttribArray(aPositionLocation);
-
-            vertexData.position(POSITION_COMPONENT_COUNT);
-            glVertexAttribPointer(aColorLocation, COLOR_COMPONENT_COUNT, GL_FLOAT, false, STRIDE, vertexData);
-            glEnableVertexAttribArray(aColorLocation);
-
-
-        }
-
+        texture = TextureHelper.loadTexture(context, R.drawable.airhockey);
 
     }
 
     @Override
     public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 
+
         glViewport(0, 0, width, height);
+
+        MatrixHelper.perspectiveM(projectionMatrix, 45, (float) width / (float) height, 1f, 10f);
+        setIdentityM(modelMatrix, 0);
+        translateM(modelMatrix, 0, 0f, 0f, -2.5f);
+        rotateM(modelMatrix, 0, -60f, 1f, 0f, 0f);
+
+        final float[] temp = new float[16];
+        multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0);
+        System.arraycopy(temp, 0, projectionMatrix, 0, temp.length);
     }
 
     @Override
@@ -139,13 +84,15 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 10); //0 is first element, 6 is last element of triangles.  ie 3 vertices per triangle.
+        textureShaderProgram.useProgram();
+        textureShaderProgram.setUniforms(projectionMatrix, texture);
+        table.bindData(textureShaderProgram);
+        table.draw();
 
-        glDrawArrays(GL_LINES, 10, 2);
-
-        glDrawArrays(GL_POINTS, 12, 1);
-
-        glDrawArrays(GL_POINTS, 13, 1);
+        colorShaderProgram.useProgram();
+        colorShaderProgram.setUniforms(projectionMatrix);
+        mallet.bindData(colorShaderProgram);
+        mallet.draw();
 
 
     }

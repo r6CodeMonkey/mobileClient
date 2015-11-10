@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -18,8 +17,6 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.NoSuchAlgorithmException;
-
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.connect.ConnectivityInterface;
 import oddymobstar.database.DBHelper;
@@ -29,13 +26,11 @@ import oddymobstar.message.out.OutAllianceMessage;
 import oddymobstar.message.out.OutCoreMessage;
 import oddymobstar.model.Alliance;
 import oddymobstar.service.handler.CheService;
-import oddymobstar.util.Configuration;
 
 /**
  * Created by root on 25/04/15.
  */
 public class NFC implements ConnectivityInterface, NfcAdapter.CreateNdefMessageCallback {
-
 
 
     public static final String BYTE_ARR_ALLIANCE_ID = "allianceID";
@@ -62,23 +57,22 @@ public class NFC implements ConnectivityInterface, NfcAdapter.CreateNdefMessageC
     }
 
     @Override
-    public void handle(int requestCode, int resultCode, Intent data){
+    public void handle(int requestCode, int resultCode, Intent data) {
 
 
     }
 
     //a fucking joke is NFC beam.  killing objects
-    public static void handleInvite(Intent data, Location location, CheService cheService, DBHelper dbHelper, String playerKey, String ackId){
+    public static void handleInvite(Intent data, Location location, CheService cheService, DBHelper dbHelper, String playerKey, String ackId) {
         //
         Parcelable[] rawMessage = data.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
         //its only 1 message, as a JSON
         NdefMessage msg = (NdefMessage) rawMessage[0];
 
         try {
-        JSONObject jsonObject = new JSONObject(new String(msg.getRecords()[0].getPayload()));
+            JSONObject jsonObject = new JSONObject(new String(msg.getRecords()[0].getPayload()));
 
-        InAllianceMessage inAllianceMessage = new InAllianceMessage(jsonObject.getJSONObject(InCoreMessage.CORE).getJSONObject(InCoreMessage.ALLIANCE));
-
+            InAllianceMessage inAllianceMessage = new InAllianceMessage(jsonObject.getJSONObject(InCoreMessage.CORE).getJSONObject(InCoreMessage.ALLIANCE));
 
 
             OutAllianceMessage allianceMessage = new OutAllianceMessage(location, playerKey, ackId);
@@ -88,7 +82,7 @@ public class NFC implements ConnectivityInterface, NfcAdapter.CreateNdefMessageC
 
             allianceMessage.setAlliance(alliance, OutCoreMessage.JOIN, OutCoreMessage.GLOBAL, "Joining");
 
-            Log.d("message is", "message"+allianceMessage.getMessage().toString());
+            Log.d("message is", "message" + allianceMessage.getMessage().toString());
 
             cheService.writeToSocket(allianceMessage);
 
@@ -98,7 +92,6 @@ public class NFC implements ConnectivityInterface, NfcAdapter.CreateNdefMessageC
         } catch (JSONException jse) {
 
         }
-
 
 
     }
@@ -125,21 +118,22 @@ public class NFC implements ConnectivityInterface, NfcAdapter.CreateNdefMessageC
     }
 
     @Override
-    public void setMessage(byte[] message) {this.message = message;}
+    public void setMessage(byte[] message) {
+        this.message = message;
+    }
 
 
     @Override
     public NdefMessage createNdefMessage(NfcEvent event) {
         NdefMessage msg = null;
 
-        Log.d("received something", "creating the message "+message.toString());
+        Log.d("received something", "creating the message " + message.toString());
 
         msg = new NdefMessage(NdefRecord.createMime("application/com.oddymobstar.android.beam", message));
 
 
         return msg;
     }
-
 
 
 }

@@ -18,7 +18,7 @@ import oddymobstar.crazycourier.R;
 public class ConfigurationFragment extends Fragment {
 
 
-     private Cursor userConfigs;
+    private Cursor userConfigs;
     private Cursor systemConfigs;
 
     private DemoActivity.ConfigurationHandler configurationHandler;
@@ -27,7 +27,7 @@ public class ConfigurationFragment extends Fragment {
 
     }
 
-    public void init(DemoActivity.ConfigurationHandler configurationHandler,  Cursor userConfigs, Cursor systemConfigs) {
+    public void init(DemoActivity.ConfigurationHandler configurationHandler, Cursor userConfigs, Cursor systemConfigs) {
         this.configurationHandler = configurationHandler;
         this.userConfigs = userConfigs;
         this.systemConfigs = systemConfigs;

@@ -4,7 +4,6 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.adapter.CoreAdapter;
@@ -42,7 +40,6 @@ public class GridFragment extends Fragment {
     private GridView gridView;
 
     private CreateView hiddenCreateView;
-
 
 
     private class LoadCursors extends AsyncTask<String, Void, String> {
@@ -105,12 +102,11 @@ public class GridFragment extends Fragment {
         }
 
 
-
         gridView = (GridView) view.findViewById(R.id.grid_view);
         gridView.setOnItemClickListener(onClickListener);
 
-      //  gridView.setFastScrollEnabled(true);
-      //  gridView.setFastScrollAlwaysVisible(true);
+        //  gridView.setFastScrollEnabled(true);
+        //  gridView.setFastScrollAlwaysVisible(true);
 
         gridView.setAdapter(adapter);
 
@@ -120,7 +116,6 @@ public class GridFragment extends Fragment {
 
         Button button = (Button) hiddenCreateView.findViewById(R.id.list_create);
         button.setTypeface(DemoActivity.getFont());
-
 
 
         new LoadCursors().execute("");
@@ -157,10 +152,9 @@ public class GridFragment extends Fragment {
         }
     }
 
-    public ListAdapter getListAdapter(){
+    public ListAdapter getListAdapter() {
         return gridView.getAdapter();
     }
-
 
 
     public void clearAdapter() {
@@ -178,6 +172,8 @@ public class GridFragment extends Fragment {
         }
     }
 
-    public CreateView getHiddenCreateView(){return hiddenCreateView;}
+    public CreateView getHiddenCreateView() {
+        return hiddenCreateView;
+    }
 
 }

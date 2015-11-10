@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import oddymobstar.activity.DemoActivity;
-import oddymobstar.adapter.SystemConfigurationAdapter;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.in.Acknowledge;
 import oddymobstar.message.in.InCoreMessage;
@@ -354,12 +353,12 @@ public class CheService extends IntentService {
     }
 
 
-    public void clearBacklog(){
+    public void clearBacklog() {
         this.messageBuffer.clear();
     }
 
 
-    public void resetConnection(){
+    public void resetConnection() {
         connect = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -371,11 +370,11 @@ public class CheService extends IntentService {
     }
 
 
-    public void resetLocationUpdates(){
+    public void resetLocationUpdates() {
 
         configuration = new Configuration(dbHelper.getConfigs());
 
-        if(locationUpdates.isAlive()){
+        if (locationUpdates.isAlive()) {
             locationUpdates.interrupt();
             locationUpdates = null;
         }
@@ -383,7 +382,7 @@ public class CheService extends IntentService {
         initLocationUpdates();
     }
 
-    private void initLocationUpdates(){
+    private void initLocationUpdates() {
         locationUpdates = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -399,7 +398,6 @@ public class CheService extends IntentService {
 
         locationUpdates.start();
     }
-
 
 
     private void reConnect() {
@@ -467,8 +465,6 @@ public class CheService extends IntentService {
 
 
     }
-
-
 
 
     public void writeToSocket(final OutCoreMessage coreMessage) {

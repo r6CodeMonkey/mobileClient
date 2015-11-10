@@ -29,7 +29,7 @@ public class GridDialog extends DialogFragment {
         locateListener = listener;
         dismissListener = dismiss;
 
-        if(!selectedGrid.trim().isEmpty()){
+        if (!selectedGrid.trim().isEmpty()) {
             lastSelectedGrid = selectedGrid;
         }
 

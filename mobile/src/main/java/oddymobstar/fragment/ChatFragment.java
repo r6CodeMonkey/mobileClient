@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.adapter.ChatAdapter;
@@ -87,8 +86,9 @@ public class ChatFragment extends Fragment {
         return title;
     }
 
-    public ChatPost getHiddenChatPost(){return hiddenChatPost;}
-
+    public ChatPost getHiddenChatPost() {
+        return hiddenChatPost;
+    }
 
 
 }

@@ -1,10 +1,6 @@
 package oddymobstar.model;
 
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-
-import java.sql.Blob;
 
 import oddymobstar.database.DBHelper;
 

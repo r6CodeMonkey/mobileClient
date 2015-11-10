@@ -66,7 +66,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String USER_IMAGE = "user_image";
 
 
-
     public static final String GRID_KEY = "grid_key";
     public static final String ALLIANCE_KEY = "alliance_key";
     public static final String PACKAGE_KEY = "package_key";
@@ -95,7 +94,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String CREATE_ALLIANCE_MEMBERS = "CREATE TABLE " + ALLIANCE_MEMBERS_TABLE + " (" + ALLIANCE_KEY + " VARCHAR2(200)," + PLAYER_KEY + " VARCHAR2(200)," + PLAYER_NAME + " VARCHAR2(30)," + LATITUDE + " NUMBER, " + LONGITUDE + " NUMBER, " + UTM + " VARCHAR2(10)," + SUBUTM + " VARCHAR2(10)," + SPEED + " NUMBER," + ALTITUDE + " NUMBER)";
     private static final String CREATE_PACKAGES = "CREATE TABLE " + PACKAGES_TABLE + " (" + PACKAGE_KEY + " VARCHAR2(200) UNIQUE NOT NULL," + PACKAGE_NAME + " VARCHAR2(30))";  //need to flesh this out later
     private static final String CREATE_MESSAGES = "CREATE TABLE " + MESSAGE_TABLE + "(" + MESSAGE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," + MESSAGE_CONTENT + " VARCHAR2(300), " + MESSAGE_KEY + " VARCHAR2(200)," + MESSAGE_TYPE + " CHAR(1), " + MESSAGE_TIME + " INTEGER," + MY_MESSAGE + " CHAR(1)," + MESSAGE_AUTHOR + " VARCHAR2(200) )";
-    private static final String CREATE_USER_IMAGES = "CREATE TABLE "+IMAGE_TABLE+"("+USER_IMAGE_KEY+" VARCHAR2(200),"+USER_IMAGE+" BLOB)";
+    private static final String CREATE_USER_IMAGES = "CREATE TABLE " + IMAGE_TABLE + "(" + USER_IMAGE_KEY + " VARCHAR2(200)," + USER_IMAGE + " BLOB)";
 
 
     private DemoActivity.MessageHandler messageHandler;
@@ -186,7 +185,7 @@ public class DBHelper extends SQLiteOpenHelper {
      */
 
 
-    public byte[] addUserImage(UserImage userImage){
+    public byte[] addUserImage(UserImage userImage) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -377,7 +376,7 @@ public class DBHelper extends SQLiteOpenHelper {
     update methods...no point updating a grid.  most will simply updte user dfined names etc.
      */
 
-    public byte[] updateUserImage(UserImage userImage){
+    public byte[] updateUserImage(UserImage userImage) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -488,13 +487,13 @@ public class DBHelper extends SQLiteOpenHelper {
         return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + "," + CONFIG_MARKUP + "," + CONFIG_VISIBLE + "," + CONFIG_TYPE + " FROM " + CONFIG_TABLE + " ORDER BY " + CONFIG_NAME + " ASC", null);
     }
 
-    public Cursor getUserImages(){
-        return this.getReadableDatabase().rawQuery("SELECT " + USER_IMAGE_KEY + " as _id," + USER_IMAGE_KEY + "," + USER_IMAGE +" FROM "+USER_IMAGE + " ORDER BY " + USER_IMAGE_KEY + " ASC", null);
+    public Cursor getUserImages() {
+        return this.getReadableDatabase().rawQuery("SELECT " + USER_IMAGE_KEY + " as _id," + USER_IMAGE_KEY + "," + USER_IMAGE + " FROM " + USER_IMAGE + " ORDER BY " + USER_IMAGE_KEY + " ASC", null);
 
     }
 
     public Cursor getConfigs(int type) {
-        return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + "," + CONFIG_MARKUP + "," + CONFIG_VISIBLE + "," + CONFIG_TYPE + " FROM " + CONFIG_TABLE + " WHERE " + CONFIG_TYPE + " =? AND "+CONFIG_VISIBLE+" = 'Y' ORDER BY " + CONFIG_NAME + " ASC", new String[]{String.valueOf(type)});
+        return this.getReadableDatabase().rawQuery("SELECT " + CONFIG_ID + " as _id," + CONFIG_ID + "," + CONFIG_NAME + "," + CONFIG_VALUE + "," + CONFIG_MARKUP + "," + CONFIG_VISIBLE + "," + CONFIG_TYPE + " FROM " + CONFIG_TABLE + " WHERE " + CONFIG_TYPE + " =? AND " + CONFIG_VISIBLE + " = 'Y' ORDER BY " + CONFIG_NAME + " ASC", new String[]{String.valueOf(type)});
     }
 
     public Cursor getGrids() {
@@ -553,13 +552,13 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-    public UserImage getUserImage(String key){
+    public UserImage getUserImage(String key) {
 
         Cursor userImage = this.getReadableDatabase().rawQuery("SELECT " + USER_IMAGE_KEY + " as _id," + USER_IMAGE_KEY + "," + USER_IMAGE + " FROM " + IMAGE_TABLE + " WHERE " + USER_IMAGE_KEY + " = ?" + " ORDER BY " + USER_IMAGE_KEY + " ASC", new String[]{key});
 
         UserImage returnUserImage = null;
 
-        while (userImage.moveToNext()){
+        while (userImage.moveToNext()) {
             returnUserImage = new UserImage(userImage);
         }
         userImage.close();

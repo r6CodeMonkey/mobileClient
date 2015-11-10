@@ -2,7 +2,6 @@ package crazycourier.oddymobstar.crazycourier.fragment;
 
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
-import android.view.MenuItem;
 
 import oddymobstar.activity.DemoActivity;
 
@@ -14,11 +13,11 @@ public class FragmentTest extends ActivityInstrumentationTestCase2<DemoActivity>
     private DemoActivity activity;
 
 
-    public FragmentTest(){
+    public FragmentTest() {
         super(DemoActivity.class);
     }
 
-    public void setUp() throws Exception{
+    public void setUp() throws Exception {
         super.setUp();
 
         activity = getActivity();
@@ -26,7 +25,7 @@ public class FragmentTest extends ActivityInstrumentationTestCase2<DemoActivity>
     }
 
     @UiThreadTest
-    public void testMenu(){
+    public void testMenu() {
 
         /*
         i really CBA to have to test all this shit out.

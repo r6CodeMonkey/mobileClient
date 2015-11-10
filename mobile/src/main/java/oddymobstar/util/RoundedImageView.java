@@ -1,7 +1,6 @@
 package oddymobstar.util;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,7 +11,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.ImageView;
 
 /**
@@ -20,7 +18,7 @@ import android.widget.ImageView;
  */
 public class RoundedImageView extends ImageView {
 
-    public RoundedImageView(Context context){
+    public RoundedImageView(Context context) {
         super(context);
     }
 
@@ -44,20 +42,20 @@ public class RoundedImageView extends ImageView {
         if (getWidth() == 0 || getHeight() == 0) {
             return;
         }
-        Bitmap b =  ((BitmapDrawable)drawable).getBitmap() ;
+        Bitmap b = ((BitmapDrawable) drawable).getBitmap();
         Bitmap bitmap = b.copy(Bitmap.Config.ARGB_8888, true);
 
         int w = getWidth(), h = getHeight();
 
 
-        Bitmap roundBitmap =  getCroppedBitmap(bitmap, w);
+        Bitmap roundBitmap = getCroppedBitmap(bitmap, w);
         canvas.drawBitmap(roundBitmap, 0, 0, null);
 
     }
 
     public static Bitmap getCroppedBitmap(Bitmap bmp, int radius) {
         Bitmap sbmp;
-        if(bmp.getWidth() != radius || bmp.getHeight() != radius)
+        if (bmp.getWidth() != radius || bmp.getHeight() != radius)
             sbmp = Bitmap.createScaledBitmap(bmp, radius, radius, false);
         else
             sbmp = bmp;
@@ -73,20 +71,16 @@ public class RoundedImageView extends ImageView {
         paint.setFilterBitmap(true);
         paint.setDither(true);
         canvas.drawARGB(0, 0, 0, 0);
-      //  paint.setColor(Color.parseColor("#BAB399"));
-          paint.setColor(Color.BLACK);
-        canvas.drawCircle(sbmp.getWidth() / 2+0.7f, sbmp.getHeight() / 2+0.7f,
-                sbmp.getWidth() / 2+0.1f, paint);
+        //  paint.setColor(Color.parseColor("#BAB399"));
+        paint.setColor(Color.BLACK);
+        canvas.drawCircle(sbmp.getWidth() / 2 + 0.7f, sbmp.getHeight() / 2 + 0.7f,
+                sbmp.getWidth() / 2 + 0.1f, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(sbmp, rect, rect, paint);
 
 
         return output;
     }
-
-
-
-
 
 
 }

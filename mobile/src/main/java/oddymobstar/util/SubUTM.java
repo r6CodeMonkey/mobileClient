@@ -18,7 +18,7 @@ public class SubUTM {
     private static List<String> subUtmList = new ArrayList<>();
 
 
-    public static void createSubUtms(){
+    public static void createSubUtms() {
         for (int indexCounter = 1; indexCounter <= 8; indexCounter++) {
             for (String val : UTMGridCreator.latValues) {
                 for (int i = 0; i < 60; i++) {
@@ -29,7 +29,9 @@ public class SubUTM {
 
     }
 
-    public static List<String> getSubUtmList(){return subUtmList;}
+    public static List<String> getSubUtmList() {
+        return subUtmList;
+    }
 
     public SubUTM(String subUtm) {
 

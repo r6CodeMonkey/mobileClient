@@ -178,7 +178,7 @@ public class Bluetooth implements ConnectivityInterface {
                 Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 
                 for (BluetoothDevice device : pairedDevices) {
-                    if(!devices.contains(device)) {
+                    if (!devices.contains(device)) {
                         devices.add(device);
                     }
                 }

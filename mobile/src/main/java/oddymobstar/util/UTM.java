@@ -16,15 +16,15 @@ public class UTM {
      need some user friendly mappings for UTM by region groups.
      */
     private static final List<String> southAmericaUTMs = new ArrayList<>();
-    private static final  List<String> centralAmericaUTMs = new ArrayList<>();
-    private static final  List<String> northAmericaUTMs = new ArrayList<>();
-    private static final  List<String> oceaniaUTMs = new ArrayList<>();
-    private static final  List<String> europeanUTMs = new ArrayList<>();
-    private static final  List<String> africanUTMs = new ArrayList<>();
-    private static final  List<String> centralAsianUTMs = new ArrayList<>();
-    private static final  List<String> asianUTMs = new ArrayList<>();
-    private static final  List<String> southAsianUTMs = new ArrayList<>();
-    private static final  List<String> middleEastUTMs = new ArrayList<>();
+    private static final List<String> centralAmericaUTMs = new ArrayList<>();
+    private static final List<String> northAmericaUTMs = new ArrayList<>();
+    private static final List<String> oceaniaUTMs = new ArrayList<>();
+    private static final List<String> europeanUTMs = new ArrayList<>();
+    private static final List<String> africanUTMs = new ArrayList<>();
+    private static final List<String> centralAsianUTMs = new ArrayList<>();
+    private static final List<String> asianUTMs = new ArrayList<>();
+    private static final List<String> southAsianUTMs = new ArrayList<>();
+    private static final List<String> middleEastUTMs = new ArrayList<>();
 
     private static final Map<String, List> utmRegions = new HashMap<>();
     private static List<String> utmList = new ArrayList<>();
@@ -32,24 +32,23 @@ public class UTM {
     private static Map<String, String> regionCentre = new HashMap<>();
 
 
-
     private int utmLong;
     private String utmLat = "";
 
-    private static void populateRegion(List<String> values,String startLetter, String endLetter, int start, int end){
+    private static void populateRegion(List<String> values, String startLetter, String endLetter, int start, int end) {
 
 
-        List<String> prefix = UTMGridCreator.latValues.subList(UTMGridCreator.latValues.indexOf(startLetter), UTMGridCreator.latValues.indexOf(endLetter)+1);
-        for(String val : prefix){
-            for(int i=start;i<=end;i++){
-                values.add(val+i);
+        List<String> prefix = UTMGridCreator.latValues.subList(UTMGridCreator.latValues.indexOf(startLetter), UTMGridCreator.latValues.indexOf(endLetter) + 1);
+        for (String val : prefix) {
+            for (int i = start; i <= end; i++) {
+                values.add(val + i);
             }
         }
 
 
     }
 
-    public static void createUTMRegions(){
+    public static void createUTMRegions() {
 
 
         /*
@@ -61,36 +60,35 @@ public class UTM {
 
         /*
         south america is F - N, 18 - 24 */
-        populateRegion(southAmericaUTMs,"F", "N", 18, 24);
+        populateRegion(southAmericaUTMs, "F", "N", 18, 24);
         regionCentre.put("South America", "K21");
         /*central america is P - R, 11 - 21  */
-        populateRegion(centralAmericaUTMs,"P", "R", 11, 21);
+        populateRegion(centralAmericaUTMs, "P", "R", 11, 21);
         regionCentre.put("Central America", "Q16");
          /*north america is S - V, 9 - 21 */
-        populateRegion(northAmericaUTMs,"S", "V", 9, 21);
+        populateRegion(northAmericaUTMs, "S", "V", 9, 21);
         regionCentre.put("North America", "T14");
         /*europe is S- V, 29 - 38 */
-        populateRegion(europeanUTMs,"S", "V", 29, 38);
+        populateRegion(europeanUTMs, "S", "V", 29, 38);
         regionCentre.put("Europe", "U32");
         /*africa is (should break it up) J- R, 28 - 38 */
-        populateRegion(africanUTMs,"J", "R", 28, 38);
+        populateRegion(africanUTMs, "J", "R", 28, 38);
         regionCentre.put("Africa", "N34");
         /*middle east is Q- S, 36 - 40 */
-        populateRegion(middleEastUTMs,"Q", "S", 36, 40);
+        populateRegion(middleEastUTMs, "Q", "S", 36, 40);
         regionCentre.put("Middle East", "R38");
         /*central asia is P - U, 41 - 46 */
-        populateRegion(centralAsianUTMs,"P", "U", 41, 46);
+        populateRegion(centralAsianUTMs, "P", "U", 41, 46);
         regionCentre.put("Central Asia", "R42");
         /*south asia is M - P, 47 55 */
-        populateRegion(southAsianUTMs,"M", "P", 47, 55);
+        populateRegion(southAsianUTMs, "M", "P", 47, 55);
         regionCentre.put("South Asia", "N48");
         /*asia is Q - U, 47 - 54 */
-        populateRegion(asianUTMs,"Q", "U", 47, 54);
+        populateRegion(asianUTMs, "Q", "U", 47, 54);
         regionCentre.put("Asia", "S50");
         /*oceania is G - L, 50 - 60 */
-        populateRegion(oceaniaUTMs,"G", "L", 50, 60);
+        populateRegion(oceaniaUTMs, "G", "L", 50, 60);
         regionCentre.put("Oceania", "J54");
-
 
 
         utmRegions.put("South America", southAmericaUTMs);
@@ -106,7 +104,7 @@ public class UTM {
 
         //what would work with this amount...is that we render them all for a region..
         //then we filter by region in utm mode.
-        for(String name : utmRegions.keySet()){
+        for (String name : utmRegions.keySet()) {
             utmList.add(name);
         }
 
@@ -114,19 +112,19 @@ public class UTM {
         for (String val : UTMGridCreator.latValues) {
             for (int i = 1; i <= 60; i++) {
 
-                 if(!isInRegions(val+i)){
-                     utmList.add(val + i);
-                 }
+                if (!isInRegions(val + i)) {
+                    utmList.add(val + i);
+                }
             }
         }
 
     }
 
 
-    private static boolean isInRegions(String utm){
+    private static boolean isInRegions(String utm) {
 
-        for(List regions : utmRegions.values()){
-            if(regions.contains(utm)){
+        for (List regions : utmRegions.values()) {
+            if (regions.contains(utm)) {
                 return true;
             }
         }
@@ -164,14 +162,18 @@ public class UTM {
     }
 
 
-    public static List<String> getUtmRegion(String region){return utmRegions.get(region);}
+    public static List<String> getUtmRegion(String region) {
+        return utmRegions.get(region);
+    }
 
-    public static boolean isUTMRegion(String key){return utmRegions.containsKey(key);}
+    public static boolean isUTMRegion(String key) {
+        return utmRegions.containsKey(key);
+    }
 
-    public static String getUTMRegion(String utm){
-        for(String key : utmRegions.keySet()){
+    public static String getUTMRegion(String utm) {
+        for (String key : utmRegions.keySet()) {
 
-            if(utmRegions.get(key).contains(utm)){
+            if (utmRegions.get(key).contains(utm)) {
                 return key;
             }
         }
@@ -179,9 +181,13 @@ public class UTM {
         return "";
     }
 
-    public static List<String> getUtmList(){return utmList;}
+    public static List<String> getUtmList() {
+        return utmList;
+    }
 
-    public static String getRegionCentre(String region){return regionCentre.get(region);}
+    public static String getRegionCentre(String region) {
+        return regionCentre.get(region);
+    }
 
 
     public static void main(String[] args) {

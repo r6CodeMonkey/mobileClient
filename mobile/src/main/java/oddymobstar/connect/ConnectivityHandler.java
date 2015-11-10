@@ -4,9 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.nfc.NfcManager;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
-import oddymobstar.activity.DemoActivity;
 import oddymobstar.connect.bluetooth.handler.Bluetooth;
 import oddymobstar.connect.nfc.NFC;
 import oddymobstar.util.widget.ConnectivityDialog;

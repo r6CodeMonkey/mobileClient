@@ -8,10 +8,11 @@ import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
 
 import oddymobstar.database.DBHelper;
-import oddymobstar.message.in.InAllianceMessage;
-import oddymobstar.model.*;
+import oddymobstar.model.Alliance;
+import oddymobstar.model.Config;
+import oddymobstar.model.Grid;
+import oddymobstar.model.Message;
 import oddymobstar.model.Package;
-import oddymobstar.util.Configuration;
 
 /**
  * Created by timmytime on 05/05/15.
@@ -21,15 +22,17 @@ public class DBHelperTest extends AndroidTestCase {
     private DBHelper dbHelper;
 
 
-    public void setUp() throws Exception{
+    public void setUp() throws Exception {
         super.setUp();
 
         final SQLiteDatabase db = SQLiteDatabase.create(null);
 
-        Context context = new MockContext(){
+        Context context = new MockContext() {
             public SQLiteDatabase openOrCreateDatabase(String file, int mode, SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler) {
                 return db;
-            };
+            }
+
+            ;
         };
 
 
@@ -39,13 +42,13 @@ public class DBHelperTest extends AndroidTestCase {
 
     }
 
-    public void tearDown(){
+    public void tearDown() {
         dbHelper.close();
     }
 
 
     //now we have a database we need to test all the calls etc...
-    public void testDatabase(){
+    public void testDatabase() {
 
         //test the adds
         dbHelper.addBaseConfiguration();
@@ -96,19 +99,16 @@ public class DBHelperTest extends AndroidTestCase {
 
         //these test models..to
         //now test individual cursors... note must are still stubs...
-      //  assertTrue("grid utm", dbHelper.getGrid("key").getUtm().equals("utm"));
-      //  assertTrue("grid sub", dbHelper.getGrid("key").getSubUtm().equals("subutm"));
-      //  assertTrue("package", dbHelper.getPackage("key").getName().equals("pack"));
+        //  assertTrue("grid utm", dbHelper.getGrid("key").getUtm().equals("utm"));
+        //  assertTrue("grid sub", dbHelper.getGrid("key").getSubUtm().equals("subutm"));
+        //  assertTrue("package", dbHelper.getPackage("key").getName().equals("pack"));
         assertTrue("alliance", dbHelper.getAlliance("key").getName().equals("alliance"));
-     //   assertTrue("config", dbHelper.getConfig("test").getName().equals("test"));
+        //   assertTrue("config", dbHelper.getConfig("test").getName().equals("test"));
 
         //test the update
         dbHelper.updateAlliance(alliance);
         dbHelper.updateConfig(config);
         dbHelper.updatePackage(pack);
-
-
-
 
 
         //test the delete
@@ -118,10 +118,6 @@ public class DBHelperTest extends AndroidTestCase {
         dbHelper.deletePackage(pack);
 
     }
-
-
-
-
 
 
 }

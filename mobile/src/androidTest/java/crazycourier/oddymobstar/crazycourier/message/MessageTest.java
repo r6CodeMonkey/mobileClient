@@ -4,8 +4,6 @@ package crazycourier.oddymobstar.crazycourier.message;
 import android.location.Location;
 import android.test.AndroidTestCase;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -18,7 +16,6 @@ import oddymobstar.message.out.OutAllianceMessage;
 import oddymobstar.message.out.OutCoreMessage;
 import oddymobstar.model.Alliance;
 
-import static org.junit.Assert.*;
 /**
  * Created by timmytime on 05/05/15.
  */
@@ -28,7 +25,7 @@ public class MessageTest extends AndroidTestCase {
     //fuck it i guess we could mess up an assignment in the class at some point
 
     @Test
-    public void testInAcknowledge(){
+    public void testInAcknowledge() {
 
         JSONObject msg = new JSONObject();
         try {
@@ -51,19 +48,18 @@ public class MessageTest extends AndroidTestCase {
             assertEquals("subutm", acknowledge.getSubUtm());
 
 
-
-        }catch (JSONException jse){
+        } catch (JSONException jse) {
             throw new AssertionError(jse.getMessage());
         }
 
     }
 
     @Test
-    public void testGridMessage(){
+    public void testGridMessage() {
 
         JSONObject msg = new JSONObject();
 
-        try{
+        try {
 
 
             msg.put(InCoreMessage.UTM, "utm");
@@ -78,19 +74,18 @@ public class MessageTest extends AndroidTestCase {
             assertEquals("msg", gridMessage.getMessage());
 
 
-
-        }catch(JSONException jse){
-            throw  new AssertionError(jse.getMessage());
+        } catch (JSONException jse) {
+            throw new AssertionError(jse.getMessage());
         }
 
     }
 
     @Test
-    public void testInAllianceMessage(){
+    public void testInAllianceMessage() {
 
         JSONObject msg = new JSONObject();
 
-        try{
+        try {
 
 
             msg.put(InCoreMessage.AID, "aid");
@@ -112,34 +107,34 @@ public class MessageTest extends AndroidTestCase {
             assertEquals("utm", allianceMessage.getUtm());
             assertEquals("subutm", allianceMessage.getSubUtm());
             assertEquals(0.0, allianceMessage.getLatitude(), 1.0);
-            assertEquals(0.0, allianceMessage.getLongitude(),1.0);
+            assertEquals(0.0, allianceMessage.getLongitude(), 1.0);
             assertEquals("name", allianceMessage.getName());
 
 
-        }catch(JSONException jse){
-            throw  new AssertionError(jse.getMessage());
+        } catch (JSONException jse) {
+            throw new AssertionError(jse.getMessage());
         }
 
 
     }
 
     @Test
-    public void testInCoreMessage(){
+    public void testInCoreMessage() {
 //not required it just takes the wrapper out
     }
 
     @Test
-    public void tesstInPackageMessage(){
+    public void tesstInPackageMessage() {
         //currently blank
 
     }
 
     @Test
-    public void testOutAcknowledge(){
+    public void testOutAcknowledge() {
 
         JSONObject msg = new JSONObject();
 
-        try{
+        try {
 
             msg.put(OutCoreMessage.ACK_ID, "ackid");
             msg.put(OutCoreMessage.NAME, "name");
@@ -150,8 +145,7 @@ public class MessageTest extends AndroidTestCase {
             assertEquals("name", acknowledge.getName());
 
 
-
-        }catch (JSONException jse){
+        } catch (JSONException jse) {
             throw new AssertionError(jse.getMessage());
         }
 
@@ -159,16 +153,15 @@ public class MessageTest extends AndroidTestCase {
     }
 
     @Test
-    public void testOutAllianceMessage(){
+    public void testOutAllianceMessage() {
 
-        try{
+        try {
 
             Location location = new Location("");
             location.setLatitude(0.0);
             location.setLongitude(0.0);
             location.setAltitude(0.0);
             location.setSpeed(0.0f);
-
 
 
             OutAllianceMessage allianceMessage = new OutAllianceMessage(location, "uid", "ackid");
@@ -191,21 +184,20 @@ public class MessageTest extends AndroidTestCase {
             assertEquals(0.0, core.getDouble(OutCoreMessage.LONG), 1.0);
 
 
-
-        }catch (JSONException jse){
+        } catch (JSONException jse) {
             throw new AssertionError(jse.toString());
         }
 
     }
 
     @Test
-    public void testOutCoreMessage(){
-      //not required see above...
+    public void testOutCoreMessage() {
+        //not required see above...
     }
 
     @Test
-    public void testOutPackageMessage(){
-    //not set up yet..
+    public void testOutPackageMessage() {
+        //not set up yet..
     }
 
 }

@@ -19,20 +19,19 @@ public class GridGLSurfaceView extends GLSurfaceView {
 
     public GridGLSurfaceView(Context context) {
         super(context, null);
-   //     init(context);
+        //     init(context);
     }
 
     public GridGLSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
-     //   init(context);
+        //   init(context);
 
 
     }
 
 
     @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
+    public boolean onTouchEvent(MotionEvent event) {
       /*  if (event != null)
         {
             float x = event.getX();
@@ -57,12 +56,12 @@ public class GridGLSurfaceView extends GLSurfaceView {
         }
         else
         {*/
-            return super.onTouchEvent(event);
+        return super.onTouchEvent(event);
         //}
     }
 
 
-    public void init(Context context, float density){
+    public void init(Context context, float density) {
         setEGLContextClientVersion(2);
 
         renderer = new GridGLRenderer(context);
@@ -72,7 +71,6 @@ public class GridGLSurfaceView extends GLSurfaceView {
 
 //        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
-
 
 
 }
