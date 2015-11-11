@@ -49,7 +49,7 @@ public class TextureShaderProgram extends ShaderProgram {
     }
 
     @Override
-    public void setUniforms(float[] matrix, float r, float g, float b){
+    public void setUniforms(float[] matrix, float r, float g, float b) {
         //not used
     }
 

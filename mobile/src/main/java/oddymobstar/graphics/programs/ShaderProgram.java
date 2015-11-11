@@ -1,10 +1,10 @@
 package oddymobstar.graphics.programs;
 
 import android.content.Context;
+import android.util.Log;
 
 import oddymobstar.util.graphics.opengles.RawResourceLoader;
 import oddymobstar.util.graphics.opengles.ShaderHelper;
-
 import static android.opengl.GLES20.glUseProgram;
 
 /**
@@ -30,7 +30,7 @@ public abstract class ShaderProgram implements ProgramInterface {
 
         program = ShaderHelper.buildProgram(RawResourceLoader.readRawResource(context, vertexShaderResourceId),
                 RawResourceLoader.readRawResource(context, fragmentShaderResourceId));
-    }
+     }
 
     public void useProgram() {
         glUseProgram(program);
@@ -38,10 +38,6 @@ public abstract class ShaderProgram implements ProgramInterface {
 
     public int getPositionAttributeLocation() {
         return aPositionLocation;
-    }
-
-    public int getColorAttributeLocation() {
-        return uColorLocation;
     }
 
     public int getaTextureCoordinatesAttributeLocation() {

@@ -20,7 +20,7 @@ public class ColorShaderProgram extends ShaderProgram {
 
         uMatrixLocation = glGetUniformLocation(program, U_MATRIX);
         aPositionLocation = glGetAttribLocation(program, A_POSITION);
-        uColorLocation = glGetAttribLocation(program, U_COLOR);
+        uColorLocation = glGetUniformLocation(program, U_COLOR);
 
     }
 
@@ -28,7 +28,7 @@ public class ColorShaderProgram extends ShaderProgram {
     public void setUniforms(float[] matrix, float r, float g, float b) {
 
         glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
-        glUniform4f(uColorLocation, r,g, b, 1f);
+        glUniform4f(uColorLocation, r, g, b, 1f);
 
     }
 
@@ -37,7 +37,7 @@ public class ColorShaderProgram extends ShaderProgram {
         //not used
     }
 
-    public void setUniforms(float[] matrix){
+    public void setUniforms(float[] matrix) {
         //not used
     }
 

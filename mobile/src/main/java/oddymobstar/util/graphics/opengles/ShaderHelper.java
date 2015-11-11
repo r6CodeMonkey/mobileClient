@@ -91,16 +91,10 @@ public class ShaderHelper {
         int vertexShaderId = ShaderHelper.compileShader(GL_VERTEX_SHADER, vertexShaderSource);
         int fragmentShaderId = ShaderHelper.compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
-        if (vertexShaderId != 0 && fragmentShaderId != 0) {
-            //if they are zero its broken.
-            program = ShaderHelper.linkProgram(vertexShaderId, fragmentShaderId);
+        program = ShaderHelper.linkProgram(vertexShaderId, fragmentShaderId);
 
-            if (program != 0) {
-                ShaderHelper.validateProgram(program);
-            }
+        ShaderHelper.validateProgram(program);
 
-
-        }
 
         return program;
 
