@@ -111,7 +111,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
 
         //set mallet 2
-      /*  setIdentityM(modelMatrix, 0);
+        setIdentityM(modelMatrix, 0);
         translateM(modelMatrix, 0, 0f, mallet.height / 2f, 0.4f);
         multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0);
 
@@ -120,8 +120,6 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
 
         //set puck
-
-
         setIdentityM(modelMatrix, 0);
         translateM(modelMatrix, 0, 0f, puck.height / 2f, 0f);
         multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0);
@@ -130,6 +128,6 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         puck.bindData(colorShaderProgram);
         puck.draw();
 
-*/
+
     }
 }
