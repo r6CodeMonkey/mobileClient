@@ -4,6 +4,7 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 
 /**
  * Created by timmytime on 08/08/15.
@@ -19,45 +20,10 @@ public class GridGLSurfaceView extends GLSurfaceView {
 
     public GridGLSurfaceView(Context context) {
         super(context, null);
-        //     init(context);
     }
 
     public GridGLSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        //   init(context);
-
-
-    }
-
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-      /*  if (event != null)
-        {
-            float x = event.getX();
-            float y = event.getY();
-
-            if (event.getAction() == MotionEvent.ACTION_MOVE)
-            {
-                if (renderer != null)
-                {
-                    float deltaX = (x - mPreviousX) / mDensity / 2f;
-                    float deltaY = (y - mPreviousY) / mDensity / 2f;
-
-                    renderer.mDeltaX += deltaX;
-                    renderer.mDeltaY += deltaY;
-                }
-            }
-
-            mPreviousX = x;
-            mPreviousY = y;
-
-            return true;
-        }
-        else
-        {*/
-        return super.onTouchEvent(event);
-        //}
     }
 
 
@@ -67,9 +33,48 @@ public class GridGLSurfaceView extends GLSurfaceView {
         renderer = new GridGLRenderer(context);
         mDensity = density;
 
+        setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event != null) {
+
+                    final float normalizedX = (event.getX() / (float) v.getWidth()) * 2 - 1;
+                    //android doesnt like c style - as it turns out when not wrapped around all calcs.
+                    final float normalizedY = ((event.getY() / (float) v.getHeight()) * 2 - 1)*-1;
+
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        queueEvent(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                renderer.handleTouchPress(normalizedX, normalizedY);
+
+                            }
+                        });
+
+                        //handle touch
+
+                    } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        //handle drag
+                        queueEvent(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                renderer.handleTouchDrag(normalizedX,normalizedY);
+                            }
+                        });
+                    }
+
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+        });
+
         setRenderer(renderer);
 
-//        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
 
