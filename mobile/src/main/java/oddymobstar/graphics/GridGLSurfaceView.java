@@ -34,6 +34,8 @@ public class GridGLSurfaceView extends GLSurfaceView {
         mDensity = density;
 
         setOnTouchListener(new View.OnTouchListener() {
+
+            float previousX, previousY;
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event != null) {
@@ -43,6 +45,10 @@ public class GridGLSurfaceView extends GLSurfaceView {
                     final float normalizedY = ((event.getY() / (float) v.getHeight()) * 2 - 1)*-1;
 
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
+
+                        previousX = event.getX();
+                        previousY = event.getY();
+
                         queueEvent(new Runnable() {
                             @Override
                             public void run() {
@@ -55,12 +61,17 @@ public class GridGLSurfaceView extends GLSurfaceView {
                         //handle touch
 
                     } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+
+                        final float deltaX = event.getX() - previousX;
+                        final float deltaY = event.getY() - previousY;
+
                         //handle drag
                         queueEvent(new Runnable() {
                             @Override
                             public void run() {
 
                                 renderer.handleTouchDrag(normalizedX,normalizedY);
+                                renderer.handleCamera(deltaX, deltaY);
                             }
                         });
                     }

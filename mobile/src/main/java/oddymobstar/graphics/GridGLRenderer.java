@@ -12,22 +12,26 @@ import oddymobstar.graphics.model.Mallet;
 import oddymobstar.graphics.model.Puck;
 import oddymobstar.graphics.model.Table;
 import oddymobstar.graphics.programs.ColorShaderProgram;
+import oddymobstar.graphics.programs.SkyBoxShaderProgram;
 import oddymobstar.graphics.programs.TextureShaderProgram;
 import oddymobstar.util.graphics.opengles.Geometry;
 import oddymobstar.util.graphics.opengles.MatrixHelper;
 import oddymobstar.util.graphics.opengles.TextureHelper;
+import oddymobstar.util.graphics.opengles.object.SkyBox;
 
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES20.GL_DEPTH_BUFFER_BIT;
 import static android.opengl.GLES20.GL_DEPTH_TEST;
 import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
+import static android.opengl.GLES20.glDisable;
 import static android.opengl.GLES20.glEnable;
 import static android.opengl.GLES20.glViewport;
 import static android.opengl.Matrix.invertM;
 import static android.opengl.Matrix.multiplyMM;
 import static android.opengl.Matrix.multiplyMV;
 import static android.opengl.Matrix.rotateM;
+import static android.opengl.Matrix.scaleM;
 import static android.opengl.Matrix.setIdentityM;
 import static android.opengl.Matrix.setLookAtM;
 import static android.opengl.Matrix.translateM;
@@ -47,14 +51,18 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private final float[] modelViewProjectionMatrix = new float[16];
     private final float[] invertedViewProjectionMatrix = new float[16];
 
+
+    private SkyBox skyBox;
+
     private Table table;
     private Mallet mallet;
     private Puck puck;
 
     private TextureShaderProgram textureShaderProgram;
     private ColorShaderProgram colorShaderProgram;
+    private SkyBoxShaderProgram skyBoxShaderProgram;
 
-    private int texture;
+    private int texture, skyBoxTexture;
 
     private boolean malletPressed = false;
     private Geometry.Point blueMalletPosition, previousBlueMalletPosition, puckPosition;
@@ -66,6 +74,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private final float farBound = -0.8f;
     private final float nearBound = 0.8f;
 
+    private float xRotation, yRotation;
 
 
     public GridGLRenderer(Context context) {
@@ -77,8 +86,8 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-        glEnable(GL_DEPTH_TEST);
 
+        skyBox = new SkyBox();
 
         table = new Table();
         mallet = new Mallet(0.08f, 0.15f, 32);
@@ -90,8 +99,14 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
         colorShaderProgram = new ColorShaderProgram(context);
         textureShaderProgram = new TextureShaderProgram(context);
+        skyBoxShaderProgram = new SkyBoxShaderProgram(context);
 
         texture = TextureHelper.loadTexture(context, R.drawable.airhockey);
+
+        skyBoxTexture = TextureHelper.loadCubeMap(context,
+                new int[]{R.drawable.sea_lf, R.drawable.sea_rt, R.drawable.sea_dn, R.drawable.sea_up, R.drawable.sea_ft, R.drawable.sea_bk});
+
+
 
     }
 
@@ -132,6 +147,20 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
         invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0);
 
+
+        //draw the skybox.
+        setIdentityM(viewMatrix, 0);
+        rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
+        rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
+        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+        skyBoxShaderProgram.useProgram();
+        skyBoxShaderProgram.setUniforms(viewProjectionMatrix, skyBoxTexture);
+        skyBox.bindData(skyBoxShaderProgram);
+        skyBox.draw();
+
+
+        glEnable(GL_DEPTH_TEST);
+
         //set table position
         setIdentityM(modelMatrix, 0);
         rotateM(modelMatrix, 0, -90f, 1f, 0f, 0f);
@@ -170,6 +199,11 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         puck.bindData(colorShaderProgram);
         puck.draw();
 
+        glDisable(GL_DEPTH_TEST);
+
+
+
+
 
     }
 
@@ -182,6 +216,18 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         Geometry.Sphere malletBoundingSphere = new Geometry.Sphere(new Geometry.Point(blueMalletPosition.x, blueMalletPosition.y, blueMalletPosition.z), mallet.height / 2f);
 
         malletPressed = Geometry.intersects(malletBoundingSphere, ray);
+    }
+
+
+    public void handleCamera(float deltaX, float deltaY){
+        xRotation += deltaX/16f;
+        yRotation += deltaY/16f;
+
+        if(yRotation < -90){
+            yRotation = -90;
+        }else if(yRotation > 90){
+            yRotation = 90;
+        }
     }
 
     public void handleTouchDrag(float normalizedX, float normalizedY){
