@@ -144,8 +144,6 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
         puckVector = puckVector.scale(0.99f);
 
-        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
-        invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0);
 
 
         //draw the skybox.
@@ -153,13 +151,17 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
         rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+
         skyBoxShaderProgram.useProgram();
         skyBoxShaderProgram.setUniforms(viewProjectionMatrix, skyBoxTexture);
         skyBox.bindData(skyBoxShaderProgram);
         skyBox.draw();
 
 
-        glEnable(GL_DEPTH_TEST);
+   /*     multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+        invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0);
+
+      //  glEnable(GL_DEPTH_TEST);
 
         //set table position
         setIdentityM(modelMatrix, 0);
@@ -199,7 +201,9 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         puck.bindData(colorShaderProgram);
         puck.draw();
 
-        glDisable(GL_DEPTH_TEST);
+        */
+
+      //  glDisable(GL_DEPTH_TEST);
 
 
 

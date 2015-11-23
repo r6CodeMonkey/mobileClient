@@ -5,8 +5,11 @@ import java.nio.ByteBuffer;
 import oddymobstar.graphics.data.VertexArray;
 import oddymobstar.graphics.programs.SkyBoxShaderProgram;
 
+import static android.opengl.GLES20.GL_LEQUAL;
+import static android.opengl.GLES20.GL_LESS;
 import static android.opengl.GLES20.GL_TRIANGLES;
 import static android.opengl.GLES20.GL_UNSIGNED_BYTE;
+import static android.opengl.GLES20.glDepthFunc;
 import static android.opengl.GLES20.glDrawElements;
 
 /**
@@ -60,6 +63,6 @@ public class SkyBox {
     }
 
     public void draw(){
-        glDrawElements(GL_TRIANGLES,36, GL_UNSIGNED_BYTE, indexArray);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, indexArray);
     }
 }
