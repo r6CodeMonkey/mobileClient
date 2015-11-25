@@ -18,6 +18,7 @@ public abstract class ShaderProgram implements ProgramInterface {
     protected static final String U_MATRIX = "u_Matrix";
 
 
+
     protected static final String U_TEXTURE_UNIT = "u_TextureUnit";
     protected static final String A_TEXTURE_COORDINATES = "a_TextureCoordinates";
 

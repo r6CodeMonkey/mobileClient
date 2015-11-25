@@ -33,7 +33,7 @@ public class SkyBoxShaderProgram extends ShaderProgram {
 
     @Override
     public void setUniforms(float[] matrix, int textureId) {
-      glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
+       glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);

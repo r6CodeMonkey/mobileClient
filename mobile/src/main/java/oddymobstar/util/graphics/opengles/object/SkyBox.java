@@ -3,6 +3,8 @@ package oddymobstar.util.graphics.opengles.object;
 import java.nio.ByteBuffer;
 
 import oddymobstar.graphics.data.VertexArray;
+import oddymobstar.graphics.model.ModelInterface;
+import oddymobstar.graphics.programs.ShaderProgram;
 import oddymobstar.graphics.programs.SkyBoxShaderProgram;
 
 import static android.opengl.GLES20.GL_LEQUAL;
@@ -15,7 +17,7 @@ import static android.opengl.GLES20.glDrawElements;
 /**
  * Created by timmytime on 17/11/15.
  */
-public class SkyBox {
+public class SkyBox implements ModelInterface {
 
     private static final int POSITION_COMPONENT_COUNT = 3;
     private final VertexArray vertexArray;
@@ -58,7 +60,7 @@ public class SkyBox {
 
     }
 
-    public void bindData(SkyBoxShaderProgram shaderProgram){
+    public void bindData(ShaderProgram shaderProgram){
         vertexArray.setVertextAttribPointer(0, shaderProgram.getPositionAttributeLocation(), POSITION_COMPONENT_COUNT, 0);
     }
 

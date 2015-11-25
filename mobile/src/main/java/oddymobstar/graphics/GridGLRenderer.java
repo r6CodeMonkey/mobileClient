@@ -1,8 +1,8 @@
 package oddymobstar.graphics;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -12,20 +12,19 @@ import oddymobstar.graphics.model.Mallet;
 import oddymobstar.graphics.model.Puck;
 import oddymobstar.graphics.model.Table;
 import oddymobstar.graphics.programs.ColorShaderProgram;
+import oddymobstar.graphics.programs.HeightMapShaderProgram;
 import oddymobstar.graphics.programs.SkyBoxShaderProgram;
 import oddymobstar.graphics.programs.TextureShaderProgram;
 import oddymobstar.util.graphics.opengles.Geometry;
 import oddymobstar.util.graphics.opengles.MatrixHelper;
 import oddymobstar.util.graphics.opengles.TextureHelper;
+import oddymobstar.util.graphics.opengles.object.HeightMap;
 import oddymobstar.util.graphics.opengles.object.SkyBox;
 
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES20.GL_DEPTH_BUFFER_BIT;
-import static android.opengl.GLES20.GL_DEPTH_TEST;
 import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
-import static android.opengl.GLES20.glDisable;
-import static android.opengl.GLES20.glEnable;
 import static android.opengl.GLES20.glViewport;
 import static android.opengl.Matrix.invertM;
 import static android.opengl.Matrix.multiplyMM;
@@ -50,9 +49,11 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private final float[] viewProjectionMatrix = new float[16];
     private final float[] modelViewProjectionMatrix = new float[16];
     private final float[] invertedViewProjectionMatrix = new float[16];
-
+    private final float[] viewMatrixForSkybox = new float[16];
+    private final float[] tempMatrix = new float[16];
 
     private SkyBox skyBox;
+    private HeightMap heightMap;
 
     private Table table;
     private Mallet mallet;
@@ -61,6 +62,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private TextureShaderProgram textureShaderProgram;
     private ColorShaderProgram colorShaderProgram;
     private SkyBoxShaderProgram skyBoxShaderProgram;
+    private HeightMapShaderProgram heightMapShaderProgram;
 
     private int texture, skyBoxTexture;
 
@@ -88,6 +90,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
 
         skyBox = new SkyBox();
+        heightMap = new HeightMap(((BitmapDrawable)context.getResources().getDrawable(R.drawable.heightmap)).getBitmap());
 
         table = new Table();
         mallet = new Mallet(0.08f, 0.15f, 32);
@@ -100,6 +103,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         colorShaderProgram = new ColorShaderProgram(context);
         textureShaderProgram = new TextureShaderProgram(context);
         skyBoxShaderProgram = new SkyBoxShaderProgram(context);
+        heightMapShaderProgram = new HeightMapShaderProgram(context);
 
         texture = TextureHelper.loadTexture(context, R.drawable.airhockey);
 
@@ -117,7 +121,9 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         glViewport(0, 0, width, height);
 
         MatrixHelper.perspectiveM(projectionMatrix, 45, (float) width / (float) height, 1f, 10f);
-        setLookAtM(viewMatrix, 0, 0f, 1.2f, 2.2f, 0f, 0f, 0f, 0f, 1f, 0f);
+       // setLookAtM(viewMatrix, 0, 0f, 1.2f, 2.2f, 0f, 0f, 0f, 0f, 1f, 0f);
+
+        updateViewMatrices();
     }
 
     @Override
@@ -146,19 +152,55 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
 
 
-        //draw the skybox.
-        setIdentityM(viewMatrix, 0);
+        drawHeightMap();
+      //  drawSkyBox();
+     //   drawAirHockey();
+
+
+    }
+
+    private void updateMvpMatrix(){
+        multiplyMM(tempMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+        multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, tempMatrix, 0);
+    }
+
+    private void updateMvpForSkybox(){
+        multiplyMM(tempMatrix, 0, viewMatrixForSkybox, 0, modelMatrix, 0);
+        multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, tempMatrix, 0);
+    }
+
+    private void updateViewMatrices(){
+        setIdentityM(viewMatrix,0);
         rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
         rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
-        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+        System.arraycopy(viewMatrix, 0, viewMatrixForSkybox, 0, viewMatrix.length);
+
+        translateM(viewMatrix, 0, 0, 1-5f, -5f);
+    }
+
+    private void drawHeightMap(){
+        setIdentityM(modelMatrix, 0);
+        scaleM(modelMatrix, 0, 100f, 10f, 100f);
+        updateMvpMatrix();
+        heightMapShaderProgram.useProgram();
+        heightMapShaderProgram.setUniforms(modelViewProjectionMatrix);
+        heightMap.bindData(heightMapShaderProgram);
+        heightMap.draw();
+    }
+
+    private void drawSkyBox(){
+        //draw the skybox.
+        setIdentityM(viewMatrix, 0);
+        updateMvpForSkybox();
 
         skyBoxShaderProgram.useProgram();
         skyBoxShaderProgram.setUniforms(viewProjectionMatrix, skyBoxTexture);
         skyBox.bindData(skyBoxShaderProgram);
         skyBox.draw();
+    }
 
-
-   /*     multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+    private void drawAirHockey(){
+        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
         invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0);
 
       //  glEnable(GL_DEPTH_TEST);
@@ -201,14 +243,9 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         puck.bindData(colorShaderProgram);
         puck.draw();
 
-        */
-
-      //  glDisable(GL_DEPTH_TEST);
 
 
-
-
-
+        //  glDisable(GL_DEPTH_TEST);
     }
 
     /*
@@ -232,6 +269,8 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         }else if(yRotation > 90){
             yRotation = 90;
         }
+
+        updateViewMatrices();
     }
 
     public void handleTouchDrag(float normalizedX, float normalizedY){
