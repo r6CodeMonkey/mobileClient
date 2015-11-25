@@ -23,8 +23,11 @@ import oddymobstar.util.graphics.opengles.object.SkyBox;
 
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES20.GL_DEPTH_BUFFER_BIT;
+import static android.opengl.GLES20.GL_DEPTH_TEST;
 import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
+import static android.opengl.GLES20.glDisable;
+import static android.opengl.GLES20.glEnable;
 import static android.opengl.GLES20.glViewport;
 import static android.opengl.Matrix.invertM;
 import static android.opengl.Matrix.multiplyMM;
@@ -121,9 +124,9 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         glViewport(0, 0, width, height);
 
         MatrixHelper.perspectiveM(projectionMatrix, 45, (float) width / (float) height, 1f, 10f);
-       // setLookAtM(viewMatrix, 0, 0f, 1.2f, 2.2f, 0f, 0f, 0f, 0f, 1f, 0f);
+        setLookAtM(viewMatrix, 0, 0f, 1.2f, 2.2f, 0f, 0f, 0f, 0f, 1f, 0f);
 
-        updateViewMatrices();
+     //   updateViewMatrices();
     }
 
     @Override
@@ -151,37 +154,21 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         puckVector = puckVector.scale(0.99f);
 
 
+        drawSkyBox();
 
-        drawHeightMap();
-      //  drawSkyBox();
-     //   drawAirHockey();
+        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+        invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0);
+
+        //    drawHeightMap();
+        drawAirHockey();
 
 
     }
 
-    private void updateMvpMatrix(){
-        multiplyMM(tempMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-        multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, tempMatrix, 0);
-    }
-
-    private void updateMvpForSkybox(){
-        multiplyMM(tempMatrix, 0, viewMatrixForSkybox, 0, modelMatrix, 0);
-        multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, tempMatrix, 0);
-    }
-
-    private void updateViewMatrices(){
-        setIdentityM(viewMatrix,0);
-        rotateM(viewMatrix, 0, -yRotation, 1f, 0f, 0f);
-        rotateM(viewMatrix, 0, -xRotation, 0f, 1f, 0f);
-        System.arraycopy(viewMatrix, 0, viewMatrixForSkybox, 0, viewMatrix.length);
-
-        translateM(viewMatrix, 0, 0, 1-5f, -5f);
-    }
 
     private void drawHeightMap(){
         setIdentityM(modelMatrix, 0);
         scaleM(modelMatrix, 0, 100f, 10f, 100f);
-        updateMvpMatrix();
         heightMapShaderProgram.useProgram();
         heightMapShaderProgram.setUniforms(modelViewProjectionMatrix);
         heightMap.bindData(heightMapShaderProgram);
@@ -190,20 +177,21 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
     private void drawSkyBox(){
         //draw the skybox.
-        setIdentityM(viewMatrix, 0);
-        updateMvpForSkybox();
+        setIdentityM(modelMatrix, 0);
+        scaleM(modelMatrix, 0, 100f, 100f, 100f);
+        rotateM(modelMatrix, 0, -yRotation, 1f, 0f, 0f);
+        rotateM(modelMatrix, 0, -xRotation, 0f, 1f, 0f);
+        multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0);
 
         skyBoxShaderProgram.useProgram();
-        skyBoxShaderProgram.setUniforms(viewProjectionMatrix, skyBoxTexture);
+        skyBoxShaderProgram.setUniforms(modelViewProjectionMatrix, skyBoxTexture);
         skyBox.bindData(skyBoxShaderProgram);
         skyBox.draw();
     }
 
     private void drawAirHockey(){
-        multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
-        invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0);
 
-      //  glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
 
         //set table position
         setIdentityM(modelMatrix, 0);
@@ -245,7 +233,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
 
 
-        //  glDisable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
     }
 
     /*
@@ -270,7 +258,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
             yRotation = 90;
         }
 
-        updateViewMatrices();
+     //   updateViewMatrices();
     }
 
     public void handleTouchDrag(float normalizedX, float normalizedY){
