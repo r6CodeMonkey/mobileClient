@@ -36,6 +36,8 @@ public class IndexBuffer {
 
         bufferId = buffers[0];
 
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[0]);
+
         ShortBuffer shortBuffer = ByteBuffer.allocateDirect(indexData.length * BYTES_PER_SHORT)
                 .order(ByteOrder.nativeOrder())
                 .asShortBuffer()

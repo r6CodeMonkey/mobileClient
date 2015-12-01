@@ -30,7 +30,7 @@ public class HeightMap implements ModelInterface {
         height = bitmap.getHeight();
 
         if (width * height > 65536) {
-            throw new RuntimeException("Height map too large for index buffer");
+            throw new RuntimeException("Height map too large for index buffer "+(width * height ));
         }
 
         numElements = calculateNumElements();
@@ -69,8 +69,8 @@ public class HeightMap implements ModelInterface {
     private short[] createIndexData() {
         final short[] indexData = new short[numElements];
         int offset = 0;
-        for (int row = 0; row < height -1; row++) {
-            for (int col = 0; col < width -1; col++) {
+        for (int row = 1; row < height -1; row++) {
+            for (int col = 1; col < width -1; col++) {
                 short topLeftIndex = (short) (row * width + col);
                 short topRightIndex = (short) (row * width + col + 1);
                 short bottomLeftIndex = (short) ((row+1) * width + col);

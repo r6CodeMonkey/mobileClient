@@ -32,6 +32,8 @@ public class VertexBuffer {
 
         bufferId = buffers[0];
 
+        glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+
         FloatBuffer vertexArray = ByteBuffer.allocateDirect(vertexData.length * VertexArray.BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer()

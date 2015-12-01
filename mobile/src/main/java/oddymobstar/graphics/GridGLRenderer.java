@@ -24,8 +24,11 @@ import oddymobstar.util.graphics.opengles.object.SkyBox;
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
 import static android.opengl.GLES20.GL_DEPTH_BUFFER_BIT;
 import static android.opengl.GLES20.GL_DEPTH_TEST;
+import static android.opengl.GLES20.GL_LEQUAL;
+import static android.opengl.GLES20.GL_LESS;
 import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
+import static android.opengl.GLES20.glDepthFunc;
 import static android.opengl.GLES20.glDisable;
 import static android.opengl.GLES20.glEnable;
 import static android.opengl.GLES20.glViewport;
@@ -91,9 +94,11 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+        glEnable(GL_DEPTH_TEST);
+
 
         skyBox = new SkyBox();
-        heightMap = new HeightMap(((BitmapDrawable)context.getResources().getDrawable(R.drawable.heightmap)).getBitmap());
+        heightMap = new HeightMap(((BitmapDrawable)context.getDrawable(R.drawable.heightmap)).getBitmap());
 
         table = new Table();
         mallet = new Mallet(0.08f, 0.15f, 32);
@@ -123,10 +128,9 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
         glViewport(0, 0, width, height);
 
-        MatrixHelper.perspectiveM(projectionMatrix, 45, (float) width / (float) height, 1f, 10f);
+        MatrixHelper.perspectiveM(projectionMatrix, 45, (float) width / (float) height, 1f, 100f);
         setLookAtM(viewMatrix, 0, 0f, 1.2f, 2.2f, 0f, 0f, 0f, 0f, 1f, 0f);
 
-     //   updateViewMatrices();
     }
 
     @Override
@@ -153,13 +157,13 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
         puckVector = puckVector.scale(0.99f);
 
-
+        drawHeightMap();
         drawSkyBox();
 
         multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
         invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0);
 
-        //    drawHeightMap();
+
         drawAirHockey();
 
 
@@ -167,8 +171,16 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
 
     private void drawHeightMap(){
+
+        //still not working.  probably the crappy image itself.  upside, i dont need this for what i am about to do
+        //therefore, fuck this off and simply use a texture as the floor, as we want the texture to scroll, rather than
+        //scroll the non rendering height map.  debug confirms it exists so it must be file.  not using file from demo which
+        //actually violates the test routine anyway (ie its too big).  note is another GL bug report to review!!
         setIdentityM(modelMatrix, 0);
-        scaleM(modelMatrix, 0, 100f, 10f, 100f);
+        translateM(modelMatrix, 0, 0f, -2f, 0f);
+        scaleM(modelMatrix, 0, 10f, 0f, 10f);
+        multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0);
+
         heightMapShaderProgram.useProgram();
         heightMapShaderProgram.setUniforms(modelViewProjectionMatrix);
         heightMap.bindData(heightMapShaderProgram);
@@ -178,20 +190,22 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private void drawSkyBox(){
         //draw the skybox.
         setIdentityM(modelMatrix, 0);
+      //pointless get height map working  translateM(modelMatrix, 0, 0f, -5f, 0f);
         scaleM(modelMatrix, 0, 100f, 100f, 100f);
         rotateM(modelMatrix, 0, -yRotation, 1f, 0f, 0f);
         rotateM(modelMatrix, 0, -xRotation, 0f, 1f, 0f);
         multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0);
 
+        glDepthFunc(GL_LEQUAL);
         skyBoxShaderProgram.useProgram();
         skyBoxShaderProgram.setUniforms(modelViewProjectionMatrix, skyBoxTexture);
         skyBox.bindData(skyBoxShaderProgram);
         skyBox.draw();
+        glDepthFunc(GL_LESS);
     }
 
     private void drawAirHockey(){
 
-        glEnable(GL_DEPTH_TEST);
 
         //set table position
         setIdentityM(modelMatrix, 0);
@@ -233,7 +247,6 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
 
 
-        glDisable(GL_DEPTH_TEST);
     }
 
     /*
