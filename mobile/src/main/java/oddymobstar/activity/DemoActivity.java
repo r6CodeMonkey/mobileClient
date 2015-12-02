@@ -198,7 +198,11 @@ public class DemoActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    //boring shit
+    /*
+
+     MATERIALS
+
+     */
     private void setUpColorLists() {
         subUtmColorList = new ColorStateList(
                 new int[][]{
@@ -355,68 +359,43 @@ public class DemoActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game);
 
-        if (!dbHelper.hasPreLoad()) {
-            dbHelper.addBaseConfiguration();
-        }
-        // dbHelper.test();
-        //we need one too...no shit.
-        dbHelper.setMessageHandler(new MessageHandler());
-
-        font = Typeface.createFromAsset(
-                this.getAssets(), "fontawesome-webfont.ttf");
-
-        setUpColorLists();
-        setUpMaterials();
-
-        //useful makes it a bit easier to work with.
-        UTM.createUTMRegions();
-        SubUTM.createSubUtms();
+    private void setNavConfigValues() {
 
 
-        configuration = new Configuration(dbHelper.getConfigs());
-        userImage = dbHelper.getUserImage(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
-        setNavConfigValues();
-
-
-        uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
-
-
-        intent = new Intent(this, CheService.class);
-        serviceIntent = new Intent(this, CheService.class);
-        connectivityHandler = new ConnectivityHandler(this, BLUETOOTH_UUID);
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter(MESSAGE_INTENT));
-
-        startService(serviceIntent);
-
-
-        serviceConnection = new ServiceConnection() {
+        runOnUiThread(new Runnable() {
             @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                cheService = ((CheService.CheServiceBinder) service).getCheServiceInstance();
-                cheService.setMessageHandler(new MessageHandler());
+            public void run() {
+
+                MenuItem item = navigationView.getMenu().findItem(R.id.utm);
+                item.setTitle(getResources().getString(R.string.menu_utm) + " - " + configuration.getConfig(Configuration.CURRENT_UTM).getValue());
+
+                item = navigationView.getMenu().findItem(R.id.sub_utm);
+                item.setTitle(getResources().getString(R.string.menu_subutm) + " - " + configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue());
+
+                item = navigationView.getMenu().findItem(R.id.encrypt);
+                item.setTitle(getResources().getString(R.string.menu_encryption) + " - " + configuration.getConfig(Configuration.SSL_ALGORITHM).getValue());
+
+                TextView textView = (TextView) navigationView.findViewById(R.id.nav_header);
+                textView.setText(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
+
+                if (userImage != null) {
+                    if (userImage.getUserImage() != null) {
+                        userImageView.setImageBitmap(userImage.getUserImage());
+                    }
+                }
+
+                gridFrag.refreshAdapter();
             }
+        });
 
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                cheService = null;
-            }
-        };
-
-        //and we need to bind to it.
-        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
-
-        setUpMapIfNeeded();
-
-        getSupportFragmentManager().beginTransaction().add(R.id.grid_view_fragment, gridViewFragment).addToBackStack(null).commit();
 
     }
 
+
+    /*
+    FAB Handlers
+   */
     private void handleChatFAB(final boolean hide) {
 
         final ChatPost hiddenChatPost = chatFrag.getHiddenChatPost();
@@ -632,115 +611,90 @@ public class DemoActivity extends AppCompatActivity {
 
     }
 
-    private void handleLocateDialog(String grid) {
+    /*
+      FAB Handlers END
+     */
 
-        if (CLEAR_GRIDS) {
-            //try twice lol.
-            for (final Polygon polygon : lastLocateUTMs.values()) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
 
-                        polygon.remove();
-                    }
-                });
-            }
-            lastLocateUTMs.clear();
-            CLEAR_GRIDS = false;
+
+
+
+    /*
+
+      MATERIALS END
+
+     */
+
+
+
+
+    /*
+      Main
+     */
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_game);
+
+        if (!dbHelper.hasPreLoad()) {
+            dbHelper.addBaseConfiguration();
         }
+        // dbHelper.test();
+        //we need one too...no shit.
+        dbHelper.setMessageHandler(new MessageHandler());
 
-        //only show 1.
-        if (CURRENT_GRID_FAB_STATE == UTM_FAB_STATE && !lastLocateUTMs.isEmpty()) {
+        font = Typeface.createFromAsset(
+                this.getAssets(), "fontawesome-webfont.ttf");
 
-            for (final Polygon polygon : lastLocateUTMs.values()) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+        setUpColorLists();
+        setUpMaterials();
 
-                        polygon.remove();
-                    }
-                });
-            }
-            CLEAR_GRIDS = true;
-
-
-        } else if (CURRENT_GRID_FAB_STATE != UTM_FAB_STATE && lastLocateSubUTM != null) {
-            lastLocateSubUTM.remove();
-        }
-
-        if (CURRENT_GRID_FAB_STATE == UTM_FAB_STATE) {
-            //are we a region?
-            if (UTM.isUTMRegion(grid)) {
-                CURRENT_GRID_FAB_STATE = UTM_REGION_FAB_STATE;
-                UTM_REGION = grid;
-
-                Polygon regionCentre = null;
-
-                for (String utm : UTM.getUtmRegion(grid)) {
-                    lastUTMOptions = UTMGridCreator.getUTMGrid(new UTM(utm)).strokeColor(getResources().getColor(android.R.color.holo_purple));
-                    Polygon polygon = map.addPolygon(lastUTMOptions);
-
-                    if (utm.equals(UTM.getRegionCentre(grid))) {
-                        regionCentre = polygon;
-                    }
-                    lastLocateUTMs.put(utm, polygon);
-
-                }
-                //we actually need the central one for this...god damn it.
-                animateToGrid(regionCentre, UTM_REGION_ZOOM);
-
-            } else {
-                lastUTMOptions = UTMGridCreator.getUTMGrid(new UTM(grid)).strokeColor(getResources().getColor(android.R.color.holo_purple));
-                lastLocateUTMs.put(grid, map.addPolygon(lastUTMOptions));
-                animateToGrid(lastLocateUTMs.get(grid), UTM_ZOOM);
-            }
-
-        } else if (CURRENT_GRID_FAB_STATE == UTM_REGION_FAB_STATE) {
-            //  PolygonOptions subUtmOptions = UTMGridCreator.getUTMGrid(new UTM(grid)).strokeColor(getResources().getColor(android.R.color.holo_purple));
-            //  lastLocateUTMs.add(map.addPolygon(subUtmOptions);
-            animateToGrid(lastLocateUTMs.get(grid), UTM_ZOOM);
-
-        } else {
-            PolygonOptions subUtmOptions = UTMGridCreator.getSubUTMGrid(new SubUTM(grid), utmOptions).strokeColor(getResources().getColor(android.R.color.holo_orange_dark));
-            lastLocateSubUTM = map.addPolygon(subUtmOptions);
-            animateToGrid(lastLocateSubUTM, SUB_UTM_ZOOM);
-        }
-
-        floatingActionButton.setVisibility(View.VISIBLE);
-
-    }
-
-    private void setNavConfigValues() {
+        //useful makes it a bit easier to work with.
+        UTM.createUTMRegions();
+        SubUTM.createSubUtms();
 
 
-        runOnUiThread(new Runnable() {
+        configuration = new Configuration(dbHelper.getConfigs());
+        userImage = dbHelper.getUserImage(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
+        setNavConfigValues();
+
+
+        uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
+
+
+        intent = new Intent(this, CheService.class);
+        serviceIntent = new Intent(this, CheService.class);
+        connectivityHandler = new ConnectivityHandler(this, BLUETOOTH_UUID);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter(MESSAGE_INTENT));
+
+        startService(serviceIntent);
+
+
+        serviceConnection = new ServiceConnection() {
             @Override
-            public void run() {
-
-                MenuItem item = navigationView.getMenu().findItem(R.id.utm);
-                item.setTitle(getResources().getString(R.string.menu_utm) + " - " + configuration.getConfig(Configuration.CURRENT_UTM).getValue());
-
-                item = navigationView.getMenu().findItem(R.id.sub_utm);
-                item.setTitle(getResources().getString(R.string.menu_subutm) + " - " + configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue());
-
-                item = navigationView.getMenu().findItem(R.id.encrypt);
-                item.setTitle(getResources().getString(R.string.menu_encryption) + " - " + configuration.getConfig(Configuration.SSL_ALGORITHM).getValue());
-
-                TextView textView = (TextView) navigationView.findViewById(R.id.nav_header);
-                textView.setText(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
-
-                if (userImage != null) {
-                    if (userImage.getUserImage() != null) {
-                        userImageView.setImageBitmap(userImage.getUserImage());
-                    }
-                }
-
-                gridFrag.refreshAdapter();
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                cheService = ((CheService.CheServiceBinder) service).getCheServiceInstance();
+                cheService.setMessageHandler(new MessageHandler());
             }
-        });
 
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                cheService = null;
+            }
+        };
+
+        //and we need to bind to it.
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+
+        setUpMapIfNeeded();
+
+        getSupportFragmentManager().beginTransaction().add(R.id.grid_view_fragment, gridViewFragment).addToBackStack(null).commit();
 
     }
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -749,15 +703,6 @@ public class DemoActivity extends AppCompatActivity {
         navToggle.syncState();
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     @Override
     public void onBackPressed() {
@@ -863,88 +808,6 @@ public class DemoActivity extends AppCompatActivity {
 
     }
 
-    private void removeFragments(boolean backPressed) {
-
-        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-        try {
-            chatFrag.getHiddenChatPost().setVisibility(View.GONE);
-        } catch (Exception e) {
-
-        }
-
-
-        try {
-            transaction.remove(chatFrag);
-        } catch (Exception e) {
-
-        }
-
-
-        try {
-            gridFrag.getHiddenCreateView().setVisibility(View.GONE);
-        } catch (Exception e) {
-
-        }
-
-        try {
-            gridFrag.clearAdapter();
-            transaction.remove(gridFrag);
-        } catch (Exception e) {
-
-        }
-
-
-        try {
-            transaction.remove(confFrag);
-        } catch (Exception e) {
-
-        }
-        if (!backPressed) {
-            try {
-                transaction.remove(gridViewFragment);
-            } catch (Exception e) {
-
-            }
-        } else {
-            try {
-                if (!gridViewFragment.isAdded()) {
-                    transaction.replace(R.id.grid_view_fragment, gridViewFragment);
-                }
-            } catch (Exception e) {
-
-            }
-        }
-
-        try {
-            floatingActionButton.setVisibility(View.INVISIBLE);
-            navToolbar.setTitle(R.string.app_name);
-            floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_search_white_24dp));
-            navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
-        } catch (Exception e) {
-
-        }
-
-
-        transaction.commit();
-
-
-    }
-
-    private void animateToGrid(Polygon polygon, float zoom) {
-        //make map zoom to the UTM and search function now allows UTM search
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target((CURRENT_GRID_FAB_STATE == UTM_FAB_STATE || CURRENT_GRID_FAB_STATE == UTM_REGION_FAB_STATE) ? UTMGridCreator.getCentreUTM(polygon.getPoints()) : UTMGridCreator.getCentreSubUTM(polygon.getPoints()))
-                .tilt(tilt)
-                .bearing(bearing)
-                .zoom(zoom)
-                .build();
-
-        //so need the optimal zoom to display the utm...tilt is tilt, and lat /long is centre of the utm (to calc based on utm shit)
-        //and bearing = bearing
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -1128,6 +991,263 @@ public class DemoActivity extends AppCompatActivity {
 
     }
 
+    public void onPause() {
+        super.onPause();
+
+        if (bluetoothReceiver != null) {
+            try {
+                unregisterReceiver(bluetoothReceiver);
+            } catch (Exception e) {
+                //its probably not registered..
+            }
+        }
+
+        SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString("latitude", String.valueOf(currentLocation.getLatitude()));
+        editor.putString("longitude", String.valueOf(currentLocation.getLongitude()));
+        editor.putFloat("zoom", map.getCameraPosition().zoom);
+        editor.putFloat("bearing", map.getCameraPosition().bearing);
+        editor.putFloat("tilt", map.getCameraPosition().tilt);
+        editor.putString("provider", currentLocation.getProvider());
+
+
+        editor.commit();
+
+
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+
+        //service = null;
+        locationUpdates = null;
+        locationUpdates = null;
+        unbindService(serviceConnection);
+
+        SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString("latitude", String.valueOf(currentLocation.getLatitude()));
+        editor.putString("longitude", String.valueOf(currentLocation.getLongitude()));
+        editor.putFloat("zoom", map.getCameraPosition().zoom);
+        editor.putFloat("bearing", map.getCameraPosition().bearing);
+        editor.putFloat("tilt", map.getCameraPosition().tilt);
+        editor.putString("provider", currentLocation.getProvider());
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
+
+        editor.commit();
+
+        if (bluetoothReceiver != null) {
+            try {
+                unregisterReceiver(bluetoothReceiver);
+            } catch (Exception e) {
+                //probably no longer registerd..
+            }
+        }
+
+
+        if (dbHelper != null) {
+            dbHelper.close();
+            dbHelper = null;
+        }
+
+
+    }
+
+
+
+
+    /*
+     *  Helpers
+      *
+      * */
+
+
+    private void animateToGrid(Polygon polygon, float zoom) {
+        //make map zoom to the UTM and search function now allows UTM search
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target((CURRENT_GRID_FAB_STATE == UTM_FAB_STATE || CURRENT_GRID_FAB_STATE == UTM_REGION_FAB_STATE) ? UTMGridCreator.getCentreUTM(polygon.getPoints()) : UTMGridCreator.getCentreSubUTM(polygon.getPoints()))
+                .tilt(tilt)
+                .bearing(bearing)
+                .zoom(zoom)
+                .build();
+
+        //so need the optimal zoom to display the utm...tilt is tilt, and lat /long is centre of the utm (to calc based on utm shit)
+        //and bearing = bearing
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+    }
+
+
+    private void handleLocateDialog(String grid) {
+
+        if (CLEAR_GRIDS) {
+            //try twice lol.
+            for (final Polygon polygon : lastLocateUTMs.values()) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        polygon.remove();
+                    }
+                });
+            }
+            lastLocateUTMs.clear();
+            CLEAR_GRIDS = false;
+        }
+
+        //only show 1.
+        if (CURRENT_GRID_FAB_STATE == UTM_FAB_STATE && !lastLocateUTMs.isEmpty()) {
+
+            for (final Polygon polygon : lastLocateUTMs.values()) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        polygon.remove();
+                    }
+                });
+            }
+            CLEAR_GRIDS = true;
+
+
+        } else if (CURRENT_GRID_FAB_STATE != UTM_FAB_STATE && lastLocateSubUTM != null) {
+            lastLocateSubUTM.remove();
+        }
+
+        if (CURRENT_GRID_FAB_STATE == UTM_FAB_STATE) {
+            //are we a region?
+            if (UTM.isUTMRegion(grid)) {
+                CURRENT_GRID_FAB_STATE = UTM_REGION_FAB_STATE;
+                UTM_REGION = grid;
+
+                Polygon regionCentre = null;
+
+                for (String utm : UTM.getUtmRegion(grid)) {
+                    lastUTMOptions = UTMGridCreator.getUTMGrid(new UTM(utm)).strokeColor(getResources().getColor(android.R.color.holo_purple));
+                    Polygon polygon = map.addPolygon(lastUTMOptions);
+
+                    if (utm.equals(UTM.getRegionCentre(grid))) {
+                        regionCentre = polygon;
+                    }
+                    lastLocateUTMs.put(utm, polygon);
+
+                }
+                //we actually need the central one for this...god damn it.
+                animateToGrid(regionCentre, UTM_REGION_ZOOM);
+
+            } else {
+                lastUTMOptions = UTMGridCreator.getUTMGrid(new UTM(grid)).strokeColor(getResources().getColor(android.R.color.holo_purple));
+                lastLocateUTMs.put(grid, map.addPolygon(lastUTMOptions));
+                animateToGrid(lastLocateUTMs.get(grid), UTM_ZOOM);
+            }
+
+        } else if (CURRENT_GRID_FAB_STATE == UTM_REGION_FAB_STATE) {
+            //  PolygonOptions subUtmOptions = UTMGridCreator.getUTMGrid(new UTM(grid)).strokeColor(getResources().getColor(android.R.color.holo_purple));
+            //  lastLocateUTMs.add(map.addPolygon(subUtmOptions);
+            animateToGrid(lastLocateUTMs.get(grid), UTM_ZOOM);
+
+        } else {
+            PolygonOptions subUtmOptions = UTMGridCreator.getSubUTMGrid(new SubUTM(grid), utmOptions).strokeColor(getResources().getColor(android.R.color.holo_orange_dark));
+            lastLocateSubUTM = map.addPolygon(subUtmOptions);
+            animateToGrid(lastLocateSubUTM, SUB_UTM_ZOOM);
+        }
+
+        floatingActionButton.setVisibility(View.VISIBLE);
+
+    }
+
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private void removeFragments(boolean backPressed) {
+
+        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        try {
+            chatFrag.getHiddenChatPost().setVisibility(View.GONE);
+        } catch (Exception e) {
+
+        }
+
+
+        try {
+            transaction.remove(chatFrag);
+        } catch (Exception e) {
+
+        }
+
+
+        try {
+            gridFrag.getHiddenCreateView().setVisibility(View.GONE);
+        } catch (Exception e) {
+
+        }
+
+        try {
+            gridFrag.clearAdapter();
+            transaction.remove(gridFrag);
+        } catch (Exception e) {
+
+        }
+
+
+        try {
+            transaction.remove(confFrag);
+        } catch (Exception e) {
+
+        }
+        if (!backPressed) {
+            try {
+                transaction.remove(gridViewFragment);
+            } catch (Exception e) {
+
+            }
+        } else {
+            try {
+                if (!gridViewFragment.isAdded()) {
+                    transaction.replace(R.id.grid_view_fragment, gridViewFragment);
+                }
+            } catch (Exception e) {
+
+            }
+        }
+
+        try {
+            floatingActionButton.setVisibility(View.INVISIBLE);
+            navToolbar.setTitle(R.string.app_name);
+            floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_search_white_24dp));
+            navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
+        } catch (Exception e) {
+
+        }
+
+
+        transaction.commit();
+
+
+    }
+
+
+    /*
+     Button callbacks
+     */
+
+
     public void deleteMessages(View view) {
         //grab the chat frag id...
         dbHelper.deleteMessages(chatFrag.getKey());
@@ -1167,9 +1287,6 @@ public class DemoActivity extends AppCompatActivity {
 
     }
 
-    /*
-      button handlers.
-     */
 
     public void allianceInvite(View view, boolean isClient) {
 
@@ -1280,6 +1397,15 @@ public class DemoActivity extends AppCompatActivity {
 
     }
 
+
+
+
+    /*
+     MAP
+
+     */
+
+
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (map == null) {
@@ -1388,73 +1514,6 @@ public class DemoActivity extends AppCompatActivity {
 
     }
 
-    public void onPause() {
-        super.onPause();
-
-        if (bluetoothReceiver != null) {
-            try {
-                unregisterReceiver(bluetoothReceiver);
-            } catch (Exception e) {
-                //its probably not registered..
-            }
-        }
-
-        SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        editor.putString("latitude", String.valueOf(currentLocation.getLatitude()));
-        editor.putString("longitude", String.valueOf(currentLocation.getLongitude()));
-        editor.putFloat("zoom", map.getCameraPosition().zoom);
-        editor.putFloat("bearing", map.getCameraPosition().bearing);
-        editor.putFloat("tilt", map.getCameraPosition().tilt);
-        editor.putString("provider", currentLocation.getProvider());
-
-
-        editor.commit();
-
-
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-
-        //service = null;
-        locationUpdates = null;
-        locationUpdates = null;
-        unbindService(serviceConnection);
-
-        SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        editor.putString("latitude", String.valueOf(currentLocation.getLatitude()));
-        editor.putString("longitude", String.valueOf(currentLocation.getLongitude()));
-        editor.putFloat("zoom", map.getCameraPosition().zoom);
-        editor.putFloat("bearing", map.getCameraPosition().bearing);
-        editor.putFloat("tilt", map.getCameraPosition().tilt);
-        editor.putString("provider", currentLocation.getProvider());
-
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
-
-        editor.commit();
-
-        if (bluetoothReceiver != null) {
-            try {
-                unregisterReceiver(bluetoothReceiver);
-            } catch (Exception e) {
-                //probably no longer registerd..
-            }
-        }
-
-
-        if (dbHelper != null) {
-            dbHelper.close();
-            dbHelper = null;
-        }
-
-
-    }
 
     private void initLocationUpdates() {
         locationUpdates = new Thread(new Runnable() {
@@ -1657,6 +1716,14 @@ public class DemoActivity extends AppCompatActivity {
 
         }
     }
+
+
+
+    /*
+     Inner helper classes for callbacks
+
+     */
+
 
     public class DeviceDiscovery {
 
