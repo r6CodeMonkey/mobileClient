@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -65,6 +64,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
+import oddymobstar.activity.helpers.Materials;
 import oddymobstar.connect.ConnectivityHandler;
 import oddymobstar.connect.bluetooth.handler.Bluetooth;
 import oddymobstar.connect.bluetooth.manager.BluetoothManager;
@@ -138,6 +138,7 @@ public class DemoActivity extends AppCompatActivity {
     /*
       materials
      */
+    private Materials materials = new Materials(this.getApplicationContext());
     private DrawerLayout navDrawer;
     private ActionBarDrawerToggle navToggle;
     private NavigationView navigationView;
@@ -145,10 +146,6 @@ public class DemoActivity extends AppCompatActivity {
     private Toolbar hiddenToolbar;
     private FloatingActionButton floatingActionButton;
     private RoundedImageView userImageView;
-    private ColorStateList subUtmColorList;
-    private ColorStateList utmColorList;
-    private ColorStateList allianceColorList;
-    private ColorStateList chatColorList;
     private int fabMode = ALLIANCE_FAB;
 
     public static final int UTM_FAB_STATE = 0;
@@ -203,59 +200,6 @@ public class DemoActivity extends AppCompatActivity {
      MATERIALS
 
      */
-    private void setUpColorLists() {
-        subUtmColorList = new ColorStateList(
-                new int[][]{
-                        new int[]{android.R.attr.state_pressed}, //1
-                        new int[]{android.R.attr.state_focused}, //2
-                        new int[]{android.R.attr.state_focused, android.R.attr.state_pressed} //3
-                },
-                new int[]{
-                        getResources().getColor(android.R.color.holo_orange_dark), //1
-                        getResources().getColor(android.R.color.holo_orange_dark), //2
-                        getResources().getColor(android.R.color.holo_orange_dark) //3
-                });
-
-        utmColorList = new ColorStateList(
-                new int[][]{
-                        new int[]{android.R.attr.state_pressed}, //1
-                        new int[]{android.R.attr.state_focused}, //2
-                        new int[]{android.R.attr.state_focused, android.R.attr.state_pressed} //3
-                },
-                new int[]{
-                        getResources().getColor(android.R.color.holo_purple), //1
-                        getResources().getColor(android.R.color.holo_purple), //2
-                        getResources().getColor(android.R.color.holo_purple) //3
-                }
-        );
-
-        allianceColorList = new ColorStateList(
-                new int[][]{
-                        new int[]{android.R.attr.state_pressed}, //1
-                        new int[]{android.R.attr.state_focused}, //2
-                        new int[]{android.R.attr.state_focused, android.R.attr.state_pressed} //3
-                },
-                new int[]{
-                        getResources().getColor(android.R.color.holo_red_dark), //1
-                        getResources().getColor(android.R.color.holo_red_dark), //2
-                        getResources().getColor(android.R.color.holo_red_dark) //3
-                }
-        );
-
-        chatColorList = new ColorStateList(
-                new int[][]{
-                        new int[]{android.R.attr.state_pressed}, //1
-                        new int[]{android.R.attr.state_focused}, //2
-                        new int[]{android.R.attr.state_focused, android.R.attr.state_pressed} //3
-                },
-                new int[]{
-                        getResources().getColor(android.R.color.holo_green_dark), //1
-                        getResources().getColor(android.R.color.holo_green_dark), //2
-                        getResources().getColor(android.R.color.holo_green_dark) //3
-                }
-        );
-
-    }
 
 
     private void setUpMaterials() {
@@ -312,7 +256,7 @@ public class DemoActivity extends AppCompatActivity {
 
         floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_search_white_24dp));
 
-        floatingActionButton.setBackgroundTintList(subUtmColorList);
+        floatingActionButton.setBackgroundTintList(materials.getSubUtmColorList());
         floatingActionButton.setVisibility(View.INVISIBLE);
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
@@ -648,7 +592,7 @@ public class DemoActivity extends AppCompatActivity {
         font = Typeface.createFromAsset(
                 this.getAssets(), "fontawesome-webfont.ttf");
 
-        setUpColorLists();
+        materials.setUpColorLists();
         setUpMaterials();
 
         //useful makes it a bit easier to work with.
@@ -856,7 +800,7 @@ public class DemoActivity extends AppCompatActivity {
 
                 navDrawer.closeDrawer(navigationView);
 
-                floatingActionButton.setBackgroundTintList(allianceColorList);
+                floatingActionButton.setBackgroundTintList(materials.getAllianceColorList());
                 floatingActionButton.setVisibility(View.VISIBLE);
                 floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_add_circle_white_24dp));
 
@@ -902,7 +846,7 @@ public class DemoActivity extends AppCompatActivity {
 
                 navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_purple));
                 navToolbar.setTitle(R.string.menu_utm);
-                floatingActionButton.setBackgroundTintList(utmColorList);
+                floatingActionButton.setBackgroundTintList(materials.getUtmColorList());
                 floatingActionButton.setVisibility(View.VISIBLE);
                 fabMode = GRID_FAB;
 
@@ -927,7 +871,7 @@ public class DemoActivity extends AppCompatActivity {
                 lastLocateSubUTM = null;
                 navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_orange_dark));
                 navToolbar.setTitle(R.string.menu_subutm);
-                floatingActionButton.setBackgroundTintList(subUtmColorList);
+                floatingActionButton.setBackgroundTintList(materials.getSubUtmColorList());
                 floatingActionButton.setVisibility(View.VISIBLE);
                 fabMode = GRID_FAB;
 
@@ -1268,7 +1212,7 @@ public class DemoActivity extends AppCompatActivity {
 
 
         //change the
-        floatingActionButton.setBackgroundTintList(chatColorList);
+        floatingActionButton.setBackgroundTintList(materials.getChatColorList());
         floatingActionButton.setVisibility(View.VISIBLE);
         floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_chat_bubble_outline_white_24dp));
         navToolbar.setTitle(title);
