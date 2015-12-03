@@ -116,9 +116,9 @@ public class DemoActivity extends AppCompatActivity {
       materials
      */
 
-    private MaterialsHelper materialsHelper = new MaterialsHelper(this);
-    private MaterialsHandler materialsHandler = new MaterialsHandler(this, materialsHelper);
-    private MaterialsListener materialsListener = new MaterialsListener(this, materialsHandler);
+    private MaterialsHelper materialsHelper;
+    private MaterialsHandler materialsHandler;
+    private MaterialsListener materialsListener;
 
 
     public static final int UTM_FAB_STATE = 0;
@@ -216,6 +216,11 @@ public class DemoActivity extends AppCompatActivity {
 
         font = Typeface.createFromAsset(
                 this.getAssets(), "fontawesome-webfont.ttf");
+
+      materialsHelper = new MaterialsHelper(this);
+        materialsHandler = new MaterialsHandler(this, materialsHelper);
+      materialsListener = new MaterialsListener(this, materialsHandler);
+
 
 
         materialsHelper.setUpMaterials(
