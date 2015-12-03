@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -64,7 +65,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-import oddymobstar.activity.helpers.Materials;
+import oddymobstar.activity.handler.MaterialsHandler;
+import oddymobstar.activity.helper.MapHelper;
+import oddymobstar.activity.helper.MaterialsHelper;
+import oddymobstar.activity.listener.MaterialsListener;
 import oddymobstar.connect.ConnectivityHandler;
 import oddymobstar.connect.bluetooth.handler.Bluetooth;
 import oddymobstar.connect.bluetooth.manager.BluetoothManager;
@@ -97,21 +101,23 @@ import oddymobstar.util.widget.GridDialog;
 
 public class DemoActivity extends AppCompatActivity {
 
+
+
+    private static String SELECTED_GRID = "";
+
+
     public static final Long TWO_MINUTES = 120000l;
     public static final String MESSAGE_INTENT = "MESSAGE_INTENT";
     private static final String BLUETOOTH_UUID = "39159dac-ead1-47ad-9975-ec8390df6f7d";
-    private static final int ALLIANCE_FAB = 0;
-    private static final int CHAT_FAB = 1;
-    private static final int GRID_FAB = 2;
     private static Typeface font = null;
     private static float UTM_REGION_ZOOM = 3;
     private static float UTM_ZOOM = 5;
     private static float SUB_UTM_ZOOM = 12;
-    private GoogleMap map; // Might be null if Google Play services APK is not available.
-    private LocationManager locationManager;
-    private android.os.Handler handler = new android.os.Handler();
+
+
+
     private Configuration configuration;
-    private UserImage userImage;
+
     private UUIDGenerator uuidGenerator;
     private CheService cheService;
     private ServiceConnection serviceConnection;
@@ -120,14 +126,9 @@ public class DemoActivity extends AppCompatActivity {
     private View actionBar;
     private boolean isClient = false;
     private BroadcastReceiver bluetoothReceiver;
-    private PolygonOptions utmOptions;
-    private PolygonOptions lastUTMOptions;
-    private Polygon myUTM;
-    private Polygon mySubUTM;
     private Map<String, Polygon> lastLocateUTMs = new HashMap<>();
     private Polygon lastLocateSubUTM;
     //map settings
-    private float bearing, tilt, zoom = 0.0f;
     private ChatFragment chatFrag = new ChatFragment();
     private GridFragment gridFrag = new GridFragment();
     private DeviceFragment deviceFragment = new DeviceFragment();
@@ -138,15 +139,13 @@ public class DemoActivity extends AppCompatActivity {
     /*
       materials
      */
-    private Materials materials = new Materials(this.getApplicationContext());
-    private DrawerLayout navDrawer;
-    private ActionBarDrawerToggle navToggle;
-    private NavigationView navigationView;
-    private Toolbar navToolbar;
-    private Toolbar hiddenToolbar;
-    private FloatingActionButton floatingActionButton;
-    private RoundedImageView userImageView;
-    private int fabMode = ALLIANCE_FAB;
+
+    private MaterialsHelper materialsHelper = new MaterialsHelper(this);
+    private MaterialsHandler materialsHandler = new MaterialsHandler(this, materialsHelper);
+    private MaterialsListener materialsListener = new MaterialsListener(this, materialsHandler);
+
+
+
 
     public static final int UTM_FAB_STATE = 0;
     public static final int SUBUTM_FAB_STATE = 1;
@@ -155,22 +154,23 @@ public class DemoActivity extends AppCompatActivity {
     /*
     result codes
      */
-    private static final int USER_IMAGE_RESULT_CODE = 1001;
+
 
     private boolean CLEAR_GRIDS = false;
 
 
     public static int CURRENT_GRID_FAB_STATE = UTM_FAB_STATE;
 
+    private PolygonOptions lastUTMOptions;
+
     public static String UTM_REGION = "";
 
 
-    private Thread locationUpdates;
+
     // private Thread service;
 
-    private Location currentLocation;
 
-    private Map<String, Marker> markerMap = new HashMap<>();
+
 
     //db helper can test this out.  and fix up the map to work.  is a start.
     //also need to set up base configs.
@@ -185,7 +185,7 @@ public class DemoActivity extends AppCompatActivity {
 
         }
     };
-    private DemoLocationListener demoLocationListener;
+    private MapHelper mapHelper;
 
     public static Typeface getFont() {
         return font;
@@ -196,385 +196,29 @@ public class DemoActivity extends AppCompatActivity {
     }
 
     /*
-
-     MATERIALS
-
+     getters to our fragments for listeners
      */
+    public ChatFragment getChatFrag(){return chatFrag;};
+    public GridFragment getGridFrag(){return gridFrag;}
+    public GridDialog getGridDialog(){return gridDialog;}
 
-
-    private void setUpMaterials() {
-        navDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        navDrawer.setElevation(16.0f);
-
-        navToolbar = (Toolbar) findViewById(R.id.toolbar);
-
-
-        navToggle = new ActionBarDrawerToggle(
-                this,
-                navDrawer,
-                navToolbar,
-                R.string.drawer_open,
-                R.string.drawer_close
-        ) {
+    public void createGridDialog(){
+        gridDialog = GridDialog.newInstance(SELECTED_GRID, new DialogInterface.OnClickListener() {
             @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-
-                invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-
-                invalidateOptionsMenu();
-            }
-        };
-
-
-        navDrawer.setDrawerListener(navToggle);
-
-
-        //  toolbar.setLogo(R.drawable.ic_drawer);
-        setSupportActionBar(navToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setElevation(12.0f);
-
-
-        navigationView = (NavigationView) findViewById(R.id.left_drawer);
-
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
-                onOptionsItemSelected(menuItem);
-                return true;
-            }
-        });
-
-        floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
-
-        floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_search_white_24dp));
-
-        floatingActionButton.setBackgroundTintList(materials.getSubUtmColorList());
-        floatingActionButton.setVisibility(View.INVISIBLE);
-
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                switch (fabMode) {
-                    case ALLIANCE_FAB:
-                        handleAllianceFAB(true);
-                        break;
-                    case CHAT_FAB:
-                        handleChatFAB(true);
-                        break;
-                    case GRID_FAB:
-                        handleSearchFab(CURRENT_GRID_FAB_STATE == SUBUTM_FAB_STATE ?
-                                configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue() :
-                                CURRENT_GRID_FAB_STATE == UTM_FAB_STATE ? UTM.getUTMRegion(configuration.getConfig(Configuration.CURRENT_UTM).getValue()) : "");
-                        break;
-                }
+            public void onClick(DialogInterface dialog, final int which) {
+                //the magic happens...but we cant deselect our selected item its not the pattern..
+                dialog.dismiss();
+                handleLocateDialog(gridDialog.getGrid(which));
 
             }
-        });
-
-        hiddenToolbar = (Toolbar) findViewById(R.id.hidden_toolbar);
-        hiddenToolbar.setVisibility(View.INVISIBLE);
-
-        hiddenToolbar.setNavigationIcon(getDrawable(R.drawable.ic_search_white_24dp));
-
-        userImageView = (RoundedImageView) navigationView.findViewById(R.id.user_image);
-        userImageView.setOnTouchListener(new View.OnTouchListener() {
+        }, new DialogInterface.OnCancelListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                //we need to launch to access gallery store
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(intent, USER_IMAGE_RESULT_CODE);
-
-                return false;
+            public void onCancel(DialogInterface dialog) {
+                materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
             }
         });
 
     }
-
-
-    private void setNavConfigValues() {
-
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                MenuItem item = navigationView.getMenu().findItem(R.id.utm);
-                item.setTitle(getResources().getString(R.string.menu_utm) + " - " + configuration.getConfig(Configuration.CURRENT_UTM).getValue());
-
-                item = navigationView.getMenu().findItem(R.id.sub_utm);
-                item.setTitle(getResources().getString(R.string.menu_subutm) + " - " + configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue());
-
-                item = navigationView.getMenu().findItem(R.id.encrypt);
-                item.setTitle(getResources().getString(R.string.menu_encryption) + " - " + configuration.getConfig(Configuration.SSL_ALGORITHM).getValue());
-
-                TextView textView = (TextView) navigationView.findViewById(R.id.nav_header);
-                textView.setText(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
-
-                if (userImage != null) {
-                    if (userImage.getUserImage() != null) {
-                        userImageView.setImageBitmap(userImage.getUserImage());
-                    }
-                }
-
-                gridFrag.refreshAdapter();
-            }
-        });
-
-
-    }
-
-
-    /*
-    FAB Handlers
-   */
-    private void handleChatFAB(final boolean hide) {
-
-        final ChatPost hiddenChatPost = chatFrag.getHiddenChatPost();
-
-        int cxIn = (hiddenChatPost.getLeft() + hiddenChatPost.getRight()) / 2;
-        int cyIn = (hiddenChatPost.getTop() + hiddenChatPost.getBottom()) / 2;
-
-        int radiusIn = Math.max(hiddenChatPost.getWidth(), hiddenChatPost.getHeight());
-
-        int cxOut = (floatingActionButton.getLeft() + floatingActionButton.getRight()) / 2;
-        int cyOut = (floatingActionButton.getTop() + floatingActionButton.getBottom()) / 2;
-
-        int radiusOut = floatingActionButton.getWidth();
-
-        Animator animatorIn, animatorOut = null;
-
-        if (hide) {
-            animatorIn = ViewAnimationUtils.createCircularReveal(hiddenChatPost, cxIn, cyIn, 0, radiusIn);
-        } else {
-            animatorIn = ViewAnimationUtils.createCircularReveal(floatingActionButton, cxOut, cyOut, 0, radiusOut);
-        }
-        //   animatorIn.setDuration(500);
-        animatorIn.setInterpolator(new AccelerateInterpolator());
-
-        if (hide) {
-            animatorOut = ViewAnimationUtils.createCircularReveal(floatingActionButton, cxOut, cyOut, radiusOut, 0);
-        } else {
-            animatorOut = ViewAnimationUtils.createCircularReveal(hiddenChatPost, cxIn, cyIn, radiusIn, 0);
-        }
-        //   animatorOut.setDuration(300);
-        animatorOut.setInterpolator(new AccelerateInterpolator());
-
-        animatorOut.addListener(new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-                super.onAnimationStart(animation);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                if (hide) {
-                    floatingActionButton.setVisibility(View.INVISIBLE);
-
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-
-                    hiddenChatPost.requestFocus();
-
-                } else {
-                    hiddenChatPost.setVisibility(View.GONE);
-
-                    InputMethodManager imm = (InputMethodManager) getSystemService(
-                            Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(hiddenChatPost.getWindowToken(), 0);
-
-
-                }
-
-            }
-        });
-
-        if (hide) {
-            hiddenChatPost.setVisibility(View.VISIBLE);
-        } else {
-            floatingActionButton.setVisibility(View.VISIBLE);
-        }
-
-
-        animatorOut.start();
-        animatorIn.start();
-
-    }
-
-    private void handleAllianceFAB(final boolean hide) {
-
-        final CreateView hiddenCreateView = gridFrag.getHiddenCreateView();
-
-
-        int cxIn = (hiddenCreateView.getLeft() + hiddenCreateView.getRight()) / 2;
-        int cyIn = (hiddenCreateView.getTop() + hiddenCreateView.getBottom()) / 2;
-
-        int radiusIn = Math.max(hiddenCreateView.getWidth(), hiddenCreateView.getHeight());
-
-        int cxOut = (floatingActionButton.getLeft() + floatingActionButton.getRight()) / 2;
-        int cyOut = (floatingActionButton.getTop() + floatingActionButton.getBottom()) / 2;
-
-        int radiusOut = floatingActionButton.getWidth();
-
-        Animator animatorIn, animatorOut = null;
-
-        if (hide) {
-            animatorIn = ViewAnimationUtils.createCircularReveal(hiddenCreateView, cxIn, cyIn, 0, radiusIn);
-        } else {
-            animatorIn = ViewAnimationUtils.createCircularReveal(floatingActionButton, cxOut, cyOut, 0, radiusOut);
-        }
-
-        //   animatorIn.setDuration(500);
-        animatorIn.setInterpolator(new AccelerateInterpolator());
-
-        if (hide) {
-            animatorOut = ViewAnimationUtils.createCircularReveal(floatingActionButton, cxOut, cyOut, radiusOut, 0);
-        } else {
-            animatorOut = ViewAnimationUtils.createCircularReveal(hiddenCreateView, cxIn, cyIn, radiusIn, 0);
-        }
-
-        // animatorOut.setDuration(300);
-        animatorOut.setInterpolator(new AccelerateInterpolator());
-
-        animatorOut.addListener(new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-                super.onAnimationStart(animation);
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-
-
-                if (hide) {
-                    floatingActionButton.setVisibility(View.INVISIBLE);
-
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-
-                    hiddenCreateView.requestFocus();
-
-                } else {
-                    hiddenCreateView.setVisibility(View.GONE);
-
-                    InputMethodManager imm = (InputMethodManager) getSystemService(
-                            Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(hiddenCreateView.getWindowToken(), 0);
-
-
-                }
-
-
-            }
-        });
-
-        if (hide) {
-            hiddenCreateView.setVisibility(View.VISIBLE);
-        } else {
-            floatingActionButton.setVisibility(View.VISIBLE);
-        }
-
-
-        animatorOut.start();
-        animatorIn.start();
-
-
-    }
-
-    //this is useful...but not for this.  we want a dialog with the codes. to launch.  give up now.
-    private void handleSearchFab(final String selectedGrid) {
-
-
-        int cxOut = (floatingActionButton.getLeft() + floatingActionButton.getRight()) / 2;
-        int cyOut = (floatingActionButton.getTop() + floatingActionButton.getBottom()) / 2;
-
-        int radiusOut = floatingActionButton.getWidth();
-
-
-        Animator animatorOut = ViewAnimationUtils.createCircularReveal(floatingActionButton, cxOut, cyOut, radiusOut, 0);
-
-        //animatorOut.setDuration(300);
-        animatorOut.setInterpolator(new AccelerateInterpolator());
-
-        animatorOut.addListener(new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-                super.onAnimationStart(animation);
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                floatingActionButton.setVisibility(View.INVISIBLE);
-
-                FragmentTransaction transaction = getSupportFragmentManager()
-                        .beginTransaction();
-
-                gridDialog = GridDialog.newInstance(selectedGrid, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, final int which) {
-                        //the magic happens...but we cant deselect our selected item its not the pattern..
-                        dialog.dismiss();
-                        handleLocateDialog(gridDialog.getGrid(which));
-
-                    }
-                }, new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        floatingActionButton.setVisibility(View.VISIBLE);
-                    }
-                });
-
-                gridDialog.show(transaction, "dialog");
-
-
-            }
-        });
-
-        animatorOut.start();
-
-
-    }
-
-    /*
-      FAB Handlers END
-     */
-
-
-
-
-
-    /*
-
-      MATERIALS END
-
-     */
-
-
-
-
-    /*
-      Main
-     */
 
 
     @Override
@@ -592,8 +236,10 @@ public class DemoActivity extends AppCompatActivity {
         font = Typeface.createFromAsset(
                 this.getAssets(), "fontawesome-webfont.ttf");
 
-        materials.setUpColorLists();
-        setUpMaterials();
+
+        materialsHelper.setUpMaterials(
+                materialsListener.getFABListener(),
+                materialsListener.getImageListener());
 
         //useful makes it a bit easier to work with.
         UTM.createUTMRegions();
@@ -601,8 +247,10 @@ public class DemoActivity extends AppCompatActivity {
 
 
         configuration = new Configuration(dbHelper.getConfigs());
-        userImage = dbHelper.getUserImage(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
-        setNavConfigValues();
+        materialsHelper.userImage = dbHelper.getUserImage(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
+        materialsHelper.setNavConfigValues(configuration);
+
+        mapHelper = new MapHelper(this, configuration, materialsHelper);
 
 
         uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
@@ -633,7 +281,7 @@ public class DemoActivity extends AppCompatActivity {
         //and we need to bind to it.
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
-        setUpMapIfNeeded();
+        mapHelper.setUpMapIfNeeded(dbHelper);
 
         getSupportFragmentManager().beginTransaction().add(R.id.grid_view_fragment, gridViewFragment).addToBackStack(null).commit();
 
@@ -644,7 +292,7 @@ public class DemoActivity extends AppCompatActivity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
-        navToggle.syncState();
+        materialsHelper.navToggle.syncState();
     }
 
 
@@ -662,7 +310,7 @@ public class DemoActivity extends AppCompatActivity {
 
         switch (requestCode) {
 
-            case USER_IMAGE_RESULT_CODE:
+            case MaterialsListener.USER_IMAGE_RESULT_CODE:
 
                 try {
                     // We need to recyle unused bitmaps
@@ -673,20 +321,20 @@ public class DemoActivity extends AppCompatActivity {
                     stream.close();
                     bitmap = Bitmap.createScaledBitmap(bitmap, 236, 354, false);
                     Log.d("bitmap size is", "size " + bitmap.getRowBytes() * bitmap.getHeight());
-                    userImageView.setImageBitmap(bitmap);
+                    materialsHelper.userImageView.setImageBitmap(bitmap);
                     byte[] imageArray;
-                    if (userImage == null) {
-                        userImage = new UserImage();
-                        userImage.setUserImageKey(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
-                        userImage.setUserImage(bitmap);
-                        imageArray = dbHelper.addUserImage(userImage);
+                    if (materialsHelper.userImage == null) {
+                        materialsHelper.userImage = new UserImage();
+                        materialsHelper.userImage.setUserImageKey(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
+                        materialsHelper.userImage.setUserImage(bitmap);
+                        imageArray = dbHelper.addUserImage(materialsHelper.userImage);
                     } else {
-                        userImage.setUserImage(bitmap);
-                        imageArray = dbHelper.updateUserImage(userImage);
+                        materialsHelper.userImage.setUserImage(bitmap);
+                        imageArray = dbHelper.updateUserImage(materialsHelper.userImage);
                     }
 
                     try {
-                        final OutImageMessage outImageMessage = new OutImageMessage(currentLocation, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                        final OutImageMessage outImageMessage = new OutImageMessage(locationListener.getCurrentLocation(), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
                         outImageMessage.setImage(Base64.encodeToString(imageArray, Base64.DEFAULT));
 
                         new Thread((new Runnable() {
@@ -756,7 +404,7 @@ public class DemoActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (navToggle.onOptionsItemSelected(item)) {
+        if (materialsHelper.navToggle.onOptionsItemSelected(item)) {
             return true;
         }
 
@@ -777,13 +425,13 @@ public class DemoActivity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case android.R.id.home:
-                navDrawer.openDrawer(GravityCompat.START);
+                materialsHelper.navDrawer.openDrawer(GravityCompat.START);
                 return true;
 
             case R.id.settings:
 
-                navDrawer.closeDrawer(navigationView);
-                navToolbar.setTitle(R.string.menu_settings);
+                materialsHelper.navDrawer.closeDrawer(materialsHelper.navigationView);
+                materialsHelper.navToolbar.setTitle(R.string.menu_settings);
 
                 confFrag.init(new ConfigurationHandler(), dbHelper.getConfigs(Config.USER), dbHelper.getConfigs(Config.SYSTEM));
 
@@ -798,15 +446,15 @@ public class DemoActivity extends AppCompatActivity {
             case R.id.alliances:
 
 
-                navDrawer.closeDrawer(navigationView);
+                materialsHelper.navDrawer.closeDrawer(materialsHelper.navigationView);
 
-                floatingActionButton.setBackgroundTintList(materials.getAllianceColorList());
-                floatingActionButton.setVisibility(View.VISIBLE);
-                floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_add_circle_white_24dp));
+                materialsHelper.floatingActionButton.setBackgroundTintList(materialsHelper.getColorStateList(MaterialsHelper.ALLIANCE_COLOR));
+                materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
+                materialsHelper.floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_add_circle_white_24dp));
 
-                fabMode = ALLIANCE_FAB;
-                navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
-                navToolbar.setTitle(R.string.menu_alliances);
+                MaterialsListener.FAB_MODE = MaterialsListener.ALLIANCE_FAB;
+                materialsHelper.navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
+                materialsHelper.navToolbar.setTitle(R.string.menu_alliances);
 
                 gridFrag.init(GridFragment.MY_ALLIANCES, listClickListener);
                 transaction.replace(R.id.chat_fragment, gridFrag);
@@ -844,15 +492,19 @@ public class DemoActivity extends AppCompatActivity {
 
                 }
 
-                navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_purple));
-                navToolbar.setTitle(R.string.menu_utm);
-                floatingActionButton.setBackgroundTintList(materials.getUtmColorList());
-                floatingActionButton.setVisibility(View.VISIBLE);
-                fabMode = GRID_FAB;
+                materialsHelper.navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_purple));
+                materialsHelper.navToolbar.setTitle(R.string.menu_utm);
+                materialsHelper.floatingActionButton.setBackgroundTintList(materialsHelper.getColorStateList(MaterialsHelper.UTM_COLOR));
+                materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
+                MaterialsListener.FAB_MODE = MaterialsListener.GRID_FAB;
+                SELECTED_GRID = CURRENT_GRID_FAB_STATE == SUBUTM_FAB_STATE ?
+                        configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue() :
+                        CURRENT_GRID_FAB_STATE == UTM_FAB_STATE ? UTM.getUTMRegion(configuration.getConfig(Configuration.CURRENT_UTM).getValue()) : "";
+
 
 
                 animateToGrid(myUTM, UTM_ZOOM);
-                navDrawer.closeDrawer(navigationView);
+                materialsHelper.navDrawer.closeDrawer(materialsHelper.navigationView);
 
                 try {
                     transaction.add(R.id.grid_view_fragment, gridViewFragment);
@@ -869,14 +521,18 @@ public class DemoActivity extends AppCompatActivity {
                     lastLocateSubUTM.remove();
                 }
                 lastLocateSubUTM = null;
-                navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_orange_dark));
-                navToolbar.setTitle(R.string.menu_subutm);
-                floatingActionButton.setBackgroundTintList(materials.getSubUtmColorList());
-                floatingActionButton.setVisibility(View.VISIBLE);
-                fabMode = GRID_FAB;
+                materialsHelper.navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_orange_dark));
+                materialsHelper.navToolbar.setTitle(R.string.menu_subutm);
+                materialsHelper.floatingActionButton.setBackgroundTintList(materialsHelper.getColorStateList(MaterialsHelper.SUB_UTM_COLOR));
+                materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
+                MaterialsListener.FAB_MODE = MaterialsListener.GRID_FAB;
+                SELECTED_GRID = CURRENT_GRID_FAB_STATE == SUBUTM_FAB_STATE ?
+                        configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue() :
+                        CURRENT_GRID_FAB_STATE == UTM_FAB_STATE ? UTM.getUTMRegion(configuration.getConfig(Configuration.CURRENT_UTM).getValue()) : "";
 
 
-                navDrawer.closeDrawer(navigationView);
+
+                materialsHelper.navDrawer.closeDrawer(materialsHelper.navigationView);
                 animateToGrid(mySubUTM, SUB_UTM_ZOOM);
 
                 try {
@@ -904,7 +560,7 @@ public class DemoActivity extends AppCompatActivity {
     @Override
     public void onConfigurationChanged(android.content.res.Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        navToggle.onConfigurationChanged(newConfig);
+        materialsHelper.navToggle.onConfigurationChanged(newConfig);
 
     }
 
@@ -915,18 +571,18 @@ public class DemoActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
 
-        if (currentLocation == null) {
-            currentLocation = new Location(sharedPreferences.getString("provider", ""));
+        if (mapHelper.getLocationListener().getCurrentLocation() == null) {
+            mapHelper.getLocationListener().setCurrentLocation(new Location(sharedPreferences.getString("provider", "")));
         }
 
-        currentLocation.setLatitude(Double.parseDouble(sharedPreferences.getString("latitude", "0.0")));
-        currentLocation.setLongitude(Double.parseDouble(sharedPreferences.getString("longitude", "0.0")));
+        mapHelper.getLocationListener().getCurrentLocation().setLatitude(Double.parseDouble(sharedPreferences.getString("latitude", "0.0")));
+        mapHelper.getLocationListener().getCurrentLocation().setLongitude(Double.parseDouble(sharedPreferences.getString("longitude", "0.0")));
 
 
-        setUpMapIfNeeded();
+        mapHelper.setUpMapIfNeeded(dbHelper);
 
-        if (locationUpdates == null) {
-            initLocationUpdates();
+        if (mapHelper.getLocationHelper().getLocationUpdates() == null) {
+            mapHelper.initLocationUpdates();
         }
         //and we need to bind to it.
         if (cheService == null) {
@@ -950,12 +606,12 @@ public class DemoActivity extends AppCompatActivity {
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putString("latitude", String.valueOf(currentLocation.getLatitude()));
-        editor.putString("longitude", String.valueOf(currentLocation.getLongitude()));
-        editor.putFloat("zoom", map.getCameraPosition().zoom);
-        editor.putFloat("bearing", map.getCameraPosition().bearing);
-        editor.putFloat("tilt", map.getCameraPosition().tilt);
-        editor.putString("provider", currentLocation.getProvider());
+        editor.putString("latitude", String.valueOf(mapHelper.getLocationListener().getCurrentLocation().getLatitude()));
+        editor.putString("longitude", String.valueOf(mapHelper.getLocationListener().getCurrentLocation().getLongitude()));
+        editor.putFloat("zoom", mapHelper.getMap().getCameraPosition().zoom);
+        editor.putFloat("bearing", mapHelper.getMap().getCameraPosition().bearing);
+        editor.putFloat("tilt", mapHelper.getMap().getCameraPosition().tilt);
+        editor.putString("provider", mapHelper.getLocationListener().getCurrentLocation().getProvider());
 
 
         editor.commit();
@@ -967,20 +623,20 @@ public class DemoActivity extends AppCompatActivity {
         super.onDestroy();
 
         //service = null;
-        locationUpdates = null;
-        locationUpdates = null;
+        mapHelper.getLocationHelper().killLocationUpdates();
+
         unbindService(serviceConnection);
 
         SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putString("latitude", String.valueOf(currentLocation.getLatitude()));
-        editor.putString("longitude", String.valueOf(currentLocation.getLongitude()));
-        editor.putFloat("zoom", map.getCameraPosition().zoom);
-        editor.putFloat("bearing", map.getCameraPosition().bearing);
-        editor.putFloat("tilt", map.getCameraPosition().tilt);
-        editor.putString("provider", currentLocation.getProvider());
+        editor.putString("latitude", String.valueOf(mapHelper.getLocationListener().getCurrentLocation().getLatitude()));
+        editor.putString("longitude", String.valueOf(mapHelper.getLocationListener().getCurrentLocation().getLongitude()));
+        editor.putFloat("zoom", mapHelper.getMap().getCameraPosition().zoom);
+        editor.putFloat("bearing", mapHelper.getMap().getCameraPosition().bearing);
+        editor.putFloat("tilt", mapHelper.getMap().getCameraPosition().tilt);
+        editor.putString("provider", mapHelper.getLocationListener().getCurrentLocation().getProvider());
 
         LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
 
@@ -1016,14 +672,14 @@ public class DemoActivity extends AppCompatActivity {
         //make map zoom to the UTM and search function now allows UTM search
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target((CURRENT_GRID_FAB_STATE == UTM_FAB_STATE || CURRENT_GRID_FAB_STATE == UTM_REGION_FAB_STATE) ? UTMGridCreator.getCentreUTM(polygon.getPoints()) : UTMGridCreator.getCentreSubUTM(polygon.getPoints()))
-                .tilt(tilt)
-                .bearing(bearing)
+                .tilt(mapHelper.tilt)
+                .bearing(mapHelper.bearing)
                 .zoom(zoom)
                 .build();
 
         //so need the optimal zoom to display the utm...tilt is tilt, and lat /long is centre of the utm (to calc based on utm shit)
         //and bearing = bearing
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
     }
 
@@ -1074,7 +730,7 @@ public class DemoActivity extends AppCompatActivity {
 
                 for (String utm : UTM.getUtmRegion(grid)) {
                     lastUTMOptions = UTMGridCreator.getUTMGrid(new UTM(utm)).strokeColor(getResources().getColor(android.R.color.holo_purple));
-                    Polygon polygon = map.addPolygon(lastUTMOptions);
+                    Polygon polygon = mapHelper.getMap().addPolygon(lastUTMOptions);
 
                     if (utm.equals(UTM.getRegionCentre(grid))) {
                         regionCentre = polygon;
@@ -1087,7 +743,7 @@ public class DemoActivity extends AppCompatActivity {
 
             } else {
                 lastUTMOptions = UTMGridCreator.getUTMGrid(new UTM(grid)).strokeColor(getResources().getColor(android.R.color.holo_purple));
-                lastLocateUTMs.put(grid, map.addPolygon(lastUTMOptions));
+                lastLocateUTMs.put(grid, mapHelper.getMap().addPolygon(lastUTMOptions));
                 animateToGrid(lastLocateUTMs.get(grid), UTM_ZOOM);
             }
 
@@ -1098,11 +754,11 @@ public class DemoActivity extends AppCompatActivity {
 
         } else {
             PolygonOptions subUtmOptions = UTMGridCreator.getSubUTMGrid(new SubUTM(grid), utmOptions).strokeColor(getResources().getColor(android.R.color.holo_orange_dark));
-            lastLocateSubUTM = map.addPolygon(subUtmOptions);
+            lastLocateSubUTM = mapHelper.getMap().addPolygon(subUtmOptions);
             animateToGrid(lastLocateSubUTM, SUB_UTM_ZOOM);
         }
 
-        floatingActionButton.setVisibility(View.VISIBLE);
+        materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
 
     }
 
@@ -1172,10 +828,10 @@ public class DemoActivity extends AppCompatActivity {
         }
 
         try {
-            floatingActionButton.setVisibility(View.INVISIBLE);
-            navToolbar.setTitle(R.string.app_name);
-            floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_search_white_24dp));
-            navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
+            materialsHelper.floatingActionButton.setVisibility(View.INVISIBLE);
+            materialsHelper.navToolbar.setTitle(R.string.app_name);
+            materialsHelper.floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_search_white_24dp));
+            materialsHelper.navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
         } catch (Exception e) {
 
         }
@@ -1212,14 +868,14 @@ public class DemoActivity extends AppCompatActivity {
 
 
         //change the
-        floatingActionButton.setBackgroundTintList(materials.getChatColorList());
-        floatingActionButton.setVisibility(View.VISIBLE);
-        floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_chat_bubble_outline_white_24dp));
-        navToolbar.setTitle(title);
+        materialsHelper.floatingActionButton.setBackgroundTintList(materialsHelper.getColorStateList(MaterialsHelper.CHAT_COLOR));
+        materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
+        materialsHelper.floatingActionButton.setImageDrawable(getDrawable(R.drawable.ic_chat_bubble_outline_white_24dp));
+        materialsHelper.navToolbar.setTitle(title);
 
-        fabMode = CHAT_FAB;
-        navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
-        navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
+        MaterialsListener.FAB_MODE = MaterialsListener.CHAT_FAB;
+        materialsHelper.navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
+        materialsHelper.navToolbar.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
 
 
         chatFrag.setCursor(dbHelper.getMessages(Message.ALLIANCE_MESSAGE, chatFrag.getKey()), chatFrag.getKey(), chatFrag.getTitle());
@@ -1269,14 +925,14 @@ public class DemoActivity extends AppCompatActivity {
                     case GridFragment.MY_ALLIANCES:
 
                         //create a message for the alliance....
-                        coreMessage = new OutAllianceMessage(currentLocation, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                        coreMessage = new OutAllianceMessage(mapHelper.getLocationListener().getCurrentLocation(), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
                         ((OutAllianceMessage) coreMessage).setAlliance(dbHelper.getAlliance(chatFrag.getKey()), OutCoreMessage.PUBLISH, OutCoreMessage.GLOBAL, chatFrag.getHiddenChatPost().getPost());
                         break;
 
                 }
 
                 //need to animate...but
-                handleChatFAB(false);
+                materialsHandler.handleChatFAB(chatFrag, false);
 
 
                 cheService.writeToSocket(coreMessage);
@@ -1315,14 +971,14 @@ public class DemoActivity extends AppCompatActivity {
                         alliance.setName(createText);
 
 
-                        OutAllianceMessage allianceMessage = new OutAllianceMessage(currentLocation, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                        OutAllianceMessage allianceMessage = new OutAllianceMessage(mapHelper.getLocationListener().getCurrentLocation(), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
                         allianceMessage.setAlliance(alliance, OutAllianceMessage.CREATE, OutAllianceMessage.GLOBAL, "");
 
                         cheService.writeToSocket(allianceMessage);
 
 
                         //need to animate...but
-                        handleAllianceFAB(false);
+                        materialsHandler.handleAllianceFAB(gridFrag, false);
 
 
                     } catch (NoSuchAlgorithmException nsae) {
@@ -1350,130 +1006,15 @@ public class DemoActivity extends AppCompatActivity {
      */
 
 
-    private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
-        if (map == null) {
-            // Try to obtain the map from the SupportMapFragment.
-            map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-
-            // Check if we were successful in obtaining the map.
-            if (map != null) {
-                setUpMap();
-            }
-        }
-    }
 
     /**
      * this is demo code.  we want to zoom in better and use last known location etc.  but for testing its fine
      * as i can see other code working
      */
-    private void setUpMap() {
-        map.getUiSettings().setZoomControlsEnabled(false);
-        //now dd our last known location.
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        demoLocationListener = new DemoLocationListener(locationManager);
-
-        initLocationUpdates();
 
 
-        SharedPreferences sharedPreferences = this.getPreferences(Context.MODE_PRIVATE);
 
 
-        zoom = sharedPreferences.getFloat("zoom", 10.0f);
-        tilt = sharedPreferences.getFloat("tilt", 0.0f);
-        bearing = sharedPreferences.getFloat("bearing", 0.0f);
-
-        LatLng currentLatLng = new LatLng(Double.parseDouble(sharedPreferences.getString("latitude", "0.0")),
-                Double.parseDouble(sharedPreferences.getString("longitude", "0.0")));
-
-        //need to manage map markers too.  as per old code ie remove and re add.  do this now....joy
-
-        /*
-        really need to then move towards a jira project to manage it as got loads of shit todo.
-
-        bsically its
-         */
-
-        if (userImage != null) {
-            if (userImage.getUserImage() != null) {
-                Bitmap bitmap = userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
-
-                int w = bitmap.getWidth();
-
-
-                Bitmap roundBitmap = RoundedImageView.getCroppedBitmap(bitmap, w);
-
-
-                markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
-            }
-        } else {
-            markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
-        }
-
-
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(currentLatLng)
-                .tilt(tilt)
-                .bearing(bearing)
-                .zoom(zoom)
-                .build();
-
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-
-        if (myUTM != null) {
-            myUTM.remove();
-        }
-
-        if (mySubUTM != null) {
-            mySubUTM.remove();
-        }
-
-        if (!configuration.getConfig(Configuration.CURRENT_UTM).getValue().trim().isEmpty()) {
-            utmOptions = UTMGridCreator.getUTMGrid(new UTM(configuration.getConfig(Configuration.CURRENT_UTM).getValue())).strokeColor(getResources().getColor(android.R.color.holo_purple));
-            myUTM = map.addPolygon(utmOptions);
-
-            PolygonOptions subUtmOptions = UTMGridCreator.getSubUTMGrid(new SubUTM(configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue()), utmOptions).strokeColor(getResources().getColor(android.R.color.holo_orange_dark));
-            mySubUTM = map.addPolygon(subUtmOptions);
-
-        }
-
-
-        //we now need to add any of our alliance members in...
-        Cursor allianceMembers = dbHelper.getAllianceMembers();
-
-        while (allianceMembers.moveToNext()) {
-            AllianceMember allianceMember = new AllianceMember(allianceMembers);
-
-            if (markerMap.containsKey(allianceMember.getKey())) {
-                markerMap.get(allianceMember.getKey()).remove();
-            }
-            markerMap.put(allianceMember.getKey(), map.addMarker(new MarkerOptions().position(new LatLng(allianceMember.getLatitude(), allianceMember.getLongitude())).title(allianceMember.getKey())));
-
-        }
-
-        allianceMembers.close();
-
-
-    }
-
-
-    private void initLocationUpdates() {
-        locationUpdates = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, demoLocationListener);
-                    }
-                });
-
-            }
-        });
-        locationUpdates.start();
-    }
 
     public class ConfigurationHandler extends Handler {
 
@@ -1497,12 +1038,12 @@ public class DemoActivity extends AppCompatActivity {
 
             configuration = new Configuration(dbHelper.getConfigs());
 
-            if (locationUpdates.isAlive()) {
-                locationUpdates.interrupt();
-                locationUpdates = null;
+            if (mapHelper.getLocationHelper().getLocationUpdates().isAlive()) {
+                mapHelper.getLocationHelper().getLocationUpdates().interrupt();
+                mapHelper.getLocationHelper().killLocationUpdates();
             }
 
-            initLocationUpdates();
+            mapHelper.initLocationUpdates();
             cheService.resetLocationUpdates();
         }
 
@@ -1536,7 +1077,7 @@ public class DemoActivity extends AppCompatActivity {
 
         public void handleUTMChange(String utm) {
 
-            setNavConfigValues();
+            materialsHelper.setNavConfigValues(configuration);
 
 
             final PolygonOptions options = UTMGridCreator.getUTMGrid(new UTM(utm)).strokeColor(getResources().getColor(android.R.color.holo_purple));
@@ -1558,7 +1099,7 @@ public class DemoActivity extends AppCompatActivity {
 
         public void handleSubUTMChange(String subUtm) {
 
-            setNavConfigValues();
+            materialsHelper.setNavConfigValues(configuration);
 
             configuration = new Configuration(dbHelper.getConfigs());
 
@@ -1745,83 +1286,7 @@ public class DemoActivity extends AppCompatActivity {
         }
     }
 
-    public class DemoLocationListener implements LocationListener {
 
-        /*
-        this really needs to be moved to the service not the app......to review and test nearer time.  use away cambridge as test
-         */
-
-        private LocationManager locationManager;
-
-        public DemoLocationListener(LocationManager locationManager) {
-            this.locationManager = locationManager;
-        }
-
-        @Override
-        public void onLocationChanged(Location location) {
-            // TODO Auto-generated method stub
-            //  callBack.setLocationUpdated(location);
-
-            currentLocation = location;
-
-            Log.d("location changed", "location changed");
-            LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-
-            if (markerMap.containsKey("Me")) {
-                markerMap.get("Me").remove();
-            }
-
-            if (userImage != null) {
-                if (userImage.getUserImage() != null) {
-
-
-                    Bitmap bitmap = userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
-
-                    int w = bitmap.getWidth();
-
-
-                    Bitmap roundBitmap = RoundedImageView.getCroppedBitmap(bitmap, w);
-
-                    //236 - 354
-                    markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
-
-                }
-            } else {
-                markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
-            }
-
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(currentLatLng)
-                    .tilt(map.getCameraPosition().tilt)
-                    .bearing(map.getCameraPosition().bearing)
-                    .zoom(map.getCameraPosition().zoom)
-                    .build();
-
-            map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            // TODO Auto-generated method stub
-            locationManager.removeUpdates(this);
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            // TODO Auto-generated method stub
-            locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
-
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            // TODO Auto-generated method stub
-
-        }
-    }
 
 
 }
