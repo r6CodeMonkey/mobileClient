@@ -65,12 +65,12 @@ public class TextureHelper {
 
     }
 
-    public static int loadCubeMap(Context context, int[] cubeResources){
+    public static int loadCubeMap(Context context, int[] cubeResources) {
         final int[] textureObjectIds = new int[1];
 
         glGenTextures(1, textureObjectIds, 0);
 
-        if(textureObjectIds[0] == 0){
+        if (textureObjectIds[0] == 0) {
             Log.d("Texture loader", "Cube Map failed");
             return 0;
         }
@@ -79,10 +79,10 @@ public class TextureHelper {
         options.inScaled = false;
         final Bitmap[] cubeBitMaps = new Bitmap[6];
 
-        for(int i=0;i<cubeBitMaps.length;i++){
+        for (int i = 0; i < cubeBitMaps.length; i++) {
             cubeBitMaps[i] = BitmapFactory.decodeResource(context.getResources(), cubeResources[i], options);
 
-            if(cubeBitMaps[i] == null){
+            if (cubeBitMaps[i] == null) {
                 Log.d("Texture loader", "Bitmap cube face failed");
                 glDeleteTextures(1, textureObjectIds, 0);
                 return 0;
@@ -95,15 +95,15 @@ public class TextureHelper {
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         texImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, cubeBitMaps[0], 0);
-        texImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, cubeBitMaps[1],0);
-        texImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, cubeBitMaps[2],0);
-        texImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, cubeBitMaps[3],0);
-        texImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, cubeBitMaps[4],0);
+        texImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, cubeBitMaps[1], 0);
+        texImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, cubeBitMaps[2], 0);
+        texImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, cubeBitMaps[3], 0);
+        texImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, cubeBitMaps[4], 0);
         texImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, cubeBitMaps[5], 0);
 
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        for(Bitmap bitmap : cubeBitMaps){
+        for (Bitmap bitmap : cubeBitMaps) {
             bitmap.recycle();
         }
 

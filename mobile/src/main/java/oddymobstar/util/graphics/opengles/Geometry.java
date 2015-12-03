@@ -1,7 +1,6 @@
 package oddymobstar.util.graphics.opengles;
 
 import android.util.FloatMath;
-import android.util.Log;
 
 /**
  * Created by timmytime on 10/11/15.
@@ -84,12 +83,12 @@ public class Geometry {
                     (x * other.y) - (y * other.x));
         }
 
-        public float dotProduct(Vector other){
-            return x * other.x + y *other.y + z* other.z;
+        public float dotProduct(Vector other) {
+            return x * other.x + y * other.y + z * other.z;
         }
 
-        public Vector scale(float f){
-            return new Vector(x*f, y*f, z*f);
+        public Vector scale(float f) {
+            return new Vector(x * f, y * f, z * f);
         }
     }
 
@@ -112,9 +111,9 @@ public class Geometry {
         return distanceBetween(sphere.centre, ray) < sphere.radius;
     }
 
-    public static Point intersectionPoint(Ray ray, Plane plane){
+    public static Point intersectionPoint(Ray ray, Plane plane) {
         Vector rayToPlaneVector = vectorBetween(ray.point, plane.point);
-        float scaleFactor = rayToPlaneVector.dotProduct(plane.normal)/ ray.vector.dotProduct(plane.normal);
+        float scaleFactor = rayToPlaneVector.dotProduct(plane.normal) / ray.vector.dotProduct(plane.normal);
 
         return ray.point.translate(ray.vector.scale(scaleFactor));
     }
@@ -129,11 +128,11 @@ public class Geometry {
         return areaOfTriangleTimesTwo / lengthOfBase;
     }
 
-    public static class Plane{
+    public static class Plane {
         public final Point point;
         public final Vector normal;
 
-        public Plane(Point point, Vector normal){
+        public Plane(Point point, Vector normal) {
             this.point = point;
             this.normal = normal;
 

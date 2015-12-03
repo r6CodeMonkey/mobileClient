@@ -55,8 +55,7 @@ public class MapHelper {
     private PolygonOptions utmOptions;
 
 
-
-    public MapHelper(DemoActivity main, Configuration configuration, MaterialsHelper materialsHelper){
+    public MapHelper(DemoActivity main, Configuration configuration, MaterialsHelper materialsHelper) {
         this.main = main;
         this.configuration = configuration;
         this.materialsHelper = materialsHelper;
@@ -170,10 +169,43 @@ public class MapHelper {
     }
 
 
+    public GoogleMap getMap() {
+        return map;
+    }
 
-    public GoogleMap getMap(){return map;}
-    public Map<String, Marker> getMarkerMap(){return markerMap;}
-    public void initLocationUpdates(){ locationHelper.initLocationUpdates(locationManager, locationListener);}
-    public LocationHelper getLocationHelper(){return  locationHelper;}
-    public LocationListener getLocationListener(){return locationListener;}
+    public Map<String, Marker> getMarkerMap() {
+        return markerMap;
+    }
+
+    public void initLocationUpdates() {
+        locationHelper.initLocationUpdates(locationManager, locationListener);
+    }
+
+    public LocationHelper getLocationHelper() {
+        return locationHelper;
+    }
+
+    public LocationListener getLocationListener() {
+        return locationListener;
+    }
+
+    public PolygonOptions getUtmOptions() {
+        return utmOptions;
+    }
+
+    public Polygon getMyUTM() {
+        return myUTM;
+    }
+
+    public Polygon getMySubUTM() {
+        return mySubUTM;
+    }
+
+    public void setMyUTM(Polygon myUTM) {
+        this.myUTM = myUTM;
+    }
+
+    public void setMySubUTM(Polygon mySubUTM) {
+        this.mySubUTM = mySubUTM;
+    }
 }

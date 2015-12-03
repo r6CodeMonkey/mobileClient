@@ -36,13 +36,14 @@ public class GridGLSurfaceView extends GLSurfaceView {
         setOnTouchListener(new View.OnTouchListener() {
 
             float previousX, previousY;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event != null) {
 
                     final float normalizedX = (event.getX() / (float) v.getWidth()) * 2 - 1;
                     //android doesnt like c style - as it turns out when not wrapped around all calcs.
-                    final float normalizedY = ((event.getY() / (float) v.getHeight()) * 2 - 1)*-1;
+                    final float normalizedY = ((event.getY() / (float) v.getHeight()) * 2 - 1) * -1;
 
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
@@ -70,7 +71,7 @@ public class GridGLSurfaceView extends GLSurfaceView {
                             @Override
                             public void run() {
 
-                                renderer.handleTouchDrag(normalizedX,normalizedY);
+                                renderer.handleTouchDrag(normalizedX, normalizedY);
                                 renderer.handleCamera(deltaX, deltaY);
                             }
                         });

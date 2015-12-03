@@ -18,7 +18,7 @@ import static android.opengl.GLES20.glUniformMatrix4fv;
  */
 public class SkyBoxShaderProgram extends ShaderProgram {
 
-    public SkyBoxShaderProgram(Context context){
+    public SkyBoxShaderProgram(Context context) {
         super(context, R.raw.skybox_vertex_shader, R.raw.skybox_fragment_shader);
 
         uMatrixLocation = glGetUniformLocation(program, U_MATRIX);
@@ -28,12 +28,12 @@ public class SkyBoxShaderProgram extends ShaderProgram {
 
     @Override
     public void setUniforms(float[] matrix) {
-          //not used
+        //not used
     }
 
     @Override
     public void setUniforms(float[] matrix, int textureId) {
-       glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
+        glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
@@ -42,6 +42,6 @@ public class SkyBoxShaderProgram extends ShaderProgram {
 
     @Override
     public void setUniforms(float[] matrix, float r, float g, float b) {
-          //not used
+        //not used
     }
 }

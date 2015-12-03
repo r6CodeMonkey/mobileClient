@@ -29,7 +29,6 @@ import static android.opengl.GLES20.GL_LESS;
 import static android.opengl.GLES20.glClear;
 import static android.opengl.GLES20.glClearColor;
 import static android.opengl.GLES20.glDepthFunc;
-import static android.opengl.GLES20.glDisable;
 import static android.opengl.GLES20.glEnable;
 import static android.opengl.GLES20.glViewport;
 import static android.opengl.Matrix.invertM;
@@ -98,15 +97,15 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
 
         skyBox = new SkyBox();
-        heightMap = new HeightMap(((BitmapDrawable)context.getDrawable(R.drawable.heightmap)).getBitmap());
+        heightMap = new HeightMap(((BitmapDrawable) context.getDrawable(R.drawable.heightmap)).getBitmap());
 
         table = new Table();
         mallet = new Mallet(0.08f, 0.15f, 32);
-        puck = new Puck(0.06f,0.02f,32);
+        puck = new Puck(0.06f, 0.02f, 32);
 
-        blueMalletPosition = new Geometry.Point(0f,mallet.height / 2f, 0.4f);
-        puckPosition = new Geometry.Point(0f,puck.height /2f, 0f);
-        puckVector = new Geometry.Vector(0f,0f,0f);
+        blueMalletPosition = new Geometry.Point(0f, mallet.height / 2f, 0.4f);
+        puckPosition = new Geometry.Point(0f, puck.height / 2f, 0f);
+        puckVector = new Geometry.Vector(0f, 0f, 0f);
 
         colorShaderProgram = new ColorShaderProgram(context);
         textureShaderProgram = new TextureShaderProgram(context);
@@ -117,7 +116,6 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
         skyBoxTexture = TextureHelper.loadCubeMap(context,
                 new int[]{R.drawable.sea_lf, R.drawable.sea_rt, R.drawable.sea_dn, R.drawable.sea_up, R.drawable.sea_ft, R.drawable.sea_bk});
-
 
 
     }
@@ -141,13 +139,13 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         puckPosition = puckPosition.translate(puckVector);
 
         //pretty crude shit.  i can use my proper stuff eventually on this, ie physics etc.  not required tho here
-        if(puckPosition.x < leftBound + puck.radius || puckPosition.x > rightBound - puck.radius){
+        if (puckPosition.x < leftBound + puck.radius || puckPosition.x > rightBound - puck.radius) {
             puckVector = new Geometry.Vector(-puckVector.x, puckVector.y, puckVector.z);
             puckVector = puckVector.scale(0.9f);
         }
 
-        if(puckPosition.z < farBound + puck.radius || puckPosition.z > nearBound - puck.radius){
-            puckVector = new Geometry.Vector(puckVector.x, puckVector.y, - puckVector.z);
+        if (puckPosition.z < farBound + puck.radius || puckPosition.z > nearBound - puck.radius) {
+            puckVector = new Geometry.Vector(puckVector.x, puckVector.y, -puckVector.z);
             puckVector = puckVector.scale(0.9f);
         }
 
@@ -170,7 +168,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     }
 
 
-    private void drawHeightMap(){
+    private void drawHeightMap() {
 
         //still not working.  probably the crappy image itself.  upside, i dont need this for what i am about to do
         //therefore, fuck this off and simply use a texture as the floor, as we want the texture to scroll, rather than
@@ -187,10 +185,10 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         heightMap.draw();
     }
 
-    private void drawSkyBox(){
+    private void drawSkyBox() {
         //draw the skybox.
         setIdentityM(modelMatrix, 0);
-      //pointless get height map working  translateM(modelMatrix, 0, 0f, -5f, 0f);
+        //pointless get height map working  translateM(modelMatrix, 0, 0f, -5f, 0f);
         scaleM(modelMatrix, 0, 100f, 100f, 100f);
         rotateM(modelMatrix, 0, -yRotation, 1f, 0f, 0f);
         rotateM(modelMatrix, 0, -xRotation, 0f, 1f, 0f);
@@ -204,7 +202,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         glDepthFunc(GL_LESS);
     }
 
-    private void drawAirHockey(){
+    private void drawAirHockey() {
 
 
         //set table position
@@ -246,13 +244,12 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         puck.draw();
 
 
-
     }
 
     /*
      touch event handlers
      */
-    public void handleTouchPress(float normalizedX, float normalizedY){
+    public void handleTouchPress(float normalizedX, float normalizedY) {
 
         Geometry.Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
         Geometry.Sphere malletBoundingSphere = new Geometry.Sphere(new Geometry.Point(blueMalletPosition.x, blueMalletPosition.y, blueMalletPosition.z), mallet.height / 2f);
@@ -261,25 +258,25 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     }
 
 
-    public void handleCamera(float deltaX, float deltaY){
-        xRotation += deltaX/16f;
-        yRotation += deltaY/16f;
+    public void handleCamera(float deltaX, float deltaY) {
+        xRotation += deltaX / 16f;
+        yRotation += deltaY / 16f;
 
-        if(yRotation < -90){
+        if (yRotation < -90) {
             yRotation = -90;
-        }else if(yRotation > 90){
+        } else if (yRotation > 90) {
             yRotation = 90;
         }
 
-     //   updateViewMatrices();
+        //   updateViewMatrices();
     }
 
-    public void handleTouchDrag(float normalizedX, float normalizedY){
+    public void handleTouchDrag(float normalizedX, float normalizedY) {
 
-        if(malletPressed){
+        if (malletPressed) {
 
             Geometry.Ray ray = convertNormalized2DPointToRay(normalizedX, normalizedY);
-            Geometry.Plane plane = new Geometry.Plane(new Geometry.Point(0,0,0), new Geometry.Vector(0,1,0));
+            Geometry.Plane plane = new Geometry.Plane(new Geometry.Point(0, 0, 0), new Geometry.Vector(0, 1, 0));
             Geometry.Point touchedPoint = Geometry.intersectionPoint(ray, plane);
 
             previousBlueMalletPosition = blueMalletPosition;
@@ -290,7 +287,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
             float distance = Geometry.vectorBetween(blueMalletPosition, puckPosition).length();
 
-            if(distance < (puck.radius + mallet.radius)){
+            if (distance < (puck.radius + mallet.radius)) {
 
                 puckVector = Geometry.vectorBetween(previousBlueMalletPosition, blueMalletPosition);
             }
@@ -300,7 +297,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     /*
      create a Ray
      */
-    private Geometry.Ray convertNormalized2DPointToRay(float normalizedX, float normalizedY){
+    private Geometry.Ray convertNormalized2DPointToRay(float normalizedX, float normalizedY) {
 
         final float[] nearPointNdc = {normalizedX, normalizedY, -1, 1};
         final float[] farPointNdc = {normalizedX, normalizedY, 1, 1};
@@ -320,7 +317,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         return new Geometry.Ray(nearPointRay, Geometry.vectorBetween(nearPointRay, farPointRay));
     }
 
-    private void divideByW(float[] vector){
+    private void divideByW(float[] vector) {
         vector[0] /= vector[3];
         vector[1] /= vector[3];
         vector[2] /= vector[3];

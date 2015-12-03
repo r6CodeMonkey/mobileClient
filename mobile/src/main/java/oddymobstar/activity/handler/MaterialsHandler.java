@@ -3,9 +3,7 @@ package oddymobstar.activity.handler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
@@ -17,7 +15,6 @@ import oddymobstar.fragment.ChatFragment;
 import oddymobstar.fragment.GridFragment;
 import oddymobstar.util.widget.ChatPost;
 import oddymobstar.util.widget.CreateView;
-import oddymobstar.util.widget.GridDialog;
 
 /**
  * Created by timmytime on 03/12/15.
@@ -28,7 +25,7 @@ public class MaterialsHandler {
     private DemoActivity main;
     private MaterialsHelper materialsHelper;
 
-    public MaterialsHandler(DemoActivity main, MaterialsHelper materialsHelper){
+    public MaterialsHandler(DemoActivity main, MaterialsHelper materialsHelper) {
         this.main = main;
         this.materialsHelper = materialsHelper;
     }
@@ -224,7 +221,7 @@ public class MaterialsHandler {
                 FragmentTransaction transaction = main.getSupportFragmentManager()
                         .beginTransaction();
 
-               main.createGridDialog();
+                main.createGridDialog();
 
                 main.getGridDialog().show(transaction, "dialog");
 

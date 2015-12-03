@@ -5,13 +5,9 @@ import java.nio.ByteBuffer;
 import oddymobstar.graphics.data.VertexArray;
 import oddymobstar.graphics.model.ModelInterface;
 import oddymobstar.graphics.programs.ShaderProgram;
-import oddymobstar.graphics.programs.SkyBoxShaderProgram;
 
-import static android.opengl.GLES20.GL_LEQUAL;
-import static android.opengl.GLES20.GL_LESS;
 import static android.opengl.GLES20.GL_TRIANGLES;
 import static android.opengl.GLES20.GL_UNSIGNED_BYTE;
-import static android.opengl.GLES20.glDepthFunc;
 import static android.opengl.GLES20.glDrawElements;
 
 /**
@@ -60,11 +56,11 @@ public class SkyBox implements ModelInterface {
 
     }
 
-    public void bindData(ShaderProgram shaderProgram){
+    public void bindData(ShaderProgram shaderProgram) {
         vertexArray.setVertextAttribPointer(0, shaderProgram.getPositionAttributeLocation(), POSITION_COMPONENT_COUNT, 0);
     }
 
-    public void draw(){
+    public void draw() {
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, indexArray);
     }
 }

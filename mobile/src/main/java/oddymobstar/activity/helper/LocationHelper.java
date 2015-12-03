@@ -14,7 +14,7 @@ public class LocationHelper {
     private Thread locationUpdates;
     private Configuration configuration;
 
-    public LocationHelper(Configuration configuration){
+    public LocationHelper(Configuration configuration) {
         this.configuration = configuration;
     }
 
@@ -34,7 +34,12 @@ public class LocationHelper {
         locationUpdates.start();
     }
 
-    public Thread getLocationUpdates(){return locationUpdates;}
-    public void killLocationUpdates(){ locationUpdates = null;}
+    public Thread getLocationUpdates() {
+        return locationUpdates;
+    }
+
+    public void killLocationUpdates() {
+        locationUpdates = null;
+    }
 
 }

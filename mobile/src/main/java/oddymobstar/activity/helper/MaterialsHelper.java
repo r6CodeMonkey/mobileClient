@@ -1,16 +1,13 @@
 package oddymobstar.activity.helper;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -18,7 +15,6 @@ import oddymobstar.activity.DemoActivity;
 import oddymobstar.crazycourier.R;
 import oddymobstar.model.UserImage;
 import oddymobstar.util.Configuration;
-import oddymobstar.util.UTM;
 import oddymobstar.util.graphics.RoundedImageView;
 
 /**
@@ -51,8 +47,7 @@ public class MaterialsHelper {
     public UserImage userImage;
 
 
-
-    public MaterialsHelper(DemoActivity main){
+    public MaterialsHelper(DemoActivity main) {
         this.context = main.getApplicationContext();
         this.main = main;
 
@@ -63,8 +58,8 @@ public class MaterialsHelper {
 
     }
 
-    public ColorStateList getColorStateList(int which){
-        switch(which) {
+    public ColorStateList getColorStateList(int which) {
+        switch (which) {
 
             case UTM_COLOR:
                 return utmColorList;
@@ -81,9 +76,8 @@ public class MaterialsHelper {
     }
 
 
-
-    private ColorStateList createColorStateList(int color){
-        return  new ColorStateList(
+    private ColorStateList createColorStateList(int color) {
+        return new ColorStateList(
                 new int[][]{
                         new int[]{android.R.attr.state_pressed}, //1
                         new int[]{android.R.attr.state_focused}, //2
@@ -229,7 +223,7 @@ public class MaterialsHelper {
                     }
                 }
 
-              //  gridFrag.refreshAdapter();  //dont really need this...to check its for alliances..
+                //  gridFrag.refreshAdapter();  //dont really need this...to check its for alliances..
             }
         });
 

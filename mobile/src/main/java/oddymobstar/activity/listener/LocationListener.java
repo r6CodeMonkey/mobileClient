@@ -31,88 +31,90 @@ public class LocationListener implements android.location.LocationListener {
     private Configuration configuration;
     private MaterialsHelper materialsHelper;
 
-        public LocationListener(LocationManager locationManager, MapHelper mapHelper, Configuration configuration, MaterialsHelper materialsHelper) {
-            this.locationManager = locationManager;
-            this.mapHelper = mapHelper;
-            this.configuration = configuration;
-            this.materialsHelper = materialsHelper;
-        }
+    public LocationListener(LocationManager locationManager, MapHelper mapHelper, Configuration configuration, MaterialsHelper materialsHelper) {
+        this.locationManager = locationManager;
+        this.mapHelper = mapHelper;
+        this.configuration = configuration;
+        this.materialsHelper = materialsHelper;
+    }
 
 
-    public Location getCurrentLocation(){return currentLocation;}
+    public Location getCurrentLocation() {
+        return currentLocation;
+    }
 
-    public void setCurrentLocation(Location currentLocation){
+    public void setCurrentLocation(Location currentLocation) {
         this.currentLocation = currentLocation;
     }
 
-    public void updateConfiguration(Configuration configuration){
+    public void updateConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
 
-        @Override
-        public void onLocationChanged(Location location) {
-            // TODO Auto-generated method stub
-            //  callBack.setLocationUpdated(location);
+    @Override
+    public void onLocationChanged(Location location) {
+        // TODO Auto-generated method stub
+        //  callBack.setLocationUpdated(location);
 
-            currentLocation = location;
+        currentLocation = location;
 
-            Log.d("location changed", "location changed");
-            LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        Log.d("location changed", "location changed");
+        LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-            if (mapHelper.getMarkerMap().containsKey("Me")) {
-                mapHelper.getMarkerMap().get("Me").remove();
+        if (mapHelper.getMarkerMap().containsKey("Me")) {
+            mapHelper.getMarkerMap().get("Me").remove();
+        }
+
+        if (materialsHelper.userImage != null) {
+            if (materialsHelper.userImage.getUserImage() != null) {
+
+
+                Bitmap bitmap = materialsHelper.userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
+
+                int w = bitmap.getWidth();
+
+
+                Bitmap roundBitmap = RoundedImageView.getCroppedBitmap(bitmap, w);
+
+                //236 - 354
+                mapHelper.getMarkerMap().put("Me", mapHelper.getMap().addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
+
             }
-
-            if (materialsHelper.userImage != null) {
-                if (materialsHelper.userImage.getUserImage() != null) {
-
-
-                    Bitmap bitmap = materialsHelper.userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
-
-                    int w = bitmap.getWidth();
-
-
-                    Bitmap roundBitmap = RoundedImageView.getCroppedBitmap(bitmap, w);
-
-                    //236 - 354
-                    mapHelper.getMarkerMap().put("Me", mapHelper.getMap().addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
-
-                }
-            } else {
-                mapHelper.getMarkerMap().put("Me", mapHelper.getMap().addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
-            }
-
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(currentLatLng)
-                    .tilt(mapHelper.getMap().getCameraPosition().tilt)
-                    .bearing(mapHelper.getMap().getCameraPosition().bearing)
-                    .zoom(mapHelper.getMap().getCameraPosition().zoom)
-                    .build();
-
-            mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-
+        } else {
+            mapHelper.getMarkerMap().put("Me", mapHelper.getMap().addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
         }
 
-        @Override
-        public void onProviderDisabled(String provider) {
-            // TODO Auto-generated method stub
-            locationManager.removeUpdates(this);
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(currentLatLng)
+                .tilt(mapHelper.getMap().getCameraPosition().tilt)
+                .bearing(mapHelper.getMap().getCameraPosition().bearing)
+                .zoom(mapHelper.getMap().getCameraPosition().zoom)
+                .build();
 
-        }
+        mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
-        @Override
-        public void onProviderEnabled(String provider) {
-            // TODO Auto-generated method stub
-            locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
 
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            // TODO Auto-generated method stub
-
-        }
     }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        // TODO Auto-generated method stub
+        locationManager.removeUpdates(this);
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        // TODO Auto-generated method stub
+        locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // TODO Auto-generated method stub
+
+    }
+}
 
 

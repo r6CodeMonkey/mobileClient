@@ -1,8 +1,6 @@
 package oddymobstar.activity;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -13,44 +11,27 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.animation.AccelerateInterpolator;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
@@ -93,14 +74,10 @@ import oddymobstar.util.SubUTM;
 import oddymobstar.util.UTM;
 import oddymobstar.util.UTMGridCreator;
 import oddymobstar.util.UUIDGenerator;
-import oddymobstar.util.graphics.RoundedImageView;
-import oddymobstar.util.widget.ChatPost;
 import oddymobstar.util.widget.ConnectivityDialog;
-import oddymobstar.util.widget.CreateView;
 import oddymobstar.util.widget.GridDialog;
 
 public class DemoActivity extends AppCompatActivity {
-
 
 
     private static String SELECTED_GRID = "";
@@ -113,7 +90,6 @@ public class DemoActivity extends AppCompatActivity {
     private static float UTM_REGION_ZOOM = 3;
     private static float UTM_ZOOM = 5;
     private static float SUB_UTM_ZOOM = 12;
-
 
 
     private Configuration configuration;
@@ -145,8 +121,6 @@ public class DemoActivity extends AppCompatActivity {
     private MaterialsListener materialsListener = new MaterialsListener(this, materialsHandler);
 
 
-
-
     public static final int UTM_FAB_STATE = 0;
     public static final int SUBUTM_FAB_STATE = 1;
     public static final int UTM_REGION_FAB_STATE = 2;
@@ -166,10 +140,7 @@ public class DemoActivity extends AppCompatActivity {
     public static String UTM_REGION = "";
 
 
-
     // private Thread service;
-
-
 
 
     //db helper can test this out.  and fix up the map to work.  is a start.
@@ -198,11 +169,21 @@ public class DemoActivity extends AppCompatActivity {
     /*
      getters to our fragments for listeners
      */
-    public ChatFragment getChatFrag(){return chatFrag;};
-    public GridFragment getGridFrag(){return gridFrag;}
-    public GridDialog getGridDialog(){return gridDialog;}
+    public ChatFragment getChatFrag() {
+        return chatFrag;
+    }
 
-    public void createGridDialog(){
+    ;
+
+    public GridFragment getGridFrag() {
+        return gridFrag;
+    }
+
+    public GridDialog getGridDialog() {
+        return gridDialog;
+    }
+
+    public void createGridDialog() {
         gridDialog = GridDialog.newInstance(SELECTED_GRID, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, final int which) {
@@ -334,7 +315,7 @@ public class DemoActivity extends AppCompatActivity {
                     }
 
                     try {
-                        final OutImageMessage outImageMessage = new OutImageMessage(locationListener.getCurrentLocation(), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+                        final OutImageMessage outImageMessage = new OutImageMessage(mapHelper.getLocationListener().getCurrentLocation(), configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
                         outImageMessage.setImage(Base64.encodeToString(imageArray, Base64.DEFAULT));
 
                         new Thread((new Runnable() {
@@ -502,8 +483,7 @@ public class DemoActivity extends AppCompatActivity {
                         CURRENT_GRID_FAB_STATE == UTM_FAB_STATE ? UTM.getUTMRegion(configuration.getConfig(Configuration.CURRENT_UTM).getValue()) : "";
 
 
-
-                animateToGrid(myUTM, UTM_ZOOM);
+                animateToGrid(mapHelper.getMyUTM(), UTM_ZOOM);
                 materialsHelper.navDrawer.closeDrawer(materialsHelper.navigationView);
 
                 try {
@@ -531,9 +511,8 @@ public class DemoActivity extends AppCompatActivity {
                         CURRENT_GRID_FAB_STATE == UTM_FAB_STATE ? UTM.getUTMRegion(configuration.getConfig(Configuration.CURRENT_UTM).getValue()) : "";
 
 
-
                 materialsHelper.navDrawer.closeDrawer(materialsHelper.navigationView);
-                animateToGrid(mySubUTM, SUB_UTM_ZOOM);
+                animateToGrid(mapHelper.getMySubUTM(), SUB_UTM_ZOOM);
 
                 try {
                     transaction.replace(R.id.grid_view_fragment, gridViewFragment);
@@ -753,7 +732,7 @@ public class DemoActivity extends AppCompatActivity {
             animateToGrid(lastLocateUTMs.get(grid), UTM_ZOOM);
 
         } else {
-            PolygonOptions subUtmOptions = UTMGridCreator.getSubUTMGrid(new SubUTM(grid), utmOptions).strokeColor(getResources().getColor(android.R.color.holo_orange_dark));
+            PolygonOptions subUtmOptions = UTMGridCreator.getSubUTMGrid(new SubUTM(grid), mapHelper.getUtmOptions()).strokeColor(getResources().getColor(android.R.color.holo_orange_dark));
             lastLocateSubUTM = mapHelper.getMap().addPolygon(subUtmOptions);
             animateToGrid(lastLocateSubUTM, SUB_UTM_ZOOM);
         }
@@ -1006,14 +985,10 @@ public class DemoActivity extends AppCompatActivity {
      */
 
 
-
     /**
      * this is demo code.  we want to zoom in better and use last known location etc.  but for testing its fine
      * as i can see other code working
      */
-
-
-
 
 
     public class ConfigurationHandler extends Handler {
@@ -1087,11 +1062,11 @@ public class DemoActivity extends AppCompatActivity {
                 @Override
                 public void run() {
 
-                    if (myUTM != null) {
-                        myUTM.remove();
+                    if (mapHelper.getMyUTM() != null) {
+                        mapHelper.getMyUTM().remove();
                     }
 
-                    myUTM = map.addPolygon(options);
+                    mapHelper.setMyUTM(mapHelper.getMap().addPolygon(options));
 
                 }
             });
@@ -1122,10 +1097,10 @@ public class DemoActivity extends AppCompatActivity {
                     @Override
                     public void run() {
 
-                        if (mySubUTM != null) {
-                            mySubUTM.remove();
+                        if (mapHelper.getMySubUTM() != null) {
+                            mapHelper.getMySubUTM().remove();
                         }
-                        mySubUTM = map.addPolygon(options);
+                        mapHelper.setMySubUTM(mapHelper.getMap().addPolygon(options));
                     }
                 });
             }
@@ -1172,26 +1147,26 @@ public class DemoActivity extends AppCompatActivity {
                 @Override
                 public void run() {
 
-                    if (markerMap.containsKey(allianceMember.getKey())) {
-                        markerMap.get(allianceMember.getKey()).remove();
+                    if (mapHelper.getMarkerMap().containsKey(allianceMember.getKey())) {
+                        mapHelper.getMarkerMap().get(allianceMember.getKey()).remove();
                         Log.d("adding marker", "removing marker ");
                     }
 
-                    Marker marker = map.addMarker(new MarkerOptions().position(allianceMember.getLatLng()).title(allianceMember.getKey()));
+                    Marker marker = mapHelper.getMap().addMarker(new MarkerOptions().position(allianceMember.getLatLng()).title(allianceMember.getKey()));
 
                     if (zoomTo) {
                         CameraPosition cameraPosition = new CameraPosition.Builder()
                                 .target(allianceMember.getLatLng())
-                                .tilt(map.getCameraPosition().tilt)
-                                .bearing(map.getCameraPosition().bearing)
-                                .zoom(map.getCameraPosition().zoom)
+                                .tilt(mapHelper.getMap().getCameraPosition().tilt)
+                                .bearing(mapHelper.getMap().getCameraPosition().bearing)
+                                .zoom(mapHelper.getMap().getCameraPosition().zoom)
                                 .build();
 
-                        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                        mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                     }
 
                     if (marker != null) {
-                        markerMap.put(allianceMember.getKey(), marker);
+                        mapHelper.getMarkerMap().put(allianceMember.getKey(), marker);
                     }
 
                 }
@@ -1217,7 +1192,7 @@ public class DemoActivity extends AppCompatActivity {
 
         public DeviceDiscovery(Context context) {
 
-            bluetoothManager = new BluetoothManager(context, connectivityHandler, dbHelper, uuidGenerator, cheService, configuration, chatFrag.getKey(), currentLocation);
+            bluetoothManager = new BluetoothManager(context, connectivityHandler, dbHelper, uuidGenerator, cheService, configuration, chatFrag.getKey(), mapHelper.getLocationListener().getCurrentLocation());
 
         }
 
@@ -1247,6 +1222,7 @@ public class DemoActivity extends AppCompatActivity {
 
 
     }
+
 
     private class ListClickListener implements AdapterView.OnItemClickListener {
 
@@ -1285,8 +1261,6 @@ public class DemoActivity extends AppCompatActivity {
 
         }
     }
-
-
 
 
 }

@@ -1,14 +1,11 @@
 package oddymobstar.activity.listener;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.activity.handler.MaterialsHandler;
-import oddymobstar.fragment.ChatFragment;
-import oddymobstar.fragment.GridFragment;
 
 /**
  * Created by timmytime on 03/12/15.
@@ -28,13 +25,13 @@ public class MaterialsListener {
     private DemoActivity main;
     private MaterialsHandler materialsHandler;
 
-    public MaterialsListener(DemoActivity main, MaterialsHandler materialsHandler){
+    public MaterialsListener(DemoActivity main, MaterialsHandler materialsHandler) {
         this.main = main;
         this.materialsHandler = materialsHandler;
     }
 
-    public View.OnClickListener getFABListener(){
-        return   new View.OnClickListener() {
+    public View.OnClickListener getFABListener() {
+        return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -61,8 +58,8 @@ public class MaterialsListener {
 
     }
 
-    public View.OnTouchListener getImageListener(){
-        return   new View.OnTouchListener() {
+    public View.OnTouchListener getImageListener() {
+        return new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 

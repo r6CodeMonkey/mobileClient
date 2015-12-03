@@ -1,10 +1,10 @@
 package oddymobstar.graphics.programs;
 
 import android.content.Context;
-import android.util.Log;
 
 import oddymobstar.util.graphics.opengles.RawResourceLoader;
 import oddymobstar.util.graphics.opengles.ShaderHelper;
+
 import static android.opengl.GLES20.glUseProgram;
 
 /**
@@ -16,7 +16,6 @@ public abstract class ShaderProgram implements ProgramInterface {
     protected static final String U_COLOR = "u_Color";
     protected static final String A_POSITION = "a_Position";
     protected static final String U_MATRIX = "u_Matrix";
-
 
 
     protected static final String U_TEXTURE_UNIT = "u_TextureUnit";
@@ -31,7 +30,7 @@ public abstract class ShaderProgram implements ProgramInterface {
 
         program = ShaderHelper.buildProgram(RawResourceLoader.readRawResource(context, vertexShaderResourceId),
                 RawResourceLoader.readRawResource(context, fragmentShaderResourceId));
-     }
+    }
 
     public void useProgram() {
         glUseProgram(program);
