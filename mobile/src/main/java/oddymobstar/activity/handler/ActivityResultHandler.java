@@ -83,7 +83,7 @@ public class ActivityResultHandler {
 
                         }
 
-                       //need to review this too.! bitmap.recycle();
+                        //need to review this too.! bitmap.recycle();
 
 
                     } catch (FileNotFoundException fe) {

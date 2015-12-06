@@ -86,7 +86,6 @@ public class DemoActivityController {
     private DemoActivity main;
 
 
-
     //this will manage the initialisation of the main objects, and can be used to pass these objects to sub routines
     public DemoActivityController(DemoActivity main) {
         this.main = main;
@@ -109,7 +108,7 @@ public class DemoActivityController {
         };
 
 
-        fragmentHandler = new FragmentHandler(main,this);
+        fragmentHandler = new FragmentHandler(main, this);
         configuration = new Configuration(dbHelper.getConfigs());
         messageHandler = new MessageHandler(main, this);
         uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());

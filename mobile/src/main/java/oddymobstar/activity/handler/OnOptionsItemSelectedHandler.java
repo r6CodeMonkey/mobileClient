@@ -79,8 +79,7 @@ public class OnOptionsItemSelectedHandler {
                 controller.materialsHandler.handleFABChange(MaterialsHelper.ALLIANCE_COLOR, R.drawable.ic_add_circle_white_24dp, View.VISIBLE);
 
                 controller.materialsListener.FAB_MODE = MaterialsListener.ALLIANCE_FAB;
-                controller.materialsHelper.navToolbar.setBackgroundColor(main.getResources().getColor(android.R.color.holo_red_dark));
-                controller.materialsHelper.navToolbar.setTitle(R.string.menu_alliances);
+                controller.materialsHandler.handleNavToolbar(main.getResources().getColor(android.R.color.holo_red_dark), "string");
 
                 controller.fragmentHandler.gridFrag.init(GridFragment.MY_ALLIANCES, controller.viewListener.getListClickListener());
                 transaction.replace(R.id.chat_fragment, controller.fragmentHandler.gridFrag);
@@ -118,9 +117,7 @@ public class OnOptionsItemSelectedHandler {
 
                 }
 
-                controller.materialsHelper.navToolbar.setBackgroundColor(main.getResources().getColor(android.R.color.holo_purple));
-                controller.materialsHelper.navToolbar.setTitle(R.string.menu_utm);
-
+                controller.materialsHandler.handleNavToolbar(main.getResources().getColor(android.R.color.holo_purple), "string");
                 controller.materialsHandler.handleFABChange(MaterialsHelper.UTM_COLOR, -1, View.VISIBLE);
 
                 MaterialsListener.FAB_MODE = MaterialsListener.GRID_FAB;
@@ -147,9 +144,9 @@ public class OnOptionsItemSelectedHandler {
                     controller.mapHandler.lastLocateSubUTM.remove();
                 }
                 controller.mapHandler.lastLocateSubUTM = null;
-                controller.materialsHelper.navToolbar.setBackgroundColor(main.getResources().getColor(android.R.color.holo_orange_dark));
-                controller.materialsHelper.navToolbar.setTitle(R.string.menu_subutm);
+                controller.materialsHandler.handleNavToolbar(main.getResources().getColor(android.R.color.holo_orange_dark), "SubUTM");
                 controller.materialsHandler.handleFABChange(MaterialsHelper.SUB_UTM_COLOR, -1, View.VISIBLE);
+
                 MaterialsListener.FAB_MODE = MaterialsListener.GRID_FAB;
                 controller.mapHandler.SELECTED_GRID = MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.SUBUTM_FAB_STATE ?
                         controller.configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue() :

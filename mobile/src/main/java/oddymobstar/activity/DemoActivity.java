@@ -1,8 +1,6 @@
 package oddymobstar.activity;
 
 
-import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -19,10 +17,8 @@ public class DemoActivity extends AppCompatActivity {
 
 
     public static final Long TWO_MINUTES = 120000l;
-
-    private DemoActivityController controller = new DemoActivityController(this);
-
     private static Typeface font = null;
+    private DemoActivityController controller = new DemoActivityController(this);
 
     public static Typeface getFont() {
         return font;
@@ -93,6 +89,9 @@ public class DemoActivity extends AppCompatActivity {
         controller.onDestroy();
     }
 
+    /*
+      View Callbacks / action performed
+     */
 
     public void deleteMessages(View view) {
         controller.viewHandler.deleteMessages();

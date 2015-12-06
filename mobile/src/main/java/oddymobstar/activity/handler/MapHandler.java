@@ -56,8 +56,6 @@ public class MapHandler {
                 .zoom(zoom)
                 .build();
 
-        //so need the optimal zoom to display the utm...tilt is tilt, and lat /long is centre of the utm (to calc based on utm shit)
-        //and bearing = bearing
         controller.mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
     }
@@ -116,7 +114,7 @@ public class MapHandler {
                     lastLocateUTMs.put(utm, polygon);
 
                 }
-                //we actually need the central one for this...god damn it.
+
                 animateToGrid(regionCentre, UTM_REGION_ZOOM);
 
             } else {
@@ -126,8 +124,6 @@ public class MapHandler {
             }
 
         } else if (CURRENT_GRID_FAB_STATE == UTM_REGION_FAB_STATE) {
-            //  PolygonOptions subUtmOptions = UTMGridCreator.getUTMGrid(new UTM(grid)).strokeColor(getResources().getColor(android.R.color.holo_purple));
-            //  lastLocateUTMs.add(map.addPolygon(subUtmOptions);
             animateToGrid(lastLocateUTMs.get(grid), UTM_ZOOM);
 
         } else {

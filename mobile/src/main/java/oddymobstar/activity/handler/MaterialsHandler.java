@@ -81,6 +81,7 @@ public class MaterialsHandler {
             animatorOut = ViewAnimationUtils.createCircularReveal(view, cxIn, cyIn, radiusIn, 0);
         }
 
+        animatorOut.setInterpolator(new AccelerateInterpolator());
 
         return animatorOut;
     }
@@ -94,8 +95,6 @@ public class MaterialsHandler {
         Animator animatorIn = getAnimatorIn(hiddenChatPost, hide);
         Animator animatorOut = getAnimatorOut(hiddenChatPost, hide);
 
-        //   animatorOut.setDuration(300);
-        animatorOut.setInterpolator(new AccelerateInterpolator());
 
         animatorOut.addListener(new AnimatorListenerAdapter() {
 
@@ -147,14 +146,6 @@ public class MaterialsHandler {
 
         Animator animatorIn = getAnimatorIn(hiddenCreateView, hide);
         Animator animatorOut = getAnimatorOut(hiddenCreateView, hide);
-
-
-        //   animatorIn.setDuration(500);
-        animatorIn.setInterpolator(new AccelerateInterpolator());
-
-
-        // animatorOut.setDuration(300);
-        animatorOut.setInterpolator(new AccelerateInterpolator());
 
         animatorOut.addListener(new AnimatorListenerAdapter() {
 
@@ -286,6 +277,12 @@ public class MaterialsHandler {
             }
         });
 
+
+    }
+
+    public void handleNavToolbar(int color, String title) {
+        controller.materialsHelper.navToolbar.setBackgroundColor(color);
+        controller.materialsHelper.navToolbar.setTitle(title);
 
     }
 

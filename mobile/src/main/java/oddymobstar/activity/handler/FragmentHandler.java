@@ -16,17 +16,16 @@ import oddymobstar.fragment.GridViewFragment;
  */
 public class FragmentHandler {
 
-    private AppCompatActivity main;
-    private DemoActivityController controller;
-
     public ChatFragment chatFrag = new ChatFragment();
     public GridFragment gridFrag = new GridFragment();
     public DeviceFragment deviceFragment = new DeviceFragment();
     public ConfigurationFragment confFrag = new ConfigurationFragment();
     public GridViewFragment gridViewFragment = new GridViewFragment();
+    private AppCompatActivity main;
+    private DemoActivityController controller;
 
 
-    public FragmentHandler(AppCompatActivity main,DemoActivityController controller){
+    public FragmentHandler(AppCompatActivity main, DemoActivityController controller) {
         this.main = main;
         this.controller = controller;
     }
