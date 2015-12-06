@@ -4,6 +4,7 @@ package oddymobstar.activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
@@ -21,11 +22,20 @@ public class DemoActivity extends AppCompatActivity {
 
     private DemoActivityController controller = new DemoActivityController(this);
 
+    private static Typeface font = null;
+
+    public static Typeface getFont() {
+        return font;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        font = Typeface.createFromAsset(
+                this.getAssets(), "fontawesome-webfont.ttf");
 
         //useful makes it a bit easier to work with.
         UTM.createUTMRegions();

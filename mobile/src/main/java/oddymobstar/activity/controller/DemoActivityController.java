@@ -52,14 +52,14 @@ public class DemoActivityController {
     //statics etc
     public static final String BLUETOOTH_UUID = "39159dac-ead1-47ad-9975-ec8390df6f7d";
     public static final String MESSAGE_INTENT = "MESSAGE_INTENT";
-    public Configuration configuration;
-    public DBHelper dbHelper;
-    public CheService cheService;
-    public ServiceConnection serviceConnection;
     //utils
     public UUIDGenerator uuidGenerator;
     public Intent intent;
     public Intent serviceIntent;
+    public Configuration configuration;
+    public DBHelper dbHelper;
+    public CheService cheService;
+    public ServiceConnection serviceConnection;
     //helpers
     public MaterialsHelper materialsHelper;
     public MapHelper mapHelper;
@@ -92,6 +92,7 @@ public class DemoActivityController {
     public GridDialog gridDialog;
     //core
     private DemoActivity main;
+
 
 
     //this will manage the initialisation of the main objects, and can be used to pass these objects to sub routines
