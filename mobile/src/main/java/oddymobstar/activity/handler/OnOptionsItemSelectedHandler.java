@@ -35,31 +35,23 @@ public class OnOptionsItemSelectedHandler {
         if (controller.materialsHelper.navToggle.onOptionsItemSelected(item)) {
             return true;
         }
-
-        controller.fragmentHandler.removeFragments(false);
-
-
         android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 
+        controller.fragmentHandler.removeFragments(false);
         controller.configuration = new Configuration(controller.dbHelper.getConfigs());
-
-
         //bind again if its down.
         if (controller.cheService == null) {
             main.bindService(controller.intent, controller.serviceConnection, main.BIND_AUTO_CREATE);
         }
-
 
         switch (item.getItemId()) {
 
             case android.R.id.home:
                 controller.materialsHelper.navDrawer.openDrawer(GravityCompat.START);
                 return true;
-
             case R.id.settings:
                 handleSettings(transaction);
                 break;
-
             case R.id.alliances:
                 handleAlliance(transaction);
                 break;
@@ -81,7 +73,6 @@ public class OnOptionsItemSelectedHandler {
                 break;
             case R.id.invite:
                 break;
-
         }
 
         return true;
