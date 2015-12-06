@@ -34,10 +34,10 @@ public class MaterialsListener {
 
                 switch (FAB_MODE) {
                     case ALLIANCE_FAB:
-                        controller.materialsHandler.handleAllianceFAB(controller.gridFrag, true);
+                        controller.materialsHandler.handleAllianceFAB(controller.fragmentHandler.gridFrag, true);
                         break;
                     case CHAT_FAB:
-                        controller.materialsHandler.handleChatFAB(controller.chatFrag, true);
+                        controller.materialsHandler.handleChatFAB(controller.fragmentHandler.chatFrag, true);
                         break;
                     case GRID_FAB:
                         controller.materialsHandler.handleSearchFab();

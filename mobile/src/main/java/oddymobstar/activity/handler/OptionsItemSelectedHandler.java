@@ -36,7 +36,7 @@ public class OptionsItemSelectedHandler {
             return true;
         }
 
-        controller.removeFragments(false);
+        controller.fragmentHandler.removeFragments(false);
 
 
         android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
@@ -61,10 +61,10 @@ public class OptionsItemSelectedHandler {
                 controller.materialsHelper.navDrawer.closeDrawer(controller.materialsHelper.navigationView);
                 controller.materialsHelper.navToolbar.setTitle(R.string.menu_settings);
 
-                controller.confFrag.init(controller.configurationHandler, controller.dbHelper.getConfigs(Config.USER), controller.dbHelper.getConfigs(Config.SYSTEM));
+                controller.fragmentHandler.confFrag.init(controller.configurationHandler, controller.dbHelper.getConfigs(Config.USER), controller.dbHelper.getConfigs(Config.SYSTEM));
 
 
-                transaction.replace(R.id.chat_fragment, controller.confFrag);
+                transaction.replace(R.id.chat_fragment, controller.fragmentHandler.confFrag);
                 transaction.addToBackStack(null);
                 transaction.commit();
 
@@ -82,8 +82,8 @@ public class OptionsItemSelectedHandler {
                 controller.materialsHelper.navToolbar.setBackgroundColor(main.getResources().getColor(android.R.color.holo_red_dark));
                 controller.materialsHelper.navToolbar.setTitle(R.string.menu_alliances);
 
-                controller.gridFrag.init(GridFragment.MY_ALLIANCES, controller.viewListener.getListClickListener());
-                transaction.replace(R.id.chat_fragment, controller.gridFrag);
+                controller.fragmentHandler.gridFrag.init(GridFragment.MY_ALLIANCES, controller.viewListener.getListClickListener());
+                transaction.replace(R.id.chat_fragment, controller.fragmentHandler.gridFrag);
                 transaction.addToBackStack(null);
                 transaction.commit();
 
@@ -133,7 +133,7 @@ public class OptionsItemSelectedHandler {
                 controller.materialsHelper.navDrawer.closeDrawer(controller.materialsHelper.navigationView);
 
                 try {
-                    transaction.add(R.id.grid_view_fragment, controller.gridViewFragment);
+                    transaction.add(R.id.grid_view_fragment, controller.fragmentHandler.gridViewFragment);
                 } catch (Exception e) {
 
                 }
@@ -160,7 +160,7 @@ public class OptionsItemSelectedHandler {
                 controller.mapHandler.animateToGrid(controller.mapHelper.getMySubUTM(), MapHandler.SUB_UTM_ZOOM);
 
                 try {
-                    transaction.replace(R.id.grid_view_fragment, controller.gridViewFragment);
+                    transaction.replace(R.id.grid_view_fragment, controller.fragmentHandler.gridViewFragment);
                 } catch (Exception e) {
 
                 }

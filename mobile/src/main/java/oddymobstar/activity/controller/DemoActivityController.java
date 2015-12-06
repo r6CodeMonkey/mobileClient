@@ -19,6 +19,7 @@ import oddymobstar.activity.DemoActivity;
 import oddymobstar.activity.handler.ActivityResultHandler;
 import oddymobstar.activity.handler.ConfigurationHandler;
 import oddymobstar.activity.handler.DeviceDiscoveryHandler;
+import oddymobstar.activity.handler.FragmentHandler;
 import oddymobstar.activity.handler.MapHandler;
 import oddymobstar.activity.handler.MaterialsHandler;
 import oddymobstar.activity.handler.MessageHandler;
@@ -74,6 +75,7 @@ public class DemoActivityController {
     public ActivityResultHandler activityResultHandler;
     public OptionsItemSelectedHandler optionsItemSelectedHandler;
     public DeviceDiscoveryHandler deviceDiscoveryHandler;
+    public FragmentHandler fragmentHandler;
     //listeners
     public MaterialsListener materialsListener;
     public LocationListener locationListener;
@@ -84,11 +86,6 @@ public class DemoActivityController {
     //managers
     public LocationManager locationManager;
     //fragments
-    public ChatFragment chatFrag = new ChatFragment();
-    public GridFragment gridFrag = new GridFragment();
-    public DeviceFragment deviceFragment = new DeviceFragment();
-    public ConfigurationFragment confFrag = new ConfigurationFragment();
-    public GridViewFragment gridViewFragment = new GridViewFragment();
     public GridDialog gridDialog;
     //core
     private DemoActivity main;
@@ -117,6 +114,7 @@ public class DemoActivityController {
         };
 
 
+        fragmentHandler = new FragmentHandler(main,this);
         configuration = new Configuration(dbHelper.getConfigs());
         messageHandler = new MessageHandler(main, this);
         uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
@@ -170,7 +168,7 @@ public class DemoActivityController {
 
         mapHelper.setUpMapIfNeeded();
 
-        main.getSupportFragmentManager().beginTransaction().add(R.id.grid_view_fragment, gridViewFragment).addToBackStack(null).commit();
+        main.getSupportFragmentManager().beginTransaction().add(R.id.grid_view_fragment, fragmentHandler.gridViewFragment).addToBackStack(null).commit();
 
 
     }
@@ -241,7 +239,7 @@ public class DemoActivityController {
     }
 
     public void onBackPressed() {
-        removeFragments(true);
+        fragmentHandler.removeFragments(true);
     }
 
 
@@ -259,69 +257,6 @@ public class DemoActivityController {
     }
 
 
-    public void removeFragments(boolean backPressed) {
 
-        android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
-
-        try {
-            chatFrag.getHiddenChatPost().setVisibility(View.GONE);
-        } catch (Exception e) {
-
-        }
-
-
-        try {
-            transaction.remove(chatFrag);
-        } catch (Exception e) {
-
-        }
-
-
-        try {
-            gridFrag.getHiddenCreateView().setVisibility(View.GONE);
-        } catch (Exception e) {
-
-        }
-
-        try {
-            gridFrag.clearAdapter();
-            transaction.remove(gridFrag);
-        } catch (Exception e) {
-
-        }
-
-
-        try {
-            transaction.remove(confFrag);
-        } catch (Exception e) {
-
-        }
-        if (!backPressed) {
-            try {
-                transaction.remove(gridViewFragment);
-            } catch (Exception e) {
-
-            }
-        } else {
-            try {
-                if (!gridViewFragment.isAdded()) {
-                    transaction.replace(R.id.grid_view_fragment, gridViewFragment);
-                }
-            } catch (Exception e) {
-
-            }
-        }
-
-        try {
-            materialsHandler.handleFABChange(-1, R.drawable.ic_search_white_24dp, View.INVISIBLE);
-            materialsHelper.navToolbar.setTitle(R.string.app_name);
-            materialsHelper.navToolbar.setBackgroundColor(main.getResources().getColor(android.R.color.holo_red_dark));
-        } catch (Exception e) {
-
-        }
-
-        transaction.commit();
-
-    }
 
 }

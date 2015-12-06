@@ -36,8 +36,8 @@ public class ViewHandler {
 
     public void deleteMessages() {
         //grab the chat frag id...
-        controller.dbHelper.deleteMessages(controller.chatFrag.getKey());
-        controller.removeFragments(false);
+        controller.dbHelper.deleteMessages(controller.fragmentHandler.chatFrag.getKey());
+        controller.fragmentHandler.removeFragments(false);
 
     }
 
@@ -57,25 +57,25 @@ public class ViewHandler {
 
 
     public void sendPost() {
-        if (controller.chatFrag.getHiddenChatPost().isPostValid()) {
+        if (controller.fragmentHandler.chatFrag.getHiddenChatPost().isPostValid()) {
             try {
 
                 OutCoreMessage coreMessage = null;
 
-                switch (controller.gridFrag.getType()) {
+                switch (controller.fragmentHandler.gridFrag.getType()) {
 
 
                     case GridFragment.MY_ALLIANCES:
 
                         //create a message for the alliance....
                         coreMessage = new OutAllianceMessage(controller.locationListener.getCurrentLocation(), controller.configuration.getConfig(Configuration.PLAYER_KEY).getValue(), controller.uuidGenerator.generateAcknowledgeKey());
-                        ((OutAllianceMessage) coreMessage).setAlliance(controller.dbHelper.getAlliance(controller.chatFrag.getKey()), OutCoreMessage.PUBLISH, OutCoreMessage.GLOBAL, controller.chatFrag.getHiddenChatPost().getPost());
+                        ((OutAllianceMessage) coreMessage).setAlliance(controller.dbHelper.getAlliance(controller.fragmentHandler.chatFrag.getKey()), OutCoreMessage.PUBLISH, OutCoreMessage.GLOBAL, controller.fragmentHandler.chatFrag.getHiddenChatPost().getPost());
                         break;
 
                 }
 
                 //need to animate...but
-                controller.materialsHandler.handleChatFAB(controller.chatFrag, false);
+                controller.materialsHandler.handleChatFAB(controller.fragmentHandler.chatFrag, false);
 
 
                 controller.cheService.writeToSocket(coreMessage);
@@ -88,18 +88,18 @@ public class ViewHandler {
             cancelPost();
         } else {
             //find out if this every works! it was not cause of my bug
-            controller.removeFragments(false);
+            controller.fragmentHandler.removeFragments(false);
         }
     }
 
     public void cancelPost() {
-        controller.chatFrag.getHiddenChatPost().cancelPost();
+        controller.fragmentHandler.chatFrag.getHiddenChatPost().cancelPost();
     }
 
     public void createButton() {
-        String createText = controller.gridFrag.getHiddenCreateView().getCreateText();
+        String createText = controller.fragmentHandler.gridFrag.getHiddenCreateView().getCreateText();
 
-        switch (controller.gridFrag.getType()) {
+        switch (controller.fragmentHandler.gridFrag.getType()) {
 
             case GridFragment.MY_ALLIANCES:
 
@@ -118,7 +118,7 @@ public class ViewHandler {
 
 
                         //need to animate...but
-                        controller.materialsHandler.handleAllianceFAB(controller.gridFrag, false);
+                        controller.materialsHandler.handleAllianceFAB(controller.fragmentHandler.gridFrag, false);
 
 
                     } catch (NoSuchAlgorithmException nsae) {
@@ -132,7 +132,7 @@ public class ViewHandler {
 
         }
 
-        controller.gridFrag.getHiddenCreateView().clear();
+        controller.fragmentHandler.gridFrag.getHiddenCreateView().clear();
 
     }
 
@@ -149,8 +149,8 @@ public class ViewHandler {
         controller.materialsHelper.navToolbar.setBackgroundColor(main.getResources().getColor(android.R.color.holo_green_dark));
 
 
-        controller.chatFrag.setCursor(controller.dbHelper.getMessages(Message.ALLIANCE_MESSAGE, controller.chatFrag.getKey()), controller.chatFrag.getKey(), controller.chatFrag.getTitle());
-        transaction.replace(R.id.chat_fragment, controller.chatFrag);
+        controller.fragmentHandler.chatFrag.setCursor(controller.dbHelper.getMessages(Message.ALLIANCE_MESSAGE, controller.fragmentHandler.chatFrag.getKey()), controller.fragmentHandler.chatFrag.getKey(), controller.fragmentHandler.chatFrag.getTitle());
+        transaction.replace(R.id.chat_fragment, controller.fragmentHandler.chatFrag);
         transaction.addToBackStack(null);
 
 

@@ -25,7 +25,7 @@ public class DeviceDiscoveryHandler {
     }
 
     public void init() {
-        bluetoothManager = new BluetoothManager(main.getApplicationContext(), controller, controller.chatFrag.getKey());
+        bluetoothManager = new BluetoothManager(main.getApplicationContext(), controller, controller.fragmentHandler.chatFrag.getKey());
     }
 
 
@@ -33,7 +33,7 @@ public class DeviceDiscoveryHandler {
 
         Log.d("adding device", "adding a device");
         if (bluetoothManager.addDevice(device)) {
-            controller.deviceFragment.refreshAdapter(device.getName());
+            controller.fragmentHandler.deviceFragment.refreshAdapter(device.getName());
         }
     }
 
@@ -47,9 +47,9 @@ public class DeviceDiscoveryHandler {
         //we launch..
         android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 
-        controller.deviceFragment = bluetoothManager.onDiscover(isClient);
+        controller.fragmentHandler.deviceFragment = bluetoothManager.onDiscover(isClient);
 
-        controller.deviceFragment.show(transaction, "dialog");
+        controller.fragmentHandler.deviceFragment.show(transaction, "dialog");
 
     }
 

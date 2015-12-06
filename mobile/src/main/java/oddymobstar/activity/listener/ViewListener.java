@@ -34,17 +34,17 @@ public class ViewListener {
             /*
             basically if they select an item we launch chat frag with an ID...
              */
-                Cursor cursor = (Cursor) controller.gridFrag.getListAdapter().getItem(position);
-                controller.removeFragments(false);
+                Cursor cursor = (Cursor) controller.fragmentHandler.gridFrag.getListAdapter().getItem(position);
+                controller.fragmentHandler.removeFragments(false);
 
                 android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 
                 String key = "";
-                switch (controller.gridFrag.getType()) {
+                switch (controller.fragmentHandler.gridFrag.getType()) {
                     case GridFragment.MY_ALLIANCES:
                         key = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_KEY));
                         String title = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME));
-                        controller.chatFrag.setCursor(controller.dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
+                        controller.fragmentHandler.chatFrag.setCursor(controller.dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
 
                         //and show
                         controller.viewHandler.showChat(title);

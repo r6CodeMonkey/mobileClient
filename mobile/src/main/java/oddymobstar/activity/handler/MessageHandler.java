@@ -34,11 +34,11 @@ public class MessageHandler extends Handler {
 
 
     public void handleList() {
-        if (controller.gridFrag != null) {
+        if (controller.fragmentHandler.gridFrag != null) {
             main.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    controller.gridFrag.refreshAdapter();
+                    controller.fragmentHandler.gridFrag.refreshAdapter();
                 }
             });
 
@@ -104,11 +104,11 @@ public class MessageHandler extends Handler {
     }
 
     public void handleChat(final String type) {
-        if (controller.chatFrag != null && controller.chatFrag.isVisible()) {
+        if (controller.fragmentHandler.chatFrag != null && controller.fragmentHandler.chatFrag.isVisible()) {
             main.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    controller.chatFrag.refreshAdapter(controller.dbHelper.getMessages(type, controller.chatFrag.getKey()));
+                    controller.fragmentHandler.chatFrag.refreshAdapter(controller.dbHelper.getMessages(type, controller.fragmentHandler.chatFrag.getKey()));
                 }
             });
         }
@@ -123,9 +123,9 @@ public class MessageHandler extends Handler {
                 android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 
 
-                controller.chatFrag.setCursor(controller.dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
+                controller.fragmentHandler.chatFrag.setCursor(controller.dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
 
-                transaction.replace(R.id.chat_fragment, controller.chatFrag);
+                transaction.replace(R.id.chat_fragment, controller.fragmentHandler.chatFrag);
                 transaction.addToBackStack(null);
                 transaction.commit();
             }
