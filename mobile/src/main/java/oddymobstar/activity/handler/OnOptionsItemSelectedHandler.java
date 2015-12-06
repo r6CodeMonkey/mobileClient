@@ -35,7 +35,6 @@ public class OnOptionsItemSelectedHandler {
         if (controller.materialsHelper.navToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 
         controller.fragmentHandler.removeFragments(false);
         controller.configuration = new Configuration(controller.dbHelper.getConfigs());
@@ -50,10 +49,10 @@ public class OnOptionsItemSelectedHandler {
                 controller.materialsHelper.navDrawer.openDrawer(GravityCompat.START);
                 return true;
             case R.id.settings:
-                handleSettings(transaction);
+                handleSettings();
                 break;
             case R.id.alliances:
-                handleAlliance(transaction);
+                handleAlliance();
                 break;
             case R.id.bluetooth_receive:
                 //same mechanism for discovery.
@@ -64,10 +63,10 @@ public class OnOptionsItemSelectedHandler {
                 controller.viewHandler.allianceInvite(false);
                 break;
             case R.id.utm:
-                handleUTM(transaction);
+                handleUTM();
                 break;
             case R.id.sub_utm:
-                handleSubUTM(transaction);
+                handleSubUTM();
                 break;
             case R.id.encrypt:
                 break;
@@ -78,7 +77,10 @@ public class OnOptionsItemSelectedHandler {
         return true;
     }
 
-    private void handleUTM(android.support.v4.app.FragmentTransaction transaction){
+    private void handleUTM(){
+
+        android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
+
         controller.mapHandler.CURRENT_GRID_FAB_STATE = MapHandler.UTM_FAB_STATE;
         if (!controller.mapHandler.lastLocateUTMs.isEmpty()) {
 
@@ -112,7 +114,10 @@ public class OnOptionsItemSelectedHandler {
         transaction.commit();
     }
 
-    private void handleSubUTM(android.support.v4.app.FragmentTransaction transaction){
+    private void handleSubUTM(){
+
+        android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
+
         controller.mapHandler.CURRENT_GRID_FAB_STATE = MapHandler.SUBUTM_FAB_STATE;
         if (controller.mapHandler.lastLocateSubUTM != null) {
             controller.mapHandler.lastLocateSubUTM.remove();
@@ -138,7 +143,10 @@ public class OnOptionsItemSelectedHandler {
 
     }
 
-    private void handleAlliance(android.support.v4.app.FragmentTransaction transaction){
+    private void handleAlliance(){
+
+        android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
+
         controller.materialsHelper.navDrawer.closeDrawer(controller.materialsHelper.navigationView);
 
         controller.materialsHandler.handleFABChange(MaterialsHelper.ALLIANCE_COLOR, R.drawable.ic_add_circle_white_24dp, View.VISIBLE);
@@ -153,7 +161,9 @@ public class OnOptionsItemSelectedHandler {
 
     }
 
-    private void handleSettings(android.support.v4.app.FragmentTransaction transaction){
+    private void handleSettings(){
+
+        android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 
         controller.materialsHelper.navDrawer.closeDrawer(controller.materialsHelper.navigationView);
         controller.materialsHelper.navToolbar.setTitle(R.string.menu_settings);
