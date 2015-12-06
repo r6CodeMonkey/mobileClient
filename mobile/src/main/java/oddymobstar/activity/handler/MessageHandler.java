@@ -143,8 +143,8 @@ public class MessageHandler extends Handler {
             @Override
             public void run() {
 
-                if (controller.mapHelper.getMarkerMap().containsKey(allianceMember.getKey())) {
-                    controller.mapHelper.getMarkerMap().get(allianceMember.getKey()).remove();
+                if (controller.mapHandler.getMarkerMap().containsKey(allianceMember.getKey())) {
+                    controller.mapHandler.getMarkerMap().get(allianceMember.getKey()).remove();
                     Log.d("adding marker", "removing marker ");
                 }
 
@@ -162,7 +162,7 @@ public class MessageHandler extends Handler {
                 }
 
                 if (marker != null) {
-                    controller.mapHelper.getMarkerMap().put(allianceMember.getKey(), marker);
+                    controller.mapHandler.getMarkerMap().put(allianceMember.getKey(), marker);
                 }
 
             }

@@ -177,13 +177,10 @@ public class BluetoothManager {
             Alliance alliance = new Alliance();
             alliance.setKey(message.getAid());
             alliance.setName(message.getName());
-
             allianceMessage.setAlliance(alliance, OutCoreMessage.JOIN, OutCoreMessage.GLOBAL, "Joining");
 
             controller.cheService.writeToSocket(allianceMessage);
-
             controller.dbHelper.addAlliance(alliance, true);
-
             controller.connectivityHandler.getBluetooth().disable();
 
         } catch (JSONException jse) {

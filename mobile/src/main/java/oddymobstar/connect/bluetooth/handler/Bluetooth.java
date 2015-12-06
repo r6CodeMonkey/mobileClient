@@ -63,9 +63,7 @@ public class Bluetooth implements ConnectivityInterface {
             }
         }
     };
-    /*
-      withmost stuff we need to enable then set up various crap..
-     */
+
     private BluetoothAdapter bluetoothAdapter;
 
     public Bluetooth(FragmentActivity activity, String uuid) {
@@ -90,7 +88,6 @@ public class Bluetooth implements ConnectivityInterface {
 
         progressDialog.setTitle("Bluetooth");
         progressDialog.setMessage("Discovering....");
-
         progressDialog.setIndeterminate(true);
 
         return progressDialog;
@@ -121,9 +118,7 @@ public class Bluetooth implements ConnectivityInterface {
             client.cancel();
         }
 
-        /* unpair
-
-         */
+        /* unpair */
         try {
             Class<?> btDeviceInstance = Class.forName(BluetoothDevice.class.getCanonicalName());
 

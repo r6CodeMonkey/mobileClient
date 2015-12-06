@@ -64,16 +64,12 @@ public class ConnectivityDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
 
                 connectivityHandler.handle(connAr.get(which).toString());
-
                 dialog.dismiss();
 
             }
         });
 
         return builder.create();
-
-
     }
-
 
 }

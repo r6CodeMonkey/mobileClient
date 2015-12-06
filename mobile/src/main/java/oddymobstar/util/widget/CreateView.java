@@ -17,10 +17,7 @@ public class CreateView extends LinearLayout {
         super(context, attrs);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
         inflater.inflate(R.layout.create_view, this, true);
-
-
     }
 
     public CreateView(Context context) {

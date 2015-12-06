@@ -18,17 +18,11 @@ public class ChatBubbleLeft extends LinearLayout {
         super(context, attrs);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        View view = inflater.inflate(R.layout.chat_bubble_left, this, true);
-
-
+        inflater.inflate(R.layout.chat_bubble_left, this, true);
     }
 
     public ChatBubbleLeft(Context context) {
         super(context, null);
-
-
     }
-
 
 }

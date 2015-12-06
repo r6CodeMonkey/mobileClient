@@ -48,28 +48,11 @@ public class LocationListener implements android.location.LocationListener {
         Log.d("location changed", "location changed");
         LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-        if (controller.mapHelper.getMarkerMap().containsKey("Me")) {
-            controller.mapHelper.getMarkerMap().get("Me").remove();
+        if (controller.mapHandler.getMarkerMap().containsKey("Me")) {
+            controller.mapHandler.getMarkerMap().get("Me").remove();
         }
 
-        if (controller.materialsHelper.userImage != null) {
-            if (controller.materialsHelper.userImage.getUserImage() != null) {
-
-
-                Bitmap bitmap = controller.materialsHelper.userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
-
-                int w = bitmap.getWidth();
-
-
-                Bitmap roundBitmap = RoundedImageView.getCroppedBitmap(bitmap, w);
-
-                //236 - 354
-                controller.mapHelper.getMarkerMap().put("Me", controller.mapHelper.getMap().addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
-
-            }
-        } else {
-            controller.mapHelper.getMarkerMap().put("Me", controller.mapHelper.getMap().addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
-        }
+       controller.mapHandler.addUser(currentLatLng);
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(currentLatLng)

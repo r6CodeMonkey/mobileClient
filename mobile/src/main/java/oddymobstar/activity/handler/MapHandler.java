@@ -1,10 +1,16 @@
 package oddymobstar.activity.handler;
 
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 
@@ -12,9 +18,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import oddymobstar.activity.controller.DemoActivityController;
+import oddymobstar.model.AllianceMember;
 import oddymobstar.util.SubUTM;
 import oddymobstar.util.UTM;
 import oddymobstar.util.UTMGridCreator;
+import oddymobstar.util.graphics.RoundedImageView;
 
 /**
  * Created by timmytime on 04/12/15.
@@ -38,6 +46,7 @@ public class MapHandler {
     public Map<String, Polygon> lastLocateUTMs = new HashMap<>();
     public Polygon lastLocateSubUTM;
 
+    private Map<String, Marker> markerMap = new HashMap<>();
 
     private DemoActivityController controller;
     private AppCompatActivity main;
@@ -46,6 +55,11 @@ public class MapHandler {
         this.main = main;
         this.controller = controller;
     }
+
+    public Map<String, Marker> getMarkerMap() {
+        return markerMap;
+    }
+
 
     public void animateToGrid(Polygon polygon, float zoom) {
         //make map zoom to the UTM and search function now allows UTM search
@@ -134,6 +148,38 @@ public class MapHandler {
 
         controller.materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
 
+    }
+
+    public void addUser(LatLng latLng){
+        if (controller.materialsHelper.userImage != null) {
+            if (controller.materialsHelper.userImage.getUserImage() != null) {
+                Bitmap bitmap = controller.materialsHelper.userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
+
+                int w = bitmap.getWidth();
+                Bitmap roundBitmap = RoundedImageView.getCroppedBitmap(bitmap, w);
+
+                markerMap.put("Me", controller.mapHelper.getMap().addMarker(new MarkerOptions().position(latLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
+            }
+        } else {
+            markerMap.put("Me", controller.mapHelper.getMap().addMarker(new MarkerOptions().position(latLng).title("Me")));
+        }
+    }
+
+    public void addOthers(){
+        //we now need to add any of our alliance members in...
+        Cursor allianceMembers = controller.dbHelper.getAllianceMembers();
+
+        while (allianceMembers.moveToNext()) {
+            AllianceMember allianceMember = new AllianceMember(allianceMembers);
+
+            if (markerMap.containsKey(allianceMember.getKey())) {
+                markerMap.get(allianceMember.getKey()).remove();
+            }
+            markerMap.put(allianceMember.getKey(), controller.mapHelper.getMap().addMarker(new MarkerOptions().position(new LatLng(allianceMember.getLatitude(), allianceMember.getLongitude())).title(allianceMember.getKey())));
+
+        }
+
+        allianceMembers.close();
     }
 
 

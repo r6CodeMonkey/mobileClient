@@ -47,7 +47,6 @@ public class MapHelper {
 
     private GoogleMap map; // Might be null if Google Play services APK is not available.
 
-    private Map<String, Marker> markerMap = new HashMap<>();
     private Polygon myUTM;
     private Polygon mySubUTM;
 
@@ -57,7 +56,6 @@ public class MapHelper {
     public MapHelper(DemoActivity main, DemoActivityController controller) {
         this.main = main;
         this.controller = controller;
-
     }
 
 
@@ -94,24 +92,7 @@ public class MapHelper {
                 Double.parseDouble(sharedPreferences.getString(SharedPreferencesHandler.LONGITUDE, "0.0")));
 
         //need to manage map markers too.  as per old code ie remove and re add.  do this now....joy
-
-
-        if (controller.materialsHelper.userImage != null) {
-            if (controller.materialsHelper.userImage.getUserImage() != null) {
-                Bitmap bitmap = controller.materialsHelper.userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
-
-                int w = bitmap.getWidth();
-
-
-                Bitmap roundBitmap = RoundedImageView.getCroppedBitmap(bitmap, w);
-
-
-                markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
-            }
-        } else {
-            markerMap.put("Me", map.addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
-        }
-
+        controller.mapHandler.addUser(currentLatLng);
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(currentLatLng)
@@ -140,22 +121,7 @@ public class MapHelper {
 
         }
 
-
-        //we now need to add any of our alliance members in...
-        Cursor allianceMembers = controller.dbHelper.getAllianceMembers();
-
-        while (allianceMembers.moveToNext()) {
-            AllianceMember allianceMember = new AllianceMember(allianceMembers);
-
-            if (markerMap.containsKey(allianceMember.getKey())) {
-                markerMap.get(allianceMember.getKey()).remove();
-            }
-            markerMap.put(allianceMember.getKey(), map.addMarker(new MarkerOptions().position(new LatLng(allianceMember.getLatitude(), allianceMember.getLongitude())).title(allianceMember.getKey())));
-
-        }
-
-        allianceMembers.close();
-
+        controller.mapHandler.addOthers();
 
     }
 
@@ -164,14 +130,9 @@ public class MapHelper {
         return map;
     }
 
-    public Map<String, Marker> getMarkerMap() {
-        return markerMap;
-    }
-
     public void initLocationUpdates() {
         controller.locationHelper.initLocationUpdates();
     }
-
 
     public PolygonOptions getUtmOptions() {
         return utmOptions;

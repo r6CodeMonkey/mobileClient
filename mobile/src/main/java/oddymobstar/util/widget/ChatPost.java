@@ -16,16 +16,13 @@ public class ChatPost extends LinearLayout {
 
     private EditText post;
 
-
     public ChatPost(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View view = inflater.inflate(R.layout.chat_post, this, true);
+        inflater.inflate(R.layout.chat_post, this, true);
         post = (EditText) findViewById(R.id.post_text);
-
-
     }
 
     public ChatPost(Context context) {
@@ -38,9 +35,7 @@ public class ChatPost extends LinearLayout {
     }
 
     public String getPost() {
-
         return post.getText().toString();
-
     }
 
     public void cancelPost() {

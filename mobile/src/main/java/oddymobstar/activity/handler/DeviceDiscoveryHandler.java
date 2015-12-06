@@ -46,11 +46,8 @@ public class DeviceDiscoveryHandler {
         bluetoothManager.setIsRunning(true);
         //we launch..
         android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
-
         controller.fragmentHandler.deviceFragment = bluetoothManager.onDiscover(isClient);
-
         controller.fragmentHandler.deviceFragment.show(transaction, "dialog");
-
     }
 
 
