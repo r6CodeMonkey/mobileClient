@@ -79,7 +79,7 @@ public class OnOptionsItemSelectedHandler {
                 controller.materialsHandler.handleFABChange(MaterialsHelper.ALLIANCE_COLOR, R.drawable.ic_add_circle_white_24dp, View.VISIBLE);
 
                 controller.materialsListener.FAB_MODE = MaterialsListener.ALLIANCE_FAB;
-                controller.materialsHandler.handleNavToolbar(main.getResources().getColor(android.R.color.holo_red_dark), "string");
+                controller.materialsHandler.handleNavToolbar(main.getResources().getColor(android.R.color.holo_red_dark), main.getResources().getString(R.string.menu_alliances));
 
                 controller.fragmentHandler.gridFrag.init(GridFragment.MY_ALLIANCES, controller.viewListener.getListClickListener());
                 transaction.replace(R.id.chat_fragment, controller.fragmentHandler.gridFrag);
@@ -117,7 +117,7 @@ public class OnOptionsItemSelectedHandler {
 
                 }
 
-                controller.materialsHandler.handleNavToolbar(main.getResources().getColor(android.R.color.holo_purple), "string");
+                controller.materialsHandler.handleNavToolbar(main.getResources().getColor(android.R.color.holo_purple), main.getResources().getString(R.string.menu_utm));
                 controller.materialsHandler.handleFABChange(MaterialsHelper.UTM_COLOR, -1, View.VISIBLE);
 
                 MaterialsListener.FAB_MODE = MaterialsListener.GRID_FAB;
@@ -144,7 +144,7 @@ public class OnOptionsItemSelectedHandler {
                     controller.mapHandler.lastLocateSubUTM.remove();
                 }
                 controller.mapHandler.lastLocateSubUTM = null;
-                controller.materialsHandler.handleNavToolbar(main.getResources().getColor(android.R.color.holo_orange_dark), "SubUTM");
+                controller.materialsHandler.handleNavToolbar(main.getResources().getColor(android.R.color.holo_orange_dark), main.getResources().getString(R.string.menu_subutm));
                 controller.materialsHandler.handleFABChange(MaterialsHelper.SUB_UTM_COLOR, -1, View.VISIBLE);
 
                 MaterialsListener.FAB_MODE = MaterialsListener.GRID_FAB;
