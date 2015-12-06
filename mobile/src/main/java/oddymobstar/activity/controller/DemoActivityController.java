@@ -12,7 +12,6 @@ import android.location.LocationManager;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import oddymobstar.activity.DemoActivity;
@@ -23,7 +22,7 @@ import oddymobstar.activity.handler.FragmentHandler;
 import oddymobstar.activity.handler.MapHandler;
 import oddymobstar.activity.handler.MaterialsHandler;
 import oddymobstar.activity.handler.MessageHandler;
-import oddymobstar.activity.handler.OptionsItemSelectedHandler;
+import oddymobstar.activity.handler.OnOptionsItemSelectedHandler;
 import oddymobstar.activity.handler.SharedPreferencesHandler;
 import oddymobstar.activity.handler.ViewHandler;
 import oddymobstar.activity.helper.LocationHelper;
@@ -35,11 +34,6 @@ import oddymobstar.activity.listener.ViewListener;
 import oddymobstar.connect.ConnectivityHandler;
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
-import oddymobstar.fragment.ChatFragment;
-import oddymobstar.fragment.ConfigurationFragment;
-import oddymobstar.fragment.DeviceFragment;
-import oddymobstar.fragment.GridFragment;
-import oddymobstar.fragment.GridViewFragment;
 import oddymobstar.service.handler.CheService;
 import oddymobstar.util.Configuration;
 import oddymobstar.util.UUIDGenerator;
@@ -73,7 +67,7 @@ public class DemoActivityController {
     public ConfigurationHandler configurationHandler;
     public ViewHandler viewHandler;
     public ActivityResultHandler activityResultHandler;
-    public OptionsItemSelectedHandler optionsItemSelectedHandler;
+    public OnOptionsItemSelectedHandler onOptionsItemSelectedHandler;
     public DeviceDiscoveryHandler deviceDiscoveryHandler;
     public FragmentHandler fragmentHandler;
     //listeners
@@ -123,7 +117,7 @@ public class DemoActivityController {
         viewHandler = new ViewHandler(main, this);
         viewListener = new ViewListener(main, this);
         activityResultHandler = new ActivityResultHandler(main, this);
-        optionsItemSelectedHandler = new OptionsItemSelectedHandler(main, this);
+        onOptionsItemSelectedHandler = new OnOptionsItemSelectedHandler(main, this);
         deviceDiscoveryHandler = new DeviceDiscoveryHandler(main, this);
 
         dbHelper.setMessageHandler(messageHandler);
@@ -253,7 +247,7 @@ public class DemoActivityController {
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-        return optionsItemSelectedHandler.onOptionsItemSelected(item);
+        return onOptionsItemSelectedHandler.onOptionsItemSelected(item);
     }
 
 

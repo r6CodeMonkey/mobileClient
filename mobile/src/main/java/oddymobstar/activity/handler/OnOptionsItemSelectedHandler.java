@@ -19,12 +19,12 @@ import oddymobstar.util.UTM;
 /**
  * Created by timmytime on 04/12/15.
  */
-public class OptionsItemSelectedHandler {
+public class OnOptionsItemSelectedHandler {
 
     private AppCompatActivity main;
     private DemoActivityController controller;
 
-    public OptionsItemSelectedHandler(AppCompatActivity main, DemoActivityController controller) {
+    public OnOptionsItemSelectedHandler(AppCompatActivity main, DemoActivityController controller) {
         this.main = main;
         this.controller = controller;
     }
