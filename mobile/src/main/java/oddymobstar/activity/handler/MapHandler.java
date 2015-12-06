@@ -182,5 +182,18 @@ public class MapHandler {
         allianceMembers.close();
     }
 
+    public void handleCamera(LatLng currentLatLng, float tilt, float bearing, float zoom) {
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(currentLatLng)
+                .tilt(tilt)
+                .bearing(bearing)
+                .zoom(zoom)
+                .build();
+
+        controller.mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+    }
+
 
 }

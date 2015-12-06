@@ -4,8 +4,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import oddymobstar.activity.controller.DemoActivityController;
@@ -48,14 +46,10 @@ public class LocationListener implements android.location.LocationListener {
 
         controller.mapHandler.addUser(currentLatLng);
 
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(currentLatLng)
-                .tilt(controller.mapHelper.getMap().getCameraPosition().tilt)
-                .bearing(controller.mapHelper.getMap().getCameraPosition().bearing)
-                .zoom(controller.mapHelper.getMap().getCameraPosition().zoom)
-                .build();
-
-        controller.mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        controller.mapHandler.handleCamera(currentLatLng,
+                controller.mapHelper.getMap().getCameraPosition().tilt,
+                controller.mapHelper.getMap().getCameraPosition().bearing,
+                controller.mapHelper.getMap().getCameraPosition().zoom);
     }
 
     @Override

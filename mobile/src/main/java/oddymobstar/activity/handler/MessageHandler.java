@@ -4,8 +4,6 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -151,14 +149,10 @@ public class MessageHandler extends Handler {
                 Marker marker = controller.mapHelper.getMap().addMarker(new MarkerOptions().position(allianceMember.getLatLng()).title(allianceMember.getKey()));
 
                 if (zoomTo) {
-                    CameraPosition cameraPosition = new CameraPosition.Builder()
-                            .target(allianceMember.getLatLng())
-                            .tilt(controller.mapHelper.getMap().getCameraPosition().tilt)
-                            .bearing(controller.mapHelper.getMap().getCameraPosition().bearing)
-                            .zoom(controller.mapHelper.getMap().getCameraPosition().zoom)
-                            .build();
-
-                    controller.mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    controller.mapHandler.handleCamera(allianceMember.getLatLng(),
+                            controller.mapHelper.getMap().getCameraPosition().tilt,
+                            controller.mapHelper.getMap().getCameraPosition().bearing,
+                            controller.mapHelper.getMap().getCameraPosition().zoom);
                 }
 
                 if (marker != null) {

@@ -5,10 +5,8 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.view.View;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -69,7 +67,7 @@ public class MapHelper {
         //now dd our last known location.
         controller.locationListener = new LocationListener(controller);
         controller.locationHelper.initLocationUpdates();
-        
+
         SharedPreferences sharedPreferences = main.getPreferences(Context.MODE_PRIVATE);
 
         zoom = sharedPreferences.getFloat(SharedPreferencesHandler.ZOOM, 10.0f);
@@ -81,16 +79,7 @@ public class MapHelper {
 
         //need to manage map markers too.  as per old code ie remove and re add.  do this now....joy
         controller.mapHandler.addUser(currentLatLng);
-
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(currentLatLng)
-                .tilt(tilt)
-                .bearing(bearing)
-                .zoom(zoom)
-                .build();
-
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
+        controller.mapHandler.handleCamera(currentLatLng, tilt, bearing, zoom);
 
         if (myUTM != null) {
             myUTM.remove();
