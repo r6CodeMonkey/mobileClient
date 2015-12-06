@@ -121,10 +121,7 @@ public class OnOptionsItemSelectedHandler {
                 controller.materialsHandler.handleFABChange(MaterialsHelper.UTM_COLOR, -1, View.VISIBLE);
 
                 MaterialsListener.FAB_MODE = MaterialsListener.GRID_FAB;
-                controller.mapHandler.SELECTED_GRID = MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.SUBUTM_FAB_STATE ?
-                        controller.configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue() :
-                        MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.UTM_FAB_STATE ? UTM.getUTMRegion(controller.configuration.getConfig(Configuration.CURRENT_UTM).getValue()) : "";
-
+                controller.mapHandler.setSelectedGrid();
 
                 controller.mapHandler.animateToGrid(controller.mapHelper.getMyUTM(), MapHandler.UTM_ZOOM);
                 controller.materialsHelper.navDrawer.closeDrawer(controller.materialsHelper.navigationView);
@@ -148,10 +145,8 @@ public class OnOptionsItemSelectedHandler {
                 controller.materialsHandler.handleFABChange(MaterialsHelper.SUB_UTM_COLOR, -1, View.VISIBLE);
 
                 MaterialsListener.FAB_MODE = MaterialsListener.GRID_FAB;
-                controller.mapHandler.SELECTED_GRID = MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.SUBUTM_FAB_STATE ?
-                        controller.configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue() :
-                        MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.UTM_FAB_STATE ? UTM.getUTMRegion(controller.configuration.getConfig(Configuration.CURRENT_UTM).getValue()) : "";
 
+                controller.mapHandler.setSelectedGrid();
 
                 controller.materialsHelper.navDrawer.closeDrawer(controller.materialsHelper.navigationView);
                 controller.mapHandler.animateToGrid(controller.mapHelper.getMySubUTM(), MapHandler.SUB_UTM_ZOOM);

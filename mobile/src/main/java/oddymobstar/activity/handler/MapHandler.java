@@ -19,6 +19,7 @@ import java.util.Map;
 
 import oddymobstar.activity.controller.DemoActivityController;
 import oddymobstar.model.AllianceMember;
+import oddymobstar.util.Configuration;
 import oddymobstar.util.SubUTM;
 import oddymobstar.util.UTM;
 import oddymobstar.util.UTMGridCreator;
@@ -40,13 +41,13 @@ public class MapHandler {
 
 
     public static String UTM_REGION = "";
-    public static String SELECTED_GRID = "";
     public boolean CLEAR_GRIDS = false;
     public PolygonOptions lastUTMOptions;
     public Map<String, Polygon> lastLocateUTMs = new HashMap<>();
     public Polygon lastLocateSubUTM;
 
     private Map<String, Marker> markerMap = new HashMap<>();
+    private String selectedGrid;
 
     private DemoActivityController controller;
     private AppCompatActivity main;
@@ -193,6 +194,17 @@ public class MapHandler {
 
         controller.mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
+    }
+
+    public void  setSelectedGrid(){
+          selectedGrid = MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.SUBUTM_FAB_STATE ?
+                controller.configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue() :
+                MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.UTM_FAB_STATE ? UTM.getUTMRegion(controller.configuration.getConfig(Configuration.CURRENT_UTM).getValue()) : "";
+
+    }
+
+    public String getSelectedGrid(){
+        return selectedGrid;
     }
 
 

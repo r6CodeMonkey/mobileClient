@@ -226,7 +226,7 @@ public class MaterialsHandler {
                 FragmentTransaction transaction = main.getSupportFragmentManager()
                         .beginTransaction();
 
-                controller.mapHelper.createGridDialog(controller.mapHandler.SELECTED_GRID).show(transaction, "dialog");
+                controller.mapHelper.createGridDialog(controller.mapHandler.getSelectedGrid()).show(transaction, "dialog");
 
             }
         });
