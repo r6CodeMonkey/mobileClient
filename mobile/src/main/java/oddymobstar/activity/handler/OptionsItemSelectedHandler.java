@@ -144,9 +144,9 @@ public class OptionsItemSelectedHandler {
             case R.id.sub_utm:
                 controller.mapHandler.CURRENT_GRID_FAB_STATE = MapHandler.SUBUTM_FAB_STATE;
                 if (controller.mapHandler.lastLocateSubUTM != null) {
-                    controller.mapHandler.lastLocateSubUTM .remove();
+                    controller.mapHandler.lastLocateSubUTM.remove();
                 }
-                controller.mapHandler.lastLocateSubUTM  = null;
+                controller.mapHandler.lastLocateSubUTM = null;
                 controller.materialsHelper.navToolbar.setBackgroundColor(main.getResources().getColor(android.R.color.holo_orange_dark));
                 controller.materialsHelper.navToolbar.setTitle(R.string.menu_subutm);
                 controller.materialsHandler.handleFABChange(MaterialsHelper.SUB_UTM_COLOR, -1, View.VISIBLE);

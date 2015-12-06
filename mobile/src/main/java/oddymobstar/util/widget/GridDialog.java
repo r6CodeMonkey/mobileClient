@@ -10,7 +10,6 @@ import android.view.KeyEvent;
 
 import java.util.List;
 
-import oddymobstar.activity.DemoActivity;
 import oddymobstar.activity.handler.MapHandler;
 import oddymobstar.util.SubUTM;
 import oddymobstar.util.UTM;

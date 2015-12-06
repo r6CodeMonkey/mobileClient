@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.AdapterView;
 
 import oddymobstar.activity.controller.DemoActivityController;
-import oddymobstar.activity.handler.ViewHandler;
 import oddymobstar.database.DBHelper;
 import oddymobstar.fragment.GridFragment;
 import oddymobstar.model.Message;
@@ -19,7 +18,7 @@ public class ViewListener {
     private AppCompatActivity main;
     private DemoActivityController controller;
 
-    public ViewListener(AppCompatActivity main, DemoActivityController controller){
+    public ViewListener(AppCompatActivity main, DemoActivityController controller) {
         this.main = main;
         this.controller = controller;
     }

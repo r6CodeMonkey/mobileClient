@@ -22,18 +22,18 @@ import oddymobstar.util.UTMGridCreator;
 public class MapHandler {
 
 
-    public static float UTM_REGION_ZOOM = 3;
-    public static float UTM_ZOOM = 5;
-    public static float SUB_UTM_ZOOM = 12;
     public static final int UTM_FAB_STATE = 0;
     public static final int SUBUTM_FAB_STATE = 1;
     public static final int UTM_REGION_FAB_STATE = 2;
+    public static float UTM_REGION_ZOOM = 3;
+    public static float UTM_ZOOM = 5;
+    public static float SUB_UTM_ZOOM = 12;
     public static int CURRENT_GRID_FAB_STATE = UTM_FAB_STATE;
 
 
     public static String UTM_REGION = "";
-    public boolean CLEAR_GRIDS = false;
     public static String SELECTED_GRID = "";
+    public boolean CLEAR_GRIDS = false;
     public PolygonOptions lastUTMOptions;
     public Map<String, Polygon> lastLocateUTMs = new HashMap<>();
     public Polygon lastLocateSubUTM;

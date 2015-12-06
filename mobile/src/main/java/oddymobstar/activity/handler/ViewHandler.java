@@ -1,11 +1,9 @@
 package oddymobstar.activity.handler;
 
-import android.database.Cursor;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 
 import org.json.JSONException;
 
@@ -15,7 +13,6 @@ import oddymobstar.activity.controller.DemoActivityController;
 import oddymobstar.activity.helper.MaterialsHelper;
 import oddymobstar.activity.listener.MaterialsListener;
 import oddymobstar.crazycourier.R;
-import oddymobstar.database.DBHelper;
 import oddymobstar.fragment.GridFragment;
 import oddymobstar.message.out.OutAllianceMessage;
 import oddymobstar.message.out.OutCoreMessage;
@@ -160,8 +157,6 @@ public class ViewHandler {
         transaction.commit();
 
     }
-
-
 
 
 }

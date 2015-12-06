@@ -52,10 +52,6 @@ public class DemoActivityController {
     //statics etc
     public static final String BLUETOOTH_UUID = "39159dac-ead1-47ad-9975-ec8390df6f7d";
     public static final String MESSAGE_INTENT = "MESSAGE_INTENT";
-
-
-    //core
-    private DemoActivity main;
     public Configuration configuration;
     public DBHelper dbHelper;
     public CheService cheService;
@@ -82,7 +78,6 @@ public class DemoActivityController {
     public MaterialsListener materialsListener;
     public LocationListener locationListener;
     public ViewListener viewListener;
-
     //receivers
     public BroadcastReceiver bluetoothReceiver;
     public BroadcastReceiver messageReceiver;
@@ -95,14 +90,13 @@ public class DemoActivityController {
     public ConfigurationFragment confFrag = new ConfigurationFragment();
     public GridViewFragment gridViewFragment = new GridViewFragment();
     public GridDialog gridDialog;
-
-
+    //core
+    private DemoActivity main;
 
 
     //this will manage the initialisation of the main objects, and can be used to pass these objects to sub routines
     public DemoActivityController(DemoActivity main) {
         this.main = main;
-
     }
 
     public void onCreate() {
@@ -171,8 +165,6 @@ public class DemoActivityController {
         LocalBroadcastManager.getInstance(main).registerReceiver(messageReceiver, new IntentFilter(MESSAGE_INTENT));
 
         main.startService(serviceIntent);
-
-
         main.bindService(intent, serviceConnection, main.BIND_AUTO_CREATE);
 
         mapHelper.setUpMapIfNeeded();
@@ -197,8 +189,6 @@ public class DemoActivityController {
 
         SharedPreferences sharedPreferences = main.getPreferences(Context.MODE_PRIVATE);
         SharedPreferencesHandler.handle(sharedPreferences, this);
-
-
     }
 
     public void onResume() {
@@ -264,7 +254,6 @@ public class DemoActivityController {
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-
         return optionsItemSelectedHandler.onOptionsItemSelected(item);
     }
 
@@ -330,11 +319,8 @@ public class DemoActivityController {
 
         }
 
-
         transaction.commit();
 
-
     }
-
 
 }

@@ -4,17 +4,10 @@ package oddymobstar.activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
-
-import com.google.android.gms.maps.model.Polygon;
-import com.google.android.gms.maps.model.PolygonOptions;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import oddymobstar.activity.controller.DemoActivityController;
 import oddymobstar.crazycourier.R;
@@ -25,15 +18,8 @@ public class DemoActivity extends AppCompatActivity {
 
 
     public static final Long TWO_MINUTES = 120000l;
-    private static Typeface font = null;
-
 
     private DemoActivityController controller = new DemoActivityController(this);
-
-
-    public static Typeface getFont() {
-        return font;
-    }
 
 
     @Override
@@ -41,17 +27,11 @@ public class DemoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-
-        font = Typeface.createFromAsset(
-                this.getAssets(), "fontawesome-webfont.ttf");
-
-
         //useful makes it a bit easier to work with.
         UTM.createUTMRegions();
         SubUTM.createSubUtms();
 
         controller.onCreate();
-
     }
 
 
@@ -65,30 +45,19 @@ public class DemoActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
         super.onBackPressed();
         controller.onBackPressed();
-
-
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         controller.onActivityResult(requestCode, resultCode, data);
-
-
     }
 
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        //most of logic here can can in a UI / materials handler class no doubt...
-
         controller.onOptionsItemSelected(item);
-
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -96,27 +65,22 @@ public class DemoActivity extends AppCompatActivity {
     public void onConfigurationChanged(android.content.res.Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         controller.onConfigurationChanged(newConfig);
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         controller.onResume();
-
     }
 
     public void onPause() {
         super.onPause();
         controller.onPause();
-
-
     }
 
     public void onDestroy() {
         super.onDestroy();
         controller.onDestroy();
-
     }
 
 
@@ -141,31 +105,23 @@ public class DemoActivity extends AppCompatActivity {
 
 
     public void allianceInvite(View view, boolean isClient) {
-
         controller.viewHandler.allianceInvite(isClient);
-
     }
 
     public void allianceInvite(View view) {
-
         allianceInvite(view, false);
     }
 
     public void sendPost(View view) {
-
         controller.viewHandler.sendPost();
-
     }
 
     public void cancelPost(View view) {
-        //make it clear message
         controller.viewHandler.cancelPost();
     }
 
     public void createButton(View view) {
-
         controller.viewHandler.createButton();
-
     }
 
 

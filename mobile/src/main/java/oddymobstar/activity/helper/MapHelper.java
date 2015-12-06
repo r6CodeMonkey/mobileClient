@@ -195,20 +195,20 @@ public class MapHelper {
 
     public GridDialog createGridDialog(String selectedGrid) {
         controller.gridDialog =
-         GridDialog.newInstance(selectedGrid, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, final int which) {
-                //the magic happens...but we cant deselect our selected item its not the pattern..
-                dialog.dismiss();
-                controller.mapHandler.handleLocateDialog(controller.gridDialog.getGrid(which));
+                GridDialog.newInstance(selectedGrid, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, final int which) {
+                        //the magic happens...but we cant deselect our selected item its not the pattern..
+                        dialog.dismiss();
+                        controller.mapHandler.handleLocateDialog(controller.gridDialog.getGrid(which));
 
-            }
-        }, new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                controller.materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
-            }
-        });
+                    }
+                }, new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        controller.materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
+                    }
+                });
 
         return controller.gridDialog;
 
