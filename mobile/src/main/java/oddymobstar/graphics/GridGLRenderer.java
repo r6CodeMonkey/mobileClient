@@ -46,8 +46,6 @@ import static android.opengl.Matrix.translateM;
  */
 public class GridGLRenderer implements GLSurfaceView.Renderer {
 
-    private Context context;
-
     private final float[] projectionMatrix = new float[16];
     private final float[] modelMatrix = new float[16];
     private final float[] viewMatrix = new float[16];
@@ -56,31 +54,24 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private final float[] invertedViewProjectionMatrix = new float[16];
     private final float[] viewMatrixForSkybox = new float[16];
     private final float[] tempMatrix = new float[16];
-
-    private SkyBox skyBox;
-    private HeightMap heightMap;
-
-    private Table table;
-    private Mallet mallet;
-    private Puck puck;
-
-    private TextureShaderProgram textureShaderProgram;
-    private ColorShaderProgram colorShaderProgram;
-    private SkyBoxShaderProgram skyBoxShaderProgram;
-    private HeightMapShaderProgram heightMapShaderProgram;
-
-    private int texture, skyBoxTexture;
-
-    private boolean malletPressed = false;
-    private Geometry.Point blueMalletPosition, previousBlueMalletPosition, puckPosition;
-
-    private Geometry.Vector puckVector;
-
     private final float leftBound = -0.5f;
     private final float rightBound = 0.5f;
     private final float farBound = -0.8f;
     private final float nearBound = 0.8f;
-
+    private Context context;
+    private SkyBox skyBox;
+    private HeightMap heightMap;
+    private Table table;
+    private Mallet mallet;
+    private Puck puck;
+    private TextureShaderProgram textureShaderProgram;
+    private ColorShaderProgram colorShaderProgram;
+    private SkyBoxShaderProgram skyBoxShaderProgram;
+    private HeightMapShaderProgram heightMapShaderProgram;
+    private int texture, skyBoxTexture;
+    private boolean malletPressed = false;
+    private Geometry.Point blueMalletPosition, previousBlueMalletPosition, puckPosition;
+    private Geometry.Vector puckVector;
     private float xRotation, yRotation;
 
 

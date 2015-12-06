@@ -14,10 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.handler.DeviceDiscoveryHandler;
 import oddymobstar.connect.ConnectivityInterface;
 import oddymobstar.connect.bluetooth.client.BluetoothClient;
 import oddymobstar.connect.bluetooth.server.BluetoothServer;
+import oddymobstar.util.widget.ConnectivityDialog;
 
 /**
  * Created by root on 25/04/15.
@@ -25,12 +26,10 @@ import oddymobstar.connect.bluetooth.server.BluetoothServer;
 public class Bluetooth implements ConnectivityInterface {
 
     public static final int REQUEST_ENABLE_BT = 46;
-
+    public static final int DISCOVERABLE_SECONDS = 120;
     private FragmentActivity activity;
     private String uuid;
     private byte[] message;
-
-    public static final int DISCOVERABLE_SECONDS = 120;
     private List<BluetoothDevice> devices = new ArrayList<>();
 
     private ProgressDialog progressDialog;
@@ -38,7 +37,7 @@ public class Bluetooth implements ConnectivityInterface {
     private BluetoothServer server;
     private BluetoothClient client;
 
-    private DemoActivity.DeviceDiscovery deviceDiscovery;
+    private DeviceDiscoveryHandler deviceDiscovery;
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -55,7 +54,7 @@ public class Bluetooth implements ConnectivityInterface {
                 //and launch dd
                 try {
                     if (!deviceDiscovery.getBluetoothManager().isRunning()) {
-                        deviceDiscovery.onDiscover();
+                        deviceDiscovery.onDiscover(ConnectivityDialog.isClient());
                     }
                 } catch (Exception e) {
                     //cos android is a pile of bluetooth shite
@@ -82,9 +81,9 @@ public class Bluetooth implements ConnectivityInterface {
 
 
     //may need to go into the interface assuming all things take time and need a progress...
-    public ProgressDialog getProgress(DemoActivity.DeviceDiscovery deviceDiscovery) {
+    public ProgressDialog getProgress(DeviceDiscoveryHandler deviceDiscoveryHandler) {
 
-        this.deviceDiscovery = deviceDiscovery;
+        this.deviceDiscovery = deviceDiscoveryHandler;
         deviceDiscovery.getBluetoothManager().init(devices, bluetoothAdapter.getName());
 
         progressDialog = new ProgressDialog(activity);

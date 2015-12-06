@@ -1,10 +1,11 @@
 package oddymobstar.activity.helper;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.location.LocationManager;
+import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,49 +22,45 @@ import java.util.HashMap;
 import java.util.Map;
 
 import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.controller.DemoActivityController;
 import oddymobstar.activity.listener.LocationListener;
 import oddymobstar.crazycourier.R;
-import oddymobstar.database.DBHelper;
 import oddymobstar.model.AllianceMember;
 import oddymobstar.util.Configuration;
 import oddymobstar.util.SubUTM;
 import oddymobstar.util.UTM;
 import oddymobstar.util.UTMGridCreator;
 import oddymobstar.util.graphics.RoundedImageView;
+import oddymobstar.util.widget.GridDialog;
 
 /**
  * Created by timmytime on 03/12/15.
  */
 public class MapHelper {
 
-    private LocationListener locationListener;
-    private LocationHelper locationHelper;
-    private LocationManager locationManager;
-    private Configuration configuration;
-    private MaterialsHelper materialsHelper;
+    public float bearing, tilt, zoom = 0.0f;
 
 
     private DemoActivity main;
+    private DemoActivityController controller;
+
     private GoogleMap map; // Might be null if Google Play services APK is not available.
+
     private Map<String, Marker> markerMap = new HashMap<>();
-
-    public float bearing, tilt, zoom = 0.0f;
-
     private Polygon myUTM;
     private Polygon mySubUTM;
 
     private PolygonOptions utmOptions;
 
 
-    public MapHelper(DemoActivity main, Configuration configuration, MaterialsHelper materialsHelper) {
+    public MapHelper(DemoActivity main, DemoActivityController controller) {
         this.main = main;
-        this.configuration = configuration;
-        this.materialsHelper = materialsHelper;
-        this.locationHelper = new LocationHelper(configuration);
+        this.controller = controller;
+
     }
 
 
-    public void setUpMapIfNeeded(DBHelper dbHelper) {
+    public void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (map == null) {
             // Try to obtain the map from the SupportMapFragment.
@@ -72,19 +69,17 @@ public class MapHelper {
 
             // Check if we were successful in obtaining the map.
             if (map != null) {
-                setUpMap(dbHelper);
+                setUpMap();
             }
         }
     }
 
 
-    private void setUpMap(DBHelper dbHelper) {
+    private void setUpMap() {
         map.getUiSettings().setZoomControlsEnabled(false);
         //now dd our last known location.
-        locationManager = (LocationManager) main.getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new LocationListener(locationManager, this, configuration, materialsHelper);
-
-        locationHelper.initLocationUpdates(locationManager, locationListener);
+        controller.locationListener = new LocationListener(controller);
+        controller.locationHelper.initLocationUpdates();
 
 
         SharedPreferences sharedPreferences = main.getPreferences(Context.MODE_PRIVATE);
@@ -99,15 +94,10 @@ public class MapHelper {
 
         //need to manage map markers too.  as per old code ie remove and re add.  do this now....joy
 
-        /*
-        really need to then move towards a jira project to manage it as got loads of shit todo.
 
-        bsically its
-         */
-
-        if (materialsHelper.userImage != null) {
-            if (materialsHelper.userImage.getUserImage() != null) {
-                Bitmap bitmap = materialsHelper.userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
+        if (controller.materialsHelper.userImage != null) {
+            if (controller.materialsHelper.userImage.getUserImage() != null) {
+                Bitmap bitmap = controller.materialsHelper.userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
 
                 int w = bitmap.getWidth();
 
@@ -140,18 +130,18 @@ public class MapHelper {
             mySubUTM.remove();
         }
 
-        if (!configuration.getConfig(Configuration.CURRENT_UTM).getValue().trim().isEmpty()) {
-            utmOptions = UTMGridCreator.getUTMGrid(new UTM(configuration.getConfig(Configuration.CURRENT_UTM).getValue())).strokeColor(main.getResources().getColor(android.R.color.holo_purple));
+        if (!controller.configuration.getConfig(Configuration.CURRENT_UTM).getValue().trim().isEmpty()) {
+            utmOptions = UTMGridCreator.getUTMGrid(new UTM(controller.configuration.getConfig(Configuration.CURRENT_UTM).getValue())).strokeColor(main.getResources().getColor(android.R.color.holo_purple));
             myUTM = map.addPolygon(utmOptions);
 
-            PolygonOptions subUtmOptions = UTMGridCreator.getSubUTMGrid(new SubUTM(configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue()), utmOptions).strokeColor(main.getResources().getColor(android.R.color.holo_orange_dark));
+            PolygonOptions subUtmOptions = UTMGridCreator.getSubUTMGrid(new SubUTM(controller.configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue()), utmOptions).strokeColor(main.getResources().getColor(android.R.color.holo_orange_dark));
             mySubUTM = map.addPolygon(subUtmOptions);
 
         }
 
 
         //we now need to add any of our alliance members in...
-        Cursor allianceMembers = dbHelper.getAllianceMembers();
+        Cursor allianceMembers = controller.dbHelper.getAllianceMembers();
 
         while (allianceMembers.moveToNext()) {
             AllianceMember allianceMember = new AllianceMember(allianceMembers);
@@ -178,16 +168,9 @@ public class MapHelper {
     }
 
     public void initLocationUpdates() {
-        locationHelper.initLocationUpdates(locationManager, locationListener);
+        controller.locationHelper.initLocationUpdates();
     }
 
-    public LocationHelper getLocationHelper() {
-        return locationHelper;
-    }
-
-    public LocationListener getLocationListener() {
-        return locationListener;
-    }
 
     public PolygonOptions getUtmOptions() {
         return utmOptions;
@@ -197,15 +180,33 @@ public class MapHelper {
         return myUTM;
     }
 
-    public Polygon getMySubUTM() {
-        return mySubUTM;
-    }
-
     public void setMyUTM(Polygon myUTM) {
         this.myUTM = myUTM;
     }
 
+    public Polygon getMySubUTM() {
+        return mySubUTM;
+    }
+
     public void setMySubUTM(Polygon mySubUTM) {
         this.mySubUTM = mySubUTM;
+    }
+
+    public GridDialog createGridDialog(String selectedGrid) {
+        return GridDialog.newInstance(selectedGrid, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, final int which) {
+                //the magic happens...but we cant deselect our selected item its not the pattern..
+                dialog.dismiss();
+                controller.mapHandler.handleLocateDialog(((GridDialog) dialog).getGrid(which));
+
+            }
+        }, new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                controller.materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
+            }
+        });
+
     }
 }

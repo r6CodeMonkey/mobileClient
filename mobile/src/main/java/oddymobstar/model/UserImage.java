@@ -25,12 +25,12 @@ public class UserImage {
 
     }
 
-    public void setUserImageKey(String userImageKey) {
-        this.userImageKey = userImageKey;
-    }
-
     public void setUserImage(Bitmap userImage) {
         this.userImage = userImage;
+    }
+
+    public Bitmap getUserImage() {
+        return userImage;
     }
 
     public void setUserImage(byte[] userImage) {
@@ -42,11 +42,11 @@ public class UserImage {
 
     }
 
-    public Bitmap getUserImage() {
-        return userImage;
-    }
-
     public String getUserImageKey() {
         return userImageKey;
+    }
+
+    public void setUserImageKey(String userImageKey) {
+        this.userImageKey = userImageKey;
     }
 }

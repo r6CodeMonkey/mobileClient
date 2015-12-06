@@ -25,28 +25,28 @@ public class Grid {
         setSubUtm(grid.getString(grid.getColumnIndexOrThrow(DBHelper.SUBUTM)));
     }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public void setUtm(String utm) {
-        this.utm = utm;
-    }
-
-    public void setSubUtm(String subUtm) {
-        this.subUtm = subUtm;
-    }
-
     public String getKey() {
         return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getUtm() {
         return utm;
     }
 
+    public void setUtm(String utm) {
+        this.utm = utm;
+    }
+
     public String getSubUtm() {
         return subUtm;
+    }
+
+    public void setSubUtm(String subUtm) {
+        this.subUtm = subUtm;
     }
 
 }

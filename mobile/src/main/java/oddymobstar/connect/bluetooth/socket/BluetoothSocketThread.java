@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.handler.DeviceDiscoveryHandler;
 import oddymobstar.message.in.InAllianceMessage;
 import oddymobstar.message.in.InCoreMessage;
 import oddymobstar.message.out.Acknowledge;
@@ -21,13 +21,13 @@ import oddymobstar.message.out.OutCoreMessage;
  */
 public class BluetoothSocketThread extends Thread {
 
-    private DemoActivity.DeviceDiscovery deviceDiscovery;
+    private DeviceDiscoveryHandler deviceDiscovery;
     private BluetoothSocket socket;
     private InputStream in;
     private OutputStream out;
 
 
-    public BluetoothSocketThread(DemoActivity.DeviceDiscovery deviceDiscovery, BluetoothSocket socket) {
+    public BluetoothSocketThread(DeviceDiscoveryHandler deviceDiscovery, BluetoothSocket socket) {
         this.socket = socket;
         this.deviceDiscovery = deviceDiscovery;
 

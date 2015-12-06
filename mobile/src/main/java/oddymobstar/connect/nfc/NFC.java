@@ -56,12 +56,6 @@ public class NFC implements ConnectivityInterface, NfcAdapter.CreateNdefMessageC
 
     }
 
-    @Override
-    public void handle(int requestCode, int resultCode, Intent data) {
-
-
-    }
-
     //a fucking joke is NFC beam.  killing objects
     public static void handleInvite(Intent data, Location location, CheService cheService, DBHelper dbHelper, String playerKey, String ackId) {
         //
@@ -92,6 +86,12 @@ public class NFC implements ConnectivityInterface, NfcAdapter.CreateNdefMessageC
         } catch (JSONException jse) {
 
         }
+
+
+    }
+
+    @Override
+    public void handle(int requestCode, int resultCode, Intent data) {
 
 
     }

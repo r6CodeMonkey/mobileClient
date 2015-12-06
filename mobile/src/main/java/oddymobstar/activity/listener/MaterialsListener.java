@@ -5,7 +5,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import oddymobstar.activity.DemoActivity;
-import oddymobstar.activity.handler.MaterialsHandler;
+import oddymobstar.activity.controller.DemoActivityController;
 
 /**
  * Created by timmytime on 03/12/15.
@@ -16,18 +16,15 @@ public class MaterialsListener {
     public static final int ALLIANCE_FAB = 0;
     public static final int CHAT_FAB = 1;
     public static final int GRID_FAB = 2;
-
+    public static final int USER_IMAGE_RESULT_CODE = 1001;
     public static int FAB_MODE = ALLIANCE_FAB;
 
-    public static final int USER_IMAGE_RESULT_CODE = 1001;
-
-
     private DemoActivity main;
-    private MaterialsHandler materialsHandler;
+    private DemoActivityController controller;
 
-    public MaterialsListener(DemoActivity main, MaterialsHandler materialsHandler) {
+    public MaterialsListener(DemoActivity main, DemoActivityController controller) {
         this.main = main;
-        this.materialsHandler = materialsHandler;
+        this.controller = controller;
     }
 
     public View.OnClickListener getFABListener() {
@@ -37,13 +34,13 @@ public class MaterialsListener {
 
                 switch (FAB_MODE) {
                     case ALLIANCE_FAB:
-                        materialsHandler.handleAllianceFAB(main.getGridFrag(), true);
+                        controller.materialsHandler.handleAllianceFAB(controller.gridFrag, true);
                         break;
                     case CHAT_FAB:
-                        materialsHandler.handleChatFAB(main.getChatFrag(), true);
+                        controller.materialsHandler.handleChatFAB(controller.chatFrag, true);
                         break;
                     case GRID_FAB:
-                        materialsHandler.handleSearchFab();
+                        controller.materialsHandler.handleSearchFab();
                         break;
                 }
 

@@ -24,7 +24,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.controller.DemoActivityController;
+import oddymobstar.activity.handler.MessageHandler;
 import oddymobstar.database.DBHelper;
 import oddymobstar.message.in.Acknowledge;
 import oddymobstar.message.in.InCoreMessage;
@@ -60,81 +61,17 @@ public class CheService extends IntentService {
     //service manager
     private LocationManager locationManager;
     private android.os.Handler handler = new android.os.Handler();
-
-
-    public class CheServiceBinder extends Binder {
-        public CheService getCheServiceInstance() {
-            return CheService.this;
-        }
-    }
-
     private CheServiceBinder cheServiceBinder = new CheServiceBinder();
-
-
-    public class DemoLocationListener implements LocationListener {
-
-        private UUIDGenerator uuidGenerator;
-
-        private LocationManager locationManager;
-
-        public DemoLocationListener(LocationManager locationManager) {
-            this.locationManager = locationManager;
-        }
-
-        @Override
-        public void onLocationChanged(Location location) {
-            // TODO Auto-generated method stub
-            //  callBack.setLocationUpdated(location);
-            uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
-            try {
-                OutCoreMessage coreMessage = new OutCoreMessage(location, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), OutCoreMessage.PLAYER);
-                writeToSocket(coreMessage);
-
-            } catch (NoSuchAlgorithmException nsae) {
-                Log.d("Security error", nsae.toString());
-            } catch (JSONException jse) {
-                Log.d("JSON error", jse.toString());
-            }
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            // TODO Auto-generated method stub
-            locationManager.removeUpdates(this);
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            // TODO Auto-generated method stub
-            locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
-
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            // TODO Auto-generated method stub
-
-            if ((!locationManager.isProviderEnabled(provider)) && status == LocationProvider.AVAILABLE) {
-                locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
-            }
-        }
-    }
-
     private DemoLocationListener demoLocationListener;
-
     private Configuration configuration;
-
 
     public CheService() {
         super("CheService");
     }
 
-    public void setMessageHandler(DemoActivity.MessageHandler messageHandler) {
+    public void setMessageHandler(MessageHandler messageHandler) {
         dbHelper.setMessageHandler(messageHandler);
     }
-
 
     @Override
     public void onCreate() {
@@ -284,7 +221,7 @@ public class CheService extends IntentService {
                         InCoreMessage coreMessage = new InCoreMessage(object);
 
 
-                        Intent messageIntent = new Intent(DemoActivity.MESSAGE_INTENT);
+                        Intent messageIntent = new Intent(DemoActivityController.MESSAGE_INTENT);
                         messageIntent.putExtra("message", coreMessage.getJsonObject().toString());
                         LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
                         Log.d("message received", "message received " + coreMessage.getJsonObject().toString());
@@ -352,11 +289,9 @@ public class CheService extends IntentService {
 
     }
 
-
     public void clearBacklog() {
         this.messageBuffer.clear();
     }
-
 
     public void resetConnection() {
         connect = new Thread(new Runnable() {
@@ -368,7 +303,6 @@ public class CheService extends IntentService {
 
         connect.start();
     }
-
 
     public void resetLocationUpdates() {
 
@@ -399,11 +333,10 @@ public class CheService extends IntentService {
         locationUpdates.start();
     }
 
-
     private void reConnect() {
 
         Log.d("reconnect", "reconnect called");
-        Intent messageIntent = new Intent(DemoActivity.MESSAGE_INTENT);
+        Intent messageIntent = new Intent(DemoActivityController.MESSAGE_INTENT);
         messageIntent.putExtra("message", "Reconnect called");
         LocalBroadcastManager.getInstance(this).sendBroadcast(messageIntent);
 
@@ -465,7 +398,6 @@ public class CheService extends IntentService {
 
 
     }
-
 
     public void writeToSocket(final OutCoreMessage coreMessage) {
 
@@ -538,7 +470,6 @@ public class CheService extends IntentService {
 
     }
 
-
     @Override
     public ComponentName startService(Intent intent) {
         return super.startService(intent);
@@ -556,6 +487,63 @@ public class CheService extends IntentService {
         //to review this.
         return START_STICKY;
         //  return super.onStartCommand(intent,flags,startId);
+    }
+
+    public class CheServiceBinder extends Binder {
+        public CheService getCheServiceInstance() {
+            return CheService.this;
+        }
+    }
+
+    public class DemoLocationListener implements LocationListener {
+
+        private UUIDGenerator uuidGenerator;
+
+        private LocationManager locationManager;
+
+        public DemoLocationListener(LocationManager locationManager) {
+            this.locationManager = locationManager;
+        }
+
+        @Override
+        public void onLocationChanged(Location location) {
+            // TODO Auto-generated method stub
+            //  callBack.setLocationUpdated(location);
+            uuidGenerator = new UUIDGenerator(configuration.getConfig(Configuration.UUID_ALGORITHM).getValue());
+            try {
+                OutCoreMessage coreMessage = new OutCoreMessage(location, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey(), OutCoreMessage.PLAYER);
+                writeToSocket(coreMessage);
+
+            } catch (NoSuchAlgorithmException nsae) {
+                Log.d("Security error", nsae.toString());
+            } catch (JSONException jse) {
+                Log.d("JSON error", jse.toString());
+            }
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            // TODO Auto-generated method stub
+            locationManager.removeUpdates(this);
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            // TODO Auto-generated method stub
+            locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
+
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            // TODO Auto-generated method stub
+
+            if ((!locationManager.isProviderEnabled(provider)) && status == LocationProvider.AVAILABLE) {
+                locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
+            }
+        }
     }
 
 

@@ -4,15 +4,20 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.support.v4.app.FragmentTransaction;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import oddymobstar.activity.DemoActivity;
-import oddymobstar.activity.helper.MaterialsHelper;
+import oddymobstar.activity.controller.DemoActivityController;
+import oddymobstar.crazycourier.R;
 import oddymobstar.fragment.ChatFragment;
 import oddymobstar.fragment.GridFragment;
+import oddymobstar.util.Configuration;
 import oddymobstar.util.widget.ChatPost;
 import oddymobstar.util.widget.CreateView;
 
@@ -21,13 +26,63 @@ import oddymobstar.util.widget.CreateView;
  */
 public class MaterialsHandler {
 
-    //private Context context;
     private DemoActivity main;
-    private MaterialsHelper materialsHelper;
+    private DemoActivityController controller;
 
-    public MaterialsHandler(DemoActivity main, MaterialsHelper materialsHelper) {
+    public MaterialsHandler(DemoActivity main, DemoActivityController controller) {
         this.main = main;
-        this.materialsHelper = materialsHelper;
+        this.controller = controller;
+    }
+
+    private Animator getAnimatorIn(LinearLayout view, boolean hide) {
+
+
+        int cxIn = (view.getLeft() + view.getRight()) / 2;
+        int cyIn = (view.getTop() + view.getBottom()) / 2;
+
+        int radiusIn = Math.max(view.getWidth(), view.getHeight());
+
+        int cxOut = (controller.materialsHelper.floatingActionButton.getLeft() + controller.materialsHelper.floatingActionButton.getRight()) / 2;
+        int cyOut = (controller.materialsHelper.floatingActionButton.getTop() + controller.materialsHelper.floatingActionButton.getBottom()) / 2;
+
+        int radiusOut = controller.materialsHelper.floatingActionButton.getWidth();
+
+        Animator animatorIn = null;
+
+        if (hide) {
+            animatorIn = ViewAnimationUtils.createCircularReveal(view, cxIn, cyIn, 0, radiusIn);
+        } else {
+            animatorIn = ViewAnimationUtils.createCircularReveal(controller.materialsHelper.floatingActionButton, cxOut, cyOut, 0, radiusOut);
+        }
+        //   animatorIn.setDuration(500);
+        animatorIn.setInterpolator(new AccelerateInterpolator());
+
+        return animatorIn;
+
+    }
+
+    private Animator getAnimatorOut(LinearLayout view, boolean hide) {
+
+        int cxIn = (view.getLeft() + view.getRight()) / 2;
+        int cyIn = (view.getTop() + view.getBottom()) / 2;
+
+        int radiusIn = Math.max(view.getWidth(), view.getHeight());
+
+        int cxOut = (controller.materialsHelper.floatingActionButton.getLeft() + controller.materialsHelper.floatingActionButton.getRight()) / 2;
+        int cyOut = (controller.materialsHelper.floatingActionButton.getTop() + controller.materialsHelper.floatingActionButton.getBottom()) / 2;
+
+        int radiusOut = controller.materialsHelper.floatingActionButton.getWidth();
+
+        Animator animatorOut = null;
+
+        if (hide) {
+            animatorOut = ViewAnimationUtils.createCircularReveal(controller.materialsHelper.floatingActionButton, cxOut, cyOut, radiusOut, 0);
+        } else {
+            animatorOut = ViewAnimationUtils.createCircularReveal(view, cxIn, cyIn, radiusIn, 0);
+        }
+
+
+        return animatorOut;
     }
 
 
@@ -35,31 +90,10 @@ public class MaterialsHandler {
 
         final ChatPost hiddenChatPost = chatFrag.getHiddenChatPost();
 
-        int cxIn = (hiddenChatPost.getLeft() + hiddenChatPost.getRight()) / 2;
-        int cyIn = (hiddenChatPost.getTop() + hiddenChatPost.getBottom()) / 2;
 
-        int radiusIn = Math.max(hiddenChatPost.getWidth(), hiddenChatPost.getHeight());
+        Animator animatorIn = getAnimatorIn(hiddenChatPost, hide);
+        Animator animatorOut = getAnimatorOut(hiddenChatPost, hide);
 
-        int cxOut = (materialsHelper.floatingActionButton.getLeft() + materialsHelper.floatingActionButton.getRight()) / 2;
-        int cyOut = (materialsHelper.floatingActionButton.getTop() + materialsHelper.floatingActionButton.getBottom()) / 2;
-
-        int radiusOut = materialsHelper.floatingActionButton.getWidth();
-
-        Animator animatorIn, animatorOut = null;
-
-        if (hide) {
-            animatorIn = ViewAnimationUtils.createCircularReveal(hiddenChatPost, cxIn, cyIn, 0, radiusIn);
-        } else {
-            animatorIn = ViewAnimationUtils.createCircularReveal(materialsHelper.floatingActionButton, cxOut, cyOut, 0, radiusOut);
-        }
-        //   animatorIn.setDuration(500);
-        animatorIn.setInterpolator(new AccelerateInterpolator());
-
-        if (hide) {
-            animatorOut = ViewAnimationUtils.createCircularReveal(materialsHelper.floatingActionButton, cxOut, cyOut, radiusOut, 0);
-        } else {
-            animatorOut = ViewAnimationUtils.createCircularReveal(hiddenChatPost, cxIn, cyIn, radiusIn, 0);
-        }
         //   animatorOut.setDuration(300);
         animatorOut.setInterpolator(new AccelerateInterpolator());
 
@@ -74,7 +108,7 @@ public class MaterialsHandler {
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 if (hide) {
-                    materialsHelper.floatingActionButton.setVisibility(View.INVISIBLE);
+                    controller.materialsHelper.floatingActionButton.setVisibility(View.INVISIBLE);
 
                     InputMethodManager imm = (InputMethodManager) main.getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
@@ -97,7 +131,7 @@ public class MaterialsHandler {
         if (hide) {
             hiddenChatPost.setVisibility(View.VISIBLE);
         } else {
-            materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
+            controller.materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
         }
 
 
@@ -111,33 +145,13 @@ public class MaterialsHandler {
 
         final CreateView hiddenCreateView = gridFrag.getHiddenCreateView();
 
+        Animator animatorIn = getAnimatorIn(hiddenCreateView, hide);
+        Animator animatorOut = getAnimatorOut(hiddenCreateView, hide);
 
-        int cxIn = (hiddenCreateView.getLeft() + hiddenCreateView.getRight()) / 2;
-        int cyIn = (hiddenCreateView.getTop() + hiddenCreateView.getBottom()) / 2;
-
-        int radiusIn = Math.max(hiddenCreateView.getWidth(), hiddenCreateView.getHeight());
-
-        int cxOut = (materialsHelper.floatingActionButton.getLeft() + materialsHelper.floatingActionButton.getRight()) / 2;
-        int cyOut = (materialsHelper.floatingActionButton.getTop() + materialsHelper.floatingActionButton.getBottom()) / 2;
-
-        int radiusOut = materialsHelper.floatingActionButton.getWidth();
-
-        Animator animatorIn, animatorOut = null;
-
-        if (hide) {
-            animatorIn = ViewAnimationUtils.createCircularReveal(hiddenCreateView, cxIn, cyIn, 0, radiusIn);
-        } else {
-            animatorIn = ViewAnimationUtils.createCircularReveal(materialsHelper.floatingActionButton, cxOut, cyOut, 0, radiusOut);
-        }
 
         //   animatorIn.setDuration(500);
         animatorIn.setInterpolator(new AccelerateInterpolator());
 
-        if (hide) {
-            animatorOut = ViewAnimationUtils.createCircularReveal(materialsHelper.floatingActionButton, cxOut, cyOut, radiusOut, 0);
-        } else {
-            animatorOut = ViewAnimationUtils.createCircularReveal(hiddenCreateView, cxIn, cyIn, radiusIn, 0);
-        }
 
         // animatorOut.setDuration(300);
         animatorOut.setInterpolator(new AccelerateInterpolator());
@@ -156,7 +170,7 @@ public class MaterialsHandler {
 
 
                 if (hide) {
-                    materialsHelper.floatingActionButton.setVisibility(View.INVISIBLE);
+                    controller.materialsHelper.floatingActionButton.setVisibility(View.INVISIBLE);
 
                     InputMethodManager imm = (InputMethodManager) main.getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
@@ -180,7 +194,7 @@ public class MaterialsHandler {
         if (hide) {
             hiddenCreateView.setVisibility(View.VISIBLE);
         } else {
-            materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
+            controller.materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
         }
 
 
@@ -194,13 +208,13 @@ public class MaterialsHandler {
     public void handleSearchFab() {
 
 
-        int cxOut = (materialsHelper.floatingActionButton.getLeft() + materialsHelper.floatingActionButton.getRight()) / 2;
-        int cyOut = (materialsHelper.floatingActionButton.getTop() + materialsHelper.floatingActionButton.getBottom()) / 2;
+        int cxOut = (controller.materialsHelper.floatingActionButton.getLeft() + controller.materialsHelper.floatingActionButton.getRight()) / 2;
+        int cyOut = (controller.materialsHelper.floatingActionButton.getTop() + controller.materialsHelper.floatingActionButton.getBottom()) / 2;
 
-        int radiusOut = materialsHelper.floatingActionButton.getWidth();
+        int radiusOut = controller.materialsHelper.floatingActionButton.getWidth();
 
 
-        Animator animatorOut = ViewAnimationUtils.createCircularReveal(materialsHelper.floatingActionButton, cxOut, cyOut, radiusOut, 0);
+        Animator animatorOut = ViewAnimationUtils.createCircularReveal(controller.materialsHelper.floatingActionButton, cxOut, cyOut, radiusOut, 0);
 
         //animatorOut.setDuration(300);
         animatorOut.setInterpolator(new AccelerateInterpolator());
@@ -216,20 +230,61 @@ public class MaterialsHandler {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                materialsHelper.floatingActionButton.setVisibility(View.INVISIBLE);
+                controller.materialsHelper.floatingActionButton.setVisibility(View.INVISIBLE);
 
                 FragmentTransaction transaction = main.getSupportFragmentManager()
                         .beginTransaction();
 
-                main.createGridDialog();
-
-                main.getGridDialog().show(transaction, "dialog");
-
+                controller.mapHelper.createGridDialog(controller.mapHandler.SELECTED_GRID).show(transaction, "dialog");
 
             }
         });
 
         animatorOut.start();
+
+
+    }
+
+    public void handleFABChange(int color, int image, int visible) {
+        if (color != -1) {
+            controller.materialsHelper.floatingActionButton.setBackgroundTintList(controller.materialsHelper.getColorStateList(color));
+        }
+        controller.materialsHelper.floatingActionButton.setVisibility(visible);
+        if (image != -1) {
+            controller.materialsHelper.floatingActionButton.setImageDrawable(main.getDrawable(image));
+        }
+
+    }
+
+
+    public void setNavConfigValues() {
+
+
+        main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                MenuItem item = controller.materialsHelper.navigationView.getMenu().findItem(R.id.utm);
+                item.setTitle(main.getResources().getString(R.string.menu_utm) + " - " + controller.configuration.getConfig(Configuration.CURRENT_UTM).getValue());
+
+                item = controller.materialsHelper.navigationView.getMenu().findItem(R.id.sub_utm);
+                item.setTitle(main.getResources().getString(R.string.menu_subutm) + " - " + controller.configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue());
+
+                item = controller.materialsHelper.navigationView.getMenu().findItem(R.id.encrypt);
+                item.setTitle(main.getResources().getString(R.string.menu_encryption) + " - " + controller.configuration.getConfig(Configuration.SSL_ALGORITHM).getValue());
+
+                TextView textView = (TextView) controller.materialsHelper.navigationView.findViewById(R.id.nav_header);
+                textView.setText(controller.configuration.getConfig(Configuration.PLAYER_KEY).getValue());
+
+                if (controller.materialsHelper.userImage != null) {
+                    if (controller.materialsHelper.userImage.getUserImage() != null) {
+                        controller.materialsHelper.userImageView.setImageBitmap(controller.materialsHelper.userImage.getUserImage());
+                    }
+                }
+
+                //  gridFrag.refreshAdapter();  //dont really need this...to check its for alliances..
+            }
+        });
 
 
     }

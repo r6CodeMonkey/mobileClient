@@ -15,9 +15,8 @@ import static android.opengl.GLES20.glGenBuffers;
  */
 public class IndexBuffer {
 
-    private final int bufferId;
-
     public static final int BYTES_PER_SHORT = 2;
+    private final int bufferId;
 
     public IndexBuffer(short[] indexData) {
         final int buffers[] = new int[1];

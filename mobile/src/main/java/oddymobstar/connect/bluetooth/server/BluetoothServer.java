@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothSocket;
 import java.io.IOException;
 import java.util.UUID;
 
-import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.handler.DeviceDiscoveryHandler;
 import oddymobstar.connect.bluetooth.socket.BluetoothSocketThread;
 
 /**
@@ -17,12 +17,12 @@ public class BluetoothServer extends Thread {
 
     private final static String BT_SERVER_NAME = "ALLIANCE INVITE";
 
-    private DemoActivity.DeviceDiscovery deviceDiscovery;
+    private DeviceDiscoveryHandler deviceDiscovery;
     private BluetoothServerSocket serverSocket;
     private BluetoothSocketThread bluetoothSocketThread;
     private byte[] message;
 
-    public BluetoothServer(DemoActivity.DeviceDiscovery deviceDiscovery, BluetoothAdapter bluetoothAdapter, String uuid, byte[] message) {
+    public BluetoothServer(DeviceDiscoveryHandler deviceDiscovery, BluetoothAdapter bluetoothAdapter, String uuid, byte[] message) {
 
         this.deviceDiscovery = deviceDiscovery;
         this.message = message;

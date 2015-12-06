@@ -11,6 +11,7 @@ import android.view.KeyEvent;
 import java.util.List;
 
 import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.handler.MapHandler;
 import oddymobstar.util.SubUTM;
 import oddymobstar.util.UTM;
 
@@ -43,17 +44,17 @@ public class GridDialog extends DialogFragment {
 
         //dont need fast indexer letters get in way.  makes user interpret values as its part of logic to gaming.  a challenge.
 
-        builder.setTitle(DemoActivity.CURRENT_GRID_FAB_STATE == DemoActivity.UTM_FAB_STATE ? "Select UTM/Region" : DemoActivity.CURRENT_GRID_FAB_STATE == DemoActivity.SUBUTM_FAB_STATE ? "Select SubUTM" : "Select UTM");
+        builder.setTitle(MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.UTM_FAB_STATE ? "Select UTM/Region" : MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.SUBUTM_FAB_STATE ? "Select SubUTM" : "Select UTM");
 
 
         //ok it runs like a dog on map...so i click.  and filter lists by where are friends are etc....tbf this is a bit
         //OTT it shows nothing of much interest.  im just playing with materials....so stuff it.
-        builder.setSingleChoiceItems(DemoActivity.CURRENT_GRID_FAB_STATE == DemoActivity.UTM_FAB_STATE ?
-                        utmList.toArray(new CharSequence[0]) : DemoActivity.CURRENT_GRID_FAB_STATE == DemoActivity.SUBUTM_FAB_STATE ?
-                        subUtmList.toArray(new CharSequence[0]) : UTM.getUtmRegion(DemoActivity.UTM_REGION).toArray(new CharSequence[0]),
-                DemoActivity.CURRENT_GRID_FAB_STATE == DemoActivity.UTM_FAB_STATE ?
-                        utmList.indexOf(lastSelectedGrid) : DemoActivity.CURRENT_GRID_FAB_STATE == DemoActivity.SUBUTM_FAB_STATE ?
-                        subUtmList.indexOf(lastSelectedGrid) : UTM.getUtmRegion(DemoActivity.UTM_REGION).indexOf(lastSelectedGrid), locateListener);
+        builder.setSingleChoiceItems(MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.UTM_FAB_STATE ?
+                        utmList.toArray(new CharSequence[0]) : MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.SUBUTM_FAB_STATE ?
+                        subUtmList.toArray(new CharSequence[0]) : UTM.getUtmRegion(MapHandler.UTM_REGION).toArray(new CharSequence[0]),
+                MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.UTM_FAB_STATE ?
+                        utmList.indexOf(lastSelectedGrid) : MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.SUBUTM_FAB_STATE ?
+                        subUtmList.indexOf(lastSelectedGrid) : UTM.getUtmRegion(MapHandler.UTM_REGION).indexOf(lastSelectedGrid), locateListener);
 
 
         //not pretty but it works as i want it to.
@@ -77,9 +78,9 @@ public class GridDialog extends DialogFragment {
     }
 
     public String getGrid(int which) {
-        return lastSelectedGrid = DemoActivity.CURRENT_GRID_FAB_STATE == DemoActivity.UTM_FAB_STATE ?
-                utmList.get(which) : DemoActivity.CURRENT_GRID_FAB_STATE == DemoActivity.SUBUTM_FAB_STATE ?
-                subUtmList.get(which) : UTM.getUtmRegion(DemoActivity.UTM_REGION).get(which);
+        return lastSelectedGrid = MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.UTM_FAB_STATE ?
+                utmList.get(which) : MapHandler.CURRENT_GRID_FAB_STATE == MapHandler.SUBUTM_FAB_STATE ?
+                subUtmList.get(which) : UTM.getUtmRegion(MapHandler.UTM_REGION).get(which);
     }
 
 

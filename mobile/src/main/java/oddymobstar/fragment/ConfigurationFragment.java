@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 
-import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.handler.ConfigurationHandler;
 import oddymobstar.adapter.ConfigurationAdapter;
 import oddymobstar.crazycourier.R;
 
@@ -21,13 +21,13 @@ public class ConfigurationFragment extends Fragment {
     private Cursor userConfigs;
     private Cursor systemConfigs;
 
-    private DemoActivity.ConfigurationHandler configurationHandler;
+    private ConfigurationHandler configurationHandler;
 
     public ConfigurationFragment() {
 
     }
 
-    public void init(DemoActivity.ConfigurationHandler configurationHandler, Cursor userConfigs, Cursor systemConfigs) {
+    public void init(ConfigurationHandler configurationHandler, Cursor userConfigs, Cursor systemConfigs) {
         this.configurationHandler = configurationHandler;
         this.userConfigs = userConfigs;
         this.systemConfigs = systemConfigs;

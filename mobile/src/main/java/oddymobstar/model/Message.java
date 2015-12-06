@@ -35,61 +35,60 @@ public class Message {
         setAuthor(message.getString(message.getColumnIndexOrThrow(DBHelper.MESSAGE_AUTHOR)));
     }
 
-
-    public void setId(long id) {
-        this.id = id;
+    public long getTime() {
+        return time;
     }
 
     public void setTime(long time) {
         this.time = time;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setMessageType(String messageType) {
-        this.messageType = messageType;
-    }
-
-    public void setMessageKey(String messageKey) {
-        this.messageKey = messageKey;
-    }
-
-    public void setMyMessage(String myMessage) {
-        this.myMessage = myMessage;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getMessage() {
         return message;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public String getMessageType() {
         return messageType;
+    }
+
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
     }
 
     public String getMessageKey() {
         return messageKey;
     }
 
+    public void setMessageKey(String messageKey) {
+        this.messageKey = messageKey;
+    }
+
     public String getAuthor() {
         return author;
     }
 
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
     public boolean isMyMessage() {
         return myMessage.equals("Y");
+    }
+
+    public void setMyMessage(String myMessage) {
+        this.myMessage = myMessage;
     }
 
     public String getTimeStamp() {

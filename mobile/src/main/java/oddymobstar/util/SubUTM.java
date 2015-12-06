@@ -10,28 +10,12 @@ import java.util.regex.Pattern;
  */
 public class SubUTM {
 
+    private static List<String> subUtmList = new ArrayList<>();
     private String subUtmLat = "";
     private String subLatString = "";
     private int subLatInt;
     private int subUtmLong;
 
-    private static List<String> subUtmList = new ArrayList<>();
-
-
-    public static void createSubUtms() {
-        for (int indexCounter = 1; indexCounter <= 8; indexCounter++) {
-            for (String val : UTMGridCreator.latValues) {
-                for (int i = 0; i < 60; i++) {
-                    subUtmList.add(indexCounter + val + i);
-                }
-            }
-        }
-
-    }
-
-    public static List<String> getSubUtmList() {
-        return subUtmList;
-    }
 
     public SubUTM(String subUtm) {
 
@@ -57,6 +41,33 @@ public class SubUTM {
 
     }
 
+    public static void createSubUtms() {
+        for (int indexCounter = 1; indexCounter <= 8; indexCounter++) {
+            for (String val : UTMGridCreator.latValues) {
+                for (int i = 0; i < 60; i++) {
+                    subUtmList.add(indexCounter + val + i);
+                }
+            }
+        }
+
+    }
+
+    public static List<String> getSubUtmList() {
+        return subUtmList;
+    }
+
+    public static void main(String[] args) {
+
+        SubUTM subUTM = new SubUTM("19V20");
+
+        System.out.println(subUTM.getSubUtmLat());
+        System.out.println(subUTM.getSubUtmLong());
+        System.out.println(subUTM.getSubLatInt());
+        System.out.println(subUTM.getSubLatString());
+
+
+    }
+
     public String getSubUtmLat() {
         return subUtmLat;
     }
@@ -71,17 +82,5 @@ public class SubUTM {
 
     public String getSubLatString() {
         return subLatString;
-    }
-
-    public static void main(String[] args) {
-
-        SubUTM subUTM = new SubUTM("19V20");
-
-        System.out.println(subUTM.getSubUtmLat());
-        System.out.println(subUTM.getSubUtmLong());
-        System.out.println(subUTM.getSubLatInt());
-        System.out.println(subUTM.getSubLatString());
-
-
     }
 }

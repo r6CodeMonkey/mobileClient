@@ -60,39 +60,6 @@ public class AllianceMember {
         setAltitude(cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.ALTITUDE)));
     }
 
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setUtm(String utm) {
-        this.utm = utm;
-    }
-
-    public void setSubUtm(String subUtm) {
-        this.subUtm = subUtm;
-    }
-
-    public void setSpeed(double speed) {
-        this.speed = speed;
-    }
-
-    public void setAltitude(double altitude) {
-        this.altitude = altitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
     public Alliance getAlliance() {
         return alliance;
     }
@@ -101,8 +68,16 @@ public class AllianceMember {
         return key;
     }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public LatLng getLatLng() {
@@ -113,23 +88,47 @@ public class AllianceMember {
         return latitude;
     }
 
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
     public double getLongitude() {
         return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     public String getUtm() {
         return utm;
     }
 
+    public void setUtm(String utm) {
+        this.utm = utm;
+    }
+
     public String getSubUtm() {
         return subUtm;
+    }
+
+    public void setSubUtm(String subUtm) {
+        this.subUtm = subUtm;
     }
 
     public double getSpeed() {
         return speed;
     }
 
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+
     public double getAltitude() {
         return altitude;
+    }
+
+    public void setAltitude(double altitude) {
+        this.altitude = altitude;
     }
 }

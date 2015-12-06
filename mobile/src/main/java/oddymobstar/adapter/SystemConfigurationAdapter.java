@@ -10,7 +10,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CursorAdapter;
 
-import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.handler.ConfigurationHandler;
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
 import oddymobstar.util.Configuration;
@@ -20,9 +20,9 @@ import oddymobstar.util.Configuration;
  */
 public class SystemConfigurationAdapter extends CursorAdapter {
 
-    private DemoActivity.ConfigurationHandler configurationHandler;
+    private ConfigurationHandler configurationHandler;
 
-    public SystemConfigurationAdapter(Context context, Cursor cursor, boolean autoRequery, DemoActivity.ConfigurationHandler configurationHandler) {
+    public SystemConfigurationAdapter(Context context, Cursor cursor, boolean autoRequery, ConfigurationHandler configurationHandler) {
         super(context, cursor, autoRequery);
 
         this.configurationHandler = configurationHandler;

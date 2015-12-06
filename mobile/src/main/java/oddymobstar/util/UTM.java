@@ -35,6 +35,25 @@ public class UTM {
     private int utmLong;
     private String utmLat = "";
 
+    public UTM(String utm) {
+
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(utm);
+
+        while (matcher.find()) {
+            utmLong = Integer.valueOf(matcher.group());
+        }
+
+        pattern = Pattern.compile("[A-Z]");
+        matcher = pattern.matcher(utm);
+
+        while (matcher.find()) {
+            utmLat = matcher.group();
+        }
+
+
+    }
+
     private static void populateRegion(List<String> values, String startLetter, String endLetter, int start, int end) {
 
 
@@ -120,7 +139,6 @@ public class UTM {
 
     }
 
-
     private static boolean isInRegions(String utm) {
 
         for (List regions : utmRegions.values()) {
@@ -131,36 +149,6 @@ public class UTM {
 
         return false;
     }
-
-
-    public UTM(String utm) {
-
-        Pattern pattern = Pattern.compile("\\d+");
-        Matcher matcher = pattern.matcher(utm);
-
-        while (matcher.find()) {
-            utmLong = Integer.valueOf(matcher.group());
-        }
-
-        pattern = Pattern.compile("[A-Z]");
-        matcher = pattern.matcher(utm);
-
-        while (matcher.find()) {
-            utmLat = matcher.group();
-        }
-
-
-    }
-
-
-    public int getUtmLong() {
-        return utmLong;
-    }
-
-    public String getUtmLat() {
-        return utmLat;
-    }
-
 
     public static List<String> getUtmRegion(String region) {
         return utmRegions.get(region);
@@ -189,7 +177,6 @@ public class UTM {
         return regionCentre.get(region);
     }
 
-
     public static void main(String[] args) {
 
         UTM utm = new UTM("E31");
@@ -198,6 +185,14 @@ public class UTM {
         System.out.println(utm.getUtmLong());
 
 
+    }
+
+    public int getUtmLong() {
+        return utmLong;
+    }
+
+    public String getUtmLat() {
+        return utmLat;
     }
 
 

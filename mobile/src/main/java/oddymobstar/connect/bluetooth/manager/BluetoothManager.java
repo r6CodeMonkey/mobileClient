@@ -15,16 +15,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import oddymobstar.connect.ConnectivityHandler;
-import oddymobstar.database.DBHelper;
+import oddymobstar.activity.controller.DemoActivityController;
 import oddymobstar.fragment.DeviceFragment;
 import oddymobstar.message.in.InAllianceMessage;
 import oddymobstar.message.out.OutAllianceMessage;
 import oddymobstar.message.out.OutCoreMessage;
 import oddymobstar.model.Alliance;
-import oddymobstar.service.handler.CheService;
 import oddymobstar.util.Configuration;
-import oddymobstar.util.UUIDGenerator;
 
 /**
  * Created by root on 27/04/15.
@@ -37,14 +34,11 @@ public class BluetoothManager {
     private List<BluetoothDevice> selectedDevices = new ArrayList<>();
     private String deviceName;
 
-    private ConnectivityHandler connectivityHandler;
-    private DBHelper dbHelper;
-    private CheService cheService;
+
     private String key;
     private Location location;  //i dont need this perse....but message does
-    private Configuration configuration;
     private Context context;
-    private UUIDGenerator uuidGenerator;
+    private DemoActivityController controller;
 
 
     private DialogInterface.OnClickListener inviteListener = new DialogInterface.OnClickListener() {
@@ -57,15 +51,15 @@ public class BluetoothManager {
 
 
             try {
-                allianceMessage = new OutAllianceMessage(location, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
-                allianceMessage.setAlliance(dbHelper.getAlliance(key), OutCoreMessage.INVITE, OutCoreMessage.GLOBAL, "Invitation to Join");
-                connectivityHandler.getBluetooth().setMessage(allianceMessage.getMessage().toString().getBytes());
+                allianceMessage = new OutAllianceMessage(location, controller.configuration.getConfig(Configuration.PLAYER_KEY).getValue(), controller.uuidGenerator.generateAcknowledgeKey());
+                allianceMessage.setAlliance(controller.dbHelper.getAlliance(key), OutCoreMessage.INVITE, OutCoreMessage.GLOBAL, "Invitation to Join");
+                controller.connectivityHandler.getBluetooth().setMessage(allianceMessage.getMessage().toString().getBytes());
             } catch (JSONException jse) {
 
             } catch (NoSuchAlgorithmException nsae) {
 
             }
-            connectivityHandler.getBluetooth().createServer();
+            controller.connectivityHandler.getBluetooth().createServer();
 
             dialog.dismiss();
         }
@@ -75,7 +69,7 @@ public class BluetoothManager {
         @Override
         public void onClick(DialogInterface dialog, int which) {
             if (!selectedDevices.isEmpty()) {
-                connectivityHandler.getBluetooth().createClient();
+                controller.connectivityHandler.getBluetooth().createClient();
                 dialog.dismiss();
             }
         }
@@ -110,16 +104,12 @@ public class BluetoothManager {
     };
 
 
-    public BluetoothManager(Context context, ConnectivityHandler connectivityHandler, DBHelper dbHelper, UUIDGenerator uuidGenerator,
-                            CheService cheService, Configuration configuration, String key, Location location) {
+    public BluetoothManager(Context context, DemoActivityController controller, String key) {
         this.context = context;
-        this.connectivityHandler = connectivityHandler;
-        this.cheService = cheService;
-        this.dbHelper = dbHelper;
+        this.controller = controller;
         this.key = key;
-        this.location = location;
-        this.configuration = configuration;
-        this.uuidGenerator = uuidGenerator;
+        this.location = controller.locationListener.getCurrentLocation();
+
     }
 
 
@@ -183,18 +173,18 @@ public class BluetoothManager {
 
         //this is where we contact che service with message...
         try {
-            OutAllianceMessage allianceMessage = new OutAllianceMessage(location, configuration.getConfig(Configuration.PLAYER_KEY).getValue(), uuidGenerator.generateAcknowledgeKey());
+            OutAllianceMessage allianceMessage = new OutAllianceMessage(location, controller.configuration.getConfig(Configuration.PLAYER_KEY).getValue(), controller.uuidGenerator.generateAcknowledgeKey());
             Alliance alliance = new Alliance();
             alliance.setKey(message.getAid());
             alliance.setName(message.getName());
 
             allianceMessage.setAlliance(alliance, OutCoreMessage.JOIN, OutCoreMessage.GLOBAL, "Joining");
 
-            cheService.writeToSocket(allianceMessage);
+            controller.cheService.writeToSocket(allianceMessage);
 
-            dbHelper.addAlliance(alliance, true);
+            controller.dbHelper.addAlliance(alliance, true);
 
-            connectivityHandler.getBluetooth().disable();
+            controller.connectivityHandler.getBluetooth().disable();
 
         } catch (JSONException jse) {
 
@@ -209,7 +199,7 @@ public class BluetoothManager {
         int pos = 0;
         for (BluetoothDevice device : selectedDevices) {
             if (device.getName().equals(deviceName)) {
-                connectivityHandler.getBluetooth().unpair(device);
+                controller.connectivityHandler.getBluetooth().unpair(device);
                 pos = counter;
             }
             counter++;
@@ -218,7 +208,7 @@ public class BluetoothManager {
         selectedDevices.remove(pos);
         //and remove
         if (selectedDevices.isEmpty()) {
-            connectivityHandler.getBluetooth().disable();
+            controller.connectivityHandler.getBluetooth().disable();
         }
 
     }

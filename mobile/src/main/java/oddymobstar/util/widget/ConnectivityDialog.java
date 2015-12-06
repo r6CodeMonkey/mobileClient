@@ -35,6 +35,10 @@ public class ConnectivityDialog extends DialogFragment {
         return new ConnectivityDialog();
     }
 
+    public static boolean isClient() {
+        return isClient;
+    }
+
     public Dialog onCreateDialog(Bundle savedInstance) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

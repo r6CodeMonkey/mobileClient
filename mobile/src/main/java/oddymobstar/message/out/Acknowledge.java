@@ -10,12 +10,10 @@ public class Acknowledge {
 
     //used by bluetooth etc.
 
+    public static final String SUCCESS = "SUCCESS";
     private JSONObject ack = new JSONObject();
-
     private String ackId;
     private String name;
-
-    public static final String SUCCESS = "SUCCESS";
 
 
     public Acknowledge(String ackId, String name
@@ -26,15 +24,15 @@ public class Acknowledge {
 
     }
 
-    public JSONObject getAcknowledge() {
-        return ack;
-    }
-
     public Acknowledge(JSONObject ack) throws JSONException {
 
         ackId = ack.getString(OutCoreMessage.ACK_ID);
         name = ack.getString(OutCoreMessage.NAME);
 
+    }
+
+    public JSONObject getAcknowledge() {
+        return ack;
     }
 
     public String getAckId() {

@@ -7,6 +7,32 @@ import android.util.FloatMath;
  */
 public class Geometry {
 
+    public static Vector vectorBetween(Point from, Point to) {
+        return new Vector(to.x - from.x, to.y - from.y, to.z - from.z);
+    }
+
+    public static boolean intersects(Sphere sphere, Ray ray) {
+
+        return distanceBetween(sphere.centre, ray) < sphere.radius;
+    }
+
+    public static Point intersectionPoint(Ray ray, Plane plane) {
+        Vector rayToPlaneVector = vectorBetween(ray.point, plane.point);
+        float scaleFactor = rayToPlaneVector.dotProduct(plane.normal) / ray.vector.dotProduct(plane.normal);
+
+        return ray.point.translate(ray.vector.scale(scaleFactor));
+    }
+
+    public static float distanceBetween(Point point, Ray ray) {
+        Vector p1ToPoint = vectorBetween(ray.point, point);
+        Vector p2ToPoint = vectorBetween(ray.point.translate(ray.vector), point);
+
+        float areaOfTriangleTimesTwo = p1ToPoint.crossProduct(p2ToPoint).length();
+        float lengthOfBase = ray.vector.length();
+
+        return areaOfTriangleTimesTwo / lengthOfBase;
+    }
+
     public static class Point {
         public final float x, y, z;
 
@@ -92,10 +118,6 @@ public class Geometry {
         }
     }
 
-    public static Vector vectorBetween(Point from, Point to) {
-        return new Vector(to.x - from.x, to.y - from.y, to.z - from.z);
-    }
-
     public static class Sphere {
         public final Point centre;
         public final float radius;
@@ -104,28 +126,6 @@ public class Geometry {
             this.centre = centre;
             this.radius = radius;
         }
-    }
-
-    public static boolean intersects(Sphere sphere, Ray ray) {
-
-        return distanceBetween(sphere.centre, ray) < sphere.radius;
-    }
-
-    public static Point intersectionPoint(Ray ray, Plane plane) {
-        Vector rayToPlaneVector = vectorBetween(ray.point, plane.point);
-        float scaleFactor = rayToPlaneVector.dotProduct(plane.normal) / ray.vector.dotProduct(plane.normal);
-
-        return ray.point.translate(ray.vector.scale(scaleFactor));
-    }
-
-    public static float distanceBetween(Point point, Ray ray) {
-        Vector p1ToPoint = vectorBetween(ray.point, point);
-        Vector p2ToPoint = vectorBetween(ray.point.translate(ray.vector), point);
-
-        float areaOfTriangleTimesTwo = p1ToPoint.crossProduct(p2ToPoint).length();
-        float lengthOfBase = ray.vector.length();
-
-        return areaOfTriangleTimesTwo / lengthOfBase;
     }
 
     public static class Plane {

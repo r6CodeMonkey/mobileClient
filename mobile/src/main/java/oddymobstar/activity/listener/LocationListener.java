@@ -2,7 +2,6 @@ package oddymobstar.activity.listener;
 
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -12,8 +11,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import oddymobstar.activity.helper.MapHelper;
-import oddymobstar.activity.helper.MaterialsHelper;
+import oddymobstar.activity.controller.DemoActivityController;
 import oddymobstar.util.Configuration;
 import oddymobstar.util.graphics.RoundedImageView;
 
@@ -23,19 +21,11 @@ import oddymobstar.util.graphics.RoundedImageView;
 public class LocationListener implements android.location.LocationListener {
 
 
+    private DemoActivityController controller;
     private Location currentLocation;
 
-
-    private LocationManager locationManager;
-    private MapHelper mapHelper;
-    private Configuration configuration;
-    private MaterialsHelper materialsHelper;
-
-    public LocationListener(LocationManager locationManager, MapHelper mapHelper, Configuration configuration, MaterialsHelper materialsHelper) {
-        this.locationManager = locationManager;
-        this.mapHelper = mapHelper;
-        this.configuration = configuration;
-        this.materialsHelper = materialsHelper;
+    public LocationListener(DemoActivityController controller) {
+        this.controller = controller;
     }
 
 
@@ -47,9 +37,6 @@ public class LocationListener implements android.location.LocationListener {
         this.currentLocation = currentLocation;
     }
 
-    public void updateConfiguration(Configuration configuration) {
-        this.configuration = configuration;
-    }
 
     @Override
     public void onLocationChanged(Location location) {
@@ -61,15 +48,15 @@ public class LocationListener implements android.location.LocationListener {
         Log.d("location changed", "location changed");
         LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-        if (mapHelper.getMarkerMap().containsKey("Me")) {
-            mapHelper.getMarkerMap().get("Me").remove();
+        if (controller.mapHelper.getMarkerMap().containsKey("Me")) {
+            controller.mapHelper.getMarkerMap().get("Me").remove();
         }
 
-        if (materialsHelper.userImage != null) {
-            if (materialsHelper.userImage.getUserImage() != null) {
+        if (controller.materialsHelper.userImage != null) {
+            if (controller.materialsHelper.userImage.getUserImage() != null) {
 
 
-                Bitmap bitmap = materialsHelper.userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
+                Bitmap bitmap = controller.materialsHelper.userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
 
                 int w = bitmap.getWidth();
 
@@ -77,21 +64,21 @@ public class LocationListener implements android.location.LocationListener {
                 Bitmap roundBitmap = RoundedImageView.getCroppedBitmap(bitmap, w);
 
                 //236 - 354
-                mapHelper.getMarkerMap().put("Me", mapHelper.getMap().addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
+                controller.mapHelper.getMarkerMap().put("Me", controller.mapHelper.getMap().addMarker(new MarkerOptions().position(currentLatLng).title("Me").icon(BitmapDescriptorFactory.fromBitmap(Bitmap.createScaledBitmap(roundBitmap, 354, 354, false))).flat(false)));
 
             }
         } else {
-            mapHelper.getMarkerMap().put("Me", mapHelper.getMap().addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
+            controller.mapHelper.getMarkerMap().put("Me", controller.mapHelper.getMap().addMarker(new MarkerOptions().position(currentLatLng).title("Me")));
         }
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(currentLatLng)
-                .tilt(mapHelper.getMap().getCameraPosition().tilt)
-                .bearing(mapHelper.getMap().getCameraPosition().bearing)
-                .zoom(mapHelper.getMap().getCameraPosition().zoom)
+                .tilt(controller.mapHelper.getMap().getCameraPosition().tilt)
+                .bearing(controller.mapHelper.getMap().getCameraPosition().bearing)
+                .zoom(controller.mapHelper.getMap().getCameraPosition().zoom)
                 .build();
 
-        mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        controller.mapHelper.getMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 
     }
@@ -99,14 +86,14 @@ public class LocationListener implements android.location.LocationListener {
     @Override
     public void onProviderDisabled(String provider) {
         // TODO Auto-generated method stub
-        locationManager.removeUpdates(this);
+        controller.locationManager.removeUpdates(this);
 
     }
 
     @Override
     public void onProviderEnabled(String provider) {
         // TODO Auto-generated method stub
-        locationManager.requestLocationUpdates(provider, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
+        controller.locationManager.requestLocationUpdates(provider, Long.parseLong(controller.configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, this);
 
     }
 

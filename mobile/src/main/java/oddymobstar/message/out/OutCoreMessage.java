@@ -10,10 +10,6 @@ import org.json.JSONObject;
  */
 public class OutCoreMessage {
 
-    protected JSONObject message = new JSONObject();
-
-    protected boolean post = false;
-
     public static final String CORE_OBJECT = "core";
     public static final String PLAYER = "player";
     public static final String UID = "uid";
@@ -25,7 +21,6 @@ public class OutCoreMessage {
     public static final String ACK_ID = "ackid";
     public static final String ALLIANCE = "alliance";
     public static final String IMAGE = "image";
-
     public static final String AID = "aid";
     public static final String STAT = "stat";
     public static final String MSG = "msg";
@@ -45,6 +40,8 @@ public class OutCoreMessage {
     public static final String UTM = "utm";
     public static final String SUBUTM = "subutm";
     public static final String PACKAGE = "package";
+    protected JSONObject message = new JSONObject();
+    protected boolean post = false;
 
 
     public OutCoreMessage(Location location, String uid, String ackId, String type) throws JSONException {

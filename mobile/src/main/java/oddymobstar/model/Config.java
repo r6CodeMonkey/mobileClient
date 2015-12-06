@@ -47,53 +47,52 @@ public class Config {
         this.visible = visible;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public void setMarkup(String markup) {
-        this.markup = markup;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
-
-
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getValue() {
         return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public String getMarkup() {
         return markup;
     }
 
+    public void setMarkup(String markup) {
+        this.markup = markup;
+    }
+
     public int getType() {
         return type;
     }
 
+    public void setType(int type) {
+        this.type = type;
+    }
+
     public boolean isVisible() {
         return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 
 

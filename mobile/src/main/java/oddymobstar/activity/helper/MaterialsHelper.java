@@ -9,12 +9,10 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.crazycourier.R;
 import oddymobstar.model.UserImage;
-import oddymobstar.util.Configuration;
 import oddymobstar.util.graphics.RoundedImageView;
 
 /**
@@ -22,20 +20,10 @@ import oddymobstar.util.graphics.RoundedImageView;
  */
 public class MaterialsHelper {
 
-    private Context context;
-    private DemoActivity main;
-
     public static final int UTM_COLOR = 1;
     public static final int SUB_UTM_COLOR = 2;
     public static final int ALLIANCE_COLOR = 3;
     public static final int CHAT_COLOR = 4;
-
-
-    private ColorStateList subUtmColorList;
-    private ColorStateList utmColorList;
-    private ColorStateList allianceColorList;
-    private ColorStateList chatColorList;
-
     public DrawerLayout navDrawer;
     public ActionBarDrawerToggle navToggle;
     public NavigationView navigationView;
@@ -43,8 +31,13 @@ public class MaterialsHelper {
     public Toolbar hiddenToolbar;
     public FloatingActionButton floatingActionButton;
     public RoundedImageView userImageView;
-
     public UserImage userImage;
+    private Context context;
+    private DemoActivity main;
+    private ColorStateList subUtmColorList;
+    private ColorStateList utmColorList;
+    private ColorStateList allianceColorList;
+    private ColorStateList chatColorList;
 
 
     public MaterialsHelper(DemoActivity main) {
@@ -150,28 +143,6 @@ public class MaterialsHelper {
 
         floatingActionButton.setOnClickListener(fabListener);
 
-           /*
-                new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                switch (fabMode) {
-                    case ALLIANCE_FAB:
-                        handleAllianceFAB(true);
-                        break;
-                    case CHAT_FAB:
-                        handleChatFAB(true);
-                        break;
-                    case GRID_FAB:
-                        handleSearchFab(CURRENT_GRID_FAB_STATE == SUBUTM_FAB_STATE ?
-                                configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue() :
-                                CURRENT_GRID_FAB_STATE == UTM_FAB_STATE ? UTM.getUTMRegion(configuration.getConfig(Configuration.CURRENT_UTM).getValue()) : "");
-                        break;
-                }
-
-            }
-        }*/
-
         hiddenToolbar = (Toolbar) main.findViewById(R.id.hidden_toolbar);
         hiddenToolbar.setVisibility(View.INVISIBLE);
 
@@ -179,54 +150,6 @@ public class MaterialsHelper {
 
         userImageView = (RoundedImageView) navigationView.findViewById(R.id.user_image);
         userImageView.setOnTouchListener(imageListener);
-
-                /*new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                //we need to launch to access gallery store
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(intent, USER_IMAGE_RESULT_CODE);
-
-                return false;
-            }
-        }*/
-
-    }
-
-
-    public void setNavConfigValues(final Configuration configuration) {
-
-
-        main.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                MenuItem item = navigationView.getMenu().findItem(R.id.utm);
-                item.setTitle(context.getResources().getString(R.string.menu_utm) + " - " + configuration.getConfig(Configuration.CURRENT_UTM).getValue());
-
-                item = navigationView.getMenu().findItem(R.id.sub_utm);
-                item.setTitle(context.getResources().getString(R.string.menu_subutm) + " - " + configuration.getConfig(Configuration.CURRENT_SUBUTM).getValue());
-
-                item = navigationView.getMenu().findItem(R.id.encrypt);
-                item.setTitle(context.getResources().getString(R.string.menu_encryption) + " - " + configuration.getConfig(Configuration.SSL_ALGORITHM).getValue());
-
-                TextView textView = (TextView) navigationView.findViewById(R.id.nav_header);
-                textView.setText(configuration.getConfig(Configuration.PLAYER_KEY).getValue());
-
-                if (userImage != null) {
-                    if (userImage.getUserImage() != null) {
-                        userImageView.setImageBitmap(userImage.getUserImage());
-                    }
-                }
-
-                //  gridFrag.refreshAdapter();  //dont really need this...to check its for alliances..
-            }
-        });
-
 
     }
 

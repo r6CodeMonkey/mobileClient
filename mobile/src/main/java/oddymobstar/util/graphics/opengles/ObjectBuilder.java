@@ -14,33 +14,8 @@ import static android.opengl.GLES20.glDrawArrays;
  */
 public class ObjectBuilder {
 
-    private final List<DrawCommand> drawList = new ArrayList<>();
-
-    public static interface DrawCommand {
-        void draw();
-    }
-
-    public static class GeneratedData {
-        private final float[] vertexData;
-        private final List<DrawCommand> drawList;
-
-        GeneratedData(float[] vertexData, List<DrawCommand> drawList) {
-            this.vertexData = vertexData;
-            this.drawList = drawList;
-        }
-
-        public float[] getVertexData() {
-            return vertexData;
-        }
-
-        public List<DrawCommand> getDrawList() {
-            return drawList;
-        }
-
-
-    }
-
     private static final int FLOATS_PER_VERTEX = 3;
+    private final List<DrawCommand> drawList = new ArrayList<>();
     private final float[] vertexData;
     private int offset = 0;
 
@@ -56,6 +31,43 @@ public class ObjectBuilder {
         return (numPoints + 1) * 2;
     }
 
+    public static GeneratedData createPuck(Geometry.Cylinder puck, int numPoints) {
+        int size = sizeOfCircleInVertices(numPoints) + sizeOfOpenCylinderInVertices(numPoints);
+
+        ObjectBuilder builder = new ObjectBuilder(size);
+
+        Geometry.Circle puckTop = new Geometry.Circle(puck.centre.translateY(puck.height / 2f), puck.radius);
+
+        builder.appendCircle(puckTop, numPoints);
+        builder.appendOpenCylinder(puck, numPoints);
+
+        return builder.build();
+    }
+
+    public static GeneratedData createMallet(Geometry.Point centre, float radius, float height, int numPoints) {
+        int size = sizeOfCircleInVertices(numPoints) * 2 + sizeOfOpenCylinderInVertices(numPoints) * 2;
+
+        ObjectBuilder builder = new ObjectBuilder(size);
+
+        float baseHeight = height * 0.25f;
+
+        Geometry.Circle baseCircle = new Geometry.Circle(centre.translateY(-baseHeight), radius);
+        Geometry.Cylinder baseCylinder = new Geometry.Cylinder(baseCircle.centre.translateY(-baseHeight / 2f), radius, baseHeight);
+
+        builder.appendCircle(baseCircle, numPoints);
+        builder.appendOpenCylinder(baseCylinder, numPoints);
+
+        float handleHeight = height * 0.75f;
+        float handleRadius = radius / 3f;
+
+        Geometry.Circle handleCircle = new Geometry.Circle(centre.translateY(height * 0.5f), handleRadius);
+        Geometry.Cylinder handleCylinder = new Geometry.Cylinder(handleCircle.centre.translateY(-handleHeight / 2f), handleRadius, handleHeight);
+
+        builder.appendCircle(handleCircle, numPoints);
+        builder.appendOpenCylinder(handleCylinder, numPoints);
+
+        return builder.build();
+    }
 
     private void appendCircle(Geometry.Circle circle, int numPoints) {
 
@@ -123,42 +135,28 @@ public class ObjectBuilder {
      the shapes we can build
      */
 
-    public static GeneratedData createPuck(Geometry.Cylinder puck, int numPoints) {
-        int size = sizeOfCircleInVertices(numPoints) + sizeOfOpenCylinderInVertices(numPoints);
-
-        ObjectBuilder builder = new ObjectBuilder(size);
-
-        Geometry.Circle puckTop = new Geometry.Circle(puck.centre.translateY(puck.height / 2f), puck.radius);
-
-        builder.appendCircle(puckTop, numPoints);
-        builder.appendOpenCylinder(puck, numPoints);
-
-        return builder.build();
+    public static interface DrawCommand {
+        void draw();
     }
 
-    public static GeneratedData createMallet(Geometry.Point centre, float radius, float height, int numPoints) {
-        int size = sizeOfCircleInVertices(numPoints) * 2 + sizeOfOpenCylinderInVertices(numPoints) * 2;
+    public static class GeneratedData {
+        private final float[] vertexData;
+        private final List<DrawCommand> drawList;
 
-        ObjectBuilder builder = new ObjectBuilder(size);
+        GeneratedData(float[] vertexData, List<DrawCommand> drawList) {
+            this.vertexData = vertexData;
+            this.drawList = drawList;
+        }
 
-        float baseHeight = height * 0.25f;
+        public float[] getVertexData() {
+            return vertexData;
+        }
 
-        Geometry.Circle baseCircle = new Geometry.Circle(centre.translateY(-baseHeight), radius);
-        Geometry.Cylinder baseCylinder = new Geometry.Cylinder(baseCircle.centre.translateY(-baseHeight / 2f), radius, baseHeight);
+        public List<DrawCommand> getDrawList() {
+            return drawList;
+        }
 
-        builder.appendCircle(baseCircle, numPoints);
-        builder.appendOpenCylinder(baseCylinder, numPoints);
 
-        float handleHeight = height * 0.75f;
-        float handleRadius = radius / 3f;
-
-        Geometry.Circle handleCircle = new Geometry.Circle(centre.translateY(height * 0.5f), handleRadius);
-        Geometry.Cylinder handleCylinder = new Geometry.Cylinder(handleCircle.centre.translateY(-handleHeight / 2f), handleRadius, handleHeight);
-
-        builder.appendCircle(handleCircle, numPoints);
-        builder.appendOpenCylinder(handleCylinder, numPoints);
-
-        return builder.build();
     }
 
 

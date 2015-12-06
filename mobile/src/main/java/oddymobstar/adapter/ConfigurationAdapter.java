@@ -11,7 +11,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.handler.ConfigurationHandler;
 import oddymobstar.crazycourier.R;
 
 
@@ -20,21 +20,17 @@ import oddymobstar.crazycourier.R;
  */
 public class ConfigurationAdapter extends BaseExpandableListAdapter {
 
-    private Context context;
-
-    private List<String> groups = new ArrayList<>();
-
     public static final int USER_CONFIGS = 0;
     public static final int SYS_CONFIGS = 1;
-
-
+    private Context context;
+    private List<String> groups = new ArrayList<>();
     private Cursor userConfigs;
     private Cursor systemConfigs;
 
     private UserConfigurationAdapter userConfigurationAdapter;
     private SystemConfigurationAdapter systemConfigurationAdapter;
 
-    public ConfigurationAdapter(Context context, DemoActivity.ConfigurationHandler configurationHandler, Cursor userConfigs, Cursor systemConfigs) {
+    public ConfigurationAdapter(Context context, ConfigurationHandler configurationHandler, Cursor userConfigs, Cursor systemConfigs) {
         this.context = context;
 
         this.userConfigs = userConfigs;

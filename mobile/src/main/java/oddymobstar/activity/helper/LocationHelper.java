@@ -2,7 +2,7 @@ package oddymobstar.activity.helper;
 
 import android.location.LocationManager;
 
-import oddymobstar.activity.listener.LocationListener;
+import oddymobstar.activity.controller.DemoActivityController;
 import oddymobstar.util.Configuration;
 
 /**
@@ -12,20 +12,20 @@ public class LocationHelper {
 
     private android.os.Handler handler = new android.os.Handler();
     private Thread locationUpdates;
-    private Configuration configuration;
+    private DemoActivityController controller;
 
-    public LocationHelper(Configuration configuration) {
-        this.configuration = configuration;
+    public LocationHelper(DemoActivityController controller) {
+        this.controller = controller;
     }
 
-    public void initLocationUpdates(final LocationManager locationManager, final LocationListener locationListener) {
+    public void initLocationUpdates() {
         locationUpdates = new Thread(new Runnable() {
             @Override
             public void run() {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, locationListener);
+                        controller.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Long.parseLong(controller.configuration.getConfig(Configuration.GPS_UPDATE_INTERVAL).getValue()), 0, controller.locationListener);
                     }
                 });
 

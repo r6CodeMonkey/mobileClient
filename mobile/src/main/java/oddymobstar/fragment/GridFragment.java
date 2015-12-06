@@ -42,40 +42,6 @@ public class GridFragment extends Fragment {
     private CreateView hiddenCreateView;
 
 
-    private class LoadCursors extends AsyncTask<String, Void, String> {
-
-        private Cursor cursor;
-
-        @Override
-        protected String doInBackground(String... params) {
-
-            if (dbHelper == null) {
-                dbHelper = DBHelper.getInstance(getActivity());
-            }
-
-            cursor = getCursor(type);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-
-            adapter = getCursorAdapter(type, cursor);
-            gridView.setAdapter(adapter);
-
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-        }
-
-    }
-
-
     public GridFragment() {
         setRetainInstance(true);
     }
@@ -84,12 +50,10 @@ public class GridFragment extends Fragment {
         return type;
     }
 
-
     public void init(int type, AdapterView.OnItemClickListener onClickListener) {
         this.onClickListener = onClickListener;
         this.type = type;
     }
-
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -139,7 +103,6 @@ public class GridFragment extends Fragment {
 
     }
 
-
     public void refreshAdapter() {
         if (adapter != null) {
             switch (type) {
@@ -156,12 +119,10 @@ public class GridFragment extends Fragment {
         return gridView.getAdapter();
     }
 
-
     public void clearAdapter() {
         gridView.setAdapter(null);
         adapter = null;
     }
-
 
     public void onDestroy() {
         super.onDestroy();
@@ -174,6 +135,39 @@ public class GridFragment extends Fragment {
 
     public CreateView getHiddenCreateView() {
         return hiddenCreateView;
+    }
+
+    private class LoadCursors extends AsyncTask<String, Void, String> {
+
+        private Cursor cursor;
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            if (dbHelper == null) {
+                dbHelper = DBHelper.getInstance(getActivity());
+            }
+
+            cursor = getCursor(type);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+
+            adapter = getCursorAdapter(type, cursor);
+            gridView.setAdapter(adapter);
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+        }
+
     }
 
 }

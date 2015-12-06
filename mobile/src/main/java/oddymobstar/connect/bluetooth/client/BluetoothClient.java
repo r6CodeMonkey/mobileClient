@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothSocket;
 import java.io.IOException;
 import java.util.UUID;
 
-import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.handler.DeviceDiscoveryHandler;
 import oddymobstar.connect.bluetooth.socket.BluetoothSocketThread;
 
 /**
@@ -13,12 +13,12 @@ import oddymobstar.connect.bluetooth.socket.BluetoothSocketThread;
  */
 public class BluetoothClient extends Thread {
 
-    private DemoActivity.DeviceDiscovery deviceDiscovery;
+    private DeviceDiscoveryHandler deviceDiscovery;
     private BluetoothSocket socket;
     private BluetoothSocketThread bluetoothSocketThread;
 
 
-    public BluetoothClient(DemoActivity.DeviceDiscovery deviceDiscovery, String uuid) {
+    public BluetoothClient(DeviceDiscoveryHandler deviceDiscovery, String uuid) {
         this.deviceDiscovery = deviceDiscovery;
 
 

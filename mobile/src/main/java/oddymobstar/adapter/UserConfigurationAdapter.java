@@ -12,7 +12,7 @@ import android.widget.CursorAdapter;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import oddymobstar.activity.DemoActivity;
+import oddymobstar.activity.handler.ConfigurationHandler;
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
 import oddymobstar.util.Configuration;
@@ -22,14 +22,12 @@ import oddymobstar.util.Configuration;
  */
 public class UserConfigurationAdapter extends CursorAdapter {
 
-    private View seekBarView;
-
     private static int SEEK_BAR_STEP = 60;
+    private View seekBarView;
+    private ConfigurationHandler configurationHandler;
 
-    private DemoActivity.ConfigurationHandler configurationHandler;
 
-
-    public UserConfigurationAdapter(Context context, Cursor cursor, boolean autoRequery, DemoActivity.ConfigurationHandler configurationHandler) {
+    public UserConfigurationAdapter(Context context, Cursor cursor, boolean autoRequery, ConfigurationHandler configurationHandler) {
         super(context, cursor, autoRequery);
 
         this.configurationHandler = configurationHandler;
