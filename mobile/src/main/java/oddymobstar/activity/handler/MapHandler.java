@@ -150,7 +150,7 @@ public class MapHandler {
 
     }
 
-    public void addUser(LatLng latLng){
+    public void addUser(LatLng latLng) {
         if (controller.materialsHelper.userImage != null) {
             if (controller.materialsHelper.userImage.getUserImage() != null) {
                 Bitmap bitmap = controller.materialsHelper.userImage.getUserImage().copy(Bitmap.Config.ARGB_8888, true);
@@ -165,7 +165,7 @@ public class MapHandler {
         }
     }
 
-    public void addOthers(){
+    public void addOthers() {
         //we now need to add any of our alliance members in...
         Cursor allianceMembers = controller.dbHelper.getAllianceMembers();
 

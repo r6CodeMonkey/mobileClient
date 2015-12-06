@@ -3,35 +3,25 @@ package oddymobstar.activity.helper;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.activity.controller.DemoActivityController;
 import oddymobstar.activity.handler.SharedPreferencesHandler;
 import oddymobstar.activity.listener.LocationListener;
 import oddymobstar.crazycourier.R;
-import oddymobstar.model.AllianceMember;
 import oddymobstar.util.Configuration;
 import oddymobstar.util.SubUTM;
 import oddymobstar.util.UTM;
 import oddymobstar.util.UTMGridCreator;
-import oddymobstar.util.graphics.RoundedImageView;
 import oddymobstar.util.widget.GridDialog;
 
 /**
@@ -79,10 +69,8 @@ public class MapHelper {
         //now dd our last known location.
         controller.locationListener = new LocationListener(controller);
         controller.locationHelper.initLocationUpdates();
-
-
+        
         SharedPreferences sharedPreferences = main.getPreferences(Context.MODE_PRIVATE);
-
 
         zoom = sharedPreferences.getFloat(SharedPreferencesHandler.ZOOM, 10.0f);
         tilt = sharedPreferences.getFloat(SharedPreferencesHandler.TILT, 0.0f);
@@ -120,9 +108,7 @@ public class MapHelper {
             mySubUTM = map.addPolygon(subUtmOptions);
 
         }
-
         controller.mapHandler.addOthers();
-
     }
 
 
@@ -172,6 +158,5 @@ public class MapHelper {
                 });
 
         return controller.gridDialog;
-
     }
 }
