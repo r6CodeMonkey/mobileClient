@@ -30,6 +30,7 @@ import oddymobstar.activity.helper.MapHelper;
 import oddymobstar.activity.helper.MaterialsHelper;
 import oddymobstar.activity.listener.LocationListener;
 import oddymobstar.activity.listener.MaterialsListener;
+import oddymobstar.activity.listener.ViewListener;
 import oddymobstar.connect.ConnectivityHandler;
 import oddymobstar.crazycourier.R;
 import oddymobstar.database.DBHelper;
@@ -54,6 +55,7 @@ public class DemoActivityController {
 
 
     //core
+    private DemoActivity main;
     public Configuration configuration;
     public DBHelper dbHelper;
     public CheService cheService;
@@ -79,6 +81,7 @@ public class DemoActivityController {
     //listeners
     public MaterialsListener materialsListener;
     public LocationListener locationListener;
+    public ViewListener viewListener;
 
     //receivers
     public BroadcastReceiver bluetoothReceiver;
@@ -92,8 +95,8 @@ public class DemoActivityController {
     public ConfigurationFragment confFrag = new ConfigurationFragment();
     public GridViewFragment gridViewFragment = new GridViewFragment();
     public GridDialog gridDialog;
-    //core
-    private DemoActivity main;
+
+
 
 
     //this will manage the initialisation of the main objects, and can be used to pass these objects to sub routines
@@ -125,6 +128,7 @@ public class DemoActivityController {
         connectivityHandler = new ConnectivityHandler(main, BLUETOOTH_UUID);
         configurationHandler = new ConfigurationHandler(this);
         viewHandler = new ViewHandler(main, this);
+        viewListener = new ViewListener(main, this);
         activityResultHandler = new ActivityResultHandler(main, this);
         optionsItemSelectedHandler = new OptionsItemSelectedHandler(main, this);
         deviceDiscoveryHandler = new DeviceDiscoveryHandler(main, this);
@@ -201,11 +205,11 @@ public class DemoActivityController {
         SharedPreferences sharedPreferences = main.getPreferences(Context.MODE_PRIVATE);
 
         if (locationListener.getCurrentLocation() == null) {
-            locationListener.setCurrentLocation(new Location(sharedPreferences.getString("provider", "")));
+            locationListener.setCurrentLocation(new Location(sharedPreferences.getString(SharedPreferencesHandler.PROVIDER, "")));
         }
 
-        locationListener.getCurrentLocation().setLatitude(Double.parseDouble(sharedPreferences.getString("latitude", "0.0")));
-        locationListener.getCurrentLocation().setLongitude(Double.parseDouble(sharedPreferences.getString("longitude", "0.0")));
+        locationListener.getCurrentLocation().setLatitude(Double.parseDouble(sharedPreferences.getString(SharedPreferencesHandler.LATITUTE, "0.0")));
+        locationListener.getCurrentLocation().setLongitude(Double.parseDouble(sharedPreferences.getString(SharedPreferencesHandler.LONGITUDE, "0.0")));
 
         mapHelper.setUpMapIfNeeded();
 

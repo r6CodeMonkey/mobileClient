@@ -23,6 +23,7 @@ import java.util.Map;
 
 import oddymobstar.activity.DemoActivity;
 import oddymobstar.activity.controller.DemoActivityController;
+import oddymobstar.activity.handler.SharedPreferencesHandler;
 import oddymobstar.activity.listener.LocationListener;
 import oddymobstar.crazycourier.R;
 import oddymobstar.model.AllianceMember;
@@ -85,12 +86,12 @@ public class MapHelper {
         SharedPreferences sharedPreferences = main.getPreferences(Context.MODE_PRIVATE);
 
 
-        zoom = sharedPreferences.getFloat("zoom", 10.0f);
-        tilt = sharedPreferences.getFloat("tilt", 0.0f);
-        bearing = sharedPreferences.getFloat("bearing", 0.0f);
+        zoom = sharedPreferences.getFloat(SharedPreferencesHandler.ZOOM, 10.0f);
+        tilt = sharedPreferences.getFloat(SharedPreferencesHandler.TILT, 0.0f);
+        bearing = sharedPreferences.getFloat(SharedPreferencesHandler.BEARING, 0.0f);
 
-        LatLng currentLatLng = new LatLng(Double.parseDouble(sharedPreferences.getString("latitude", "0.0")),
-                Double.parseDouble(sharedPreferences.getString("longitude", "0.0")));
+        LatLng currentLatLng = new LatLng(Double.parseDouble(sharedPreferences.getString(SharedPreferencesHandler.LATITUTE, "0.0")),
+                Double.parseDouble(sharedPreferences.getString(SharedPreferencesHandler.LONGITUDE, "0.0")));
 
         //need to manage map markers too.  as per old code ie remove and re add.  do this now....joy
 
@@ -193,12 +194,13 @@ public class MapHelper {
     }
 
     public GridDialog createGridDialog(String selectedGrid) {
-        return GridDialog.newInstance(selectedGrid, new DialogInterface.OnClickListener() {
+        controller.gridDialog =
+         GridDialog.newInstance(selectedGrid, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, final int which) {
                 //the magic happens...but we cant deselect our selected item its not the pattern..
                 dialog.dismiss();
-                controller.mapHandler.handleLocateDialog(((GridDialog) dialog).getGrid(which));
+                controller.mapHandler.handleLocateDialog(controller.gridDialog.getGrid(which));
 
             }
         }, new DialogInterface.OnCancelListener() {
@@ -207,6 +209,8 @@ public class MapHelper {
                 controller.materialsHelper.floatingActionButton.setVisibility(View.VISIBLE);
             }
         });
+
+        return controller.gridDialog;
 
     }
 }

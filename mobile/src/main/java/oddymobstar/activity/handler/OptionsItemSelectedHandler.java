@@ -82,7 +82,7 @@ public class OptionsItemSelectedHandler {
                 controller.materialsHelper.navToolbar.setBackgroundColor(main.getResources().getColor(android.R.color.holo_red_dark));
                 controller.materialsHelper.navToolbar.setTitle(R.string.menu_alliances);
 
-                controller.gridFrag.init(GridFragment.MY_ALLIANCES, controller.viewHandler.getListClickListener());
+                controller.gridFrag.init(GridFragment.MY_ALLIANCES, controller.viewListener.getListClickListener());
                 transaction.replace(R.id.chat_fragment, controller.gridFrag);
                 transaction.addToBackStack(null);
                 transaction.commit();

@@ -162,42 +162,6 @@ public class ViewHandler {
     }
 
 
-    public AdapterView.OnItemClickListener getListClickListener() {
 
-        return new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> listView, View v, int position,
-                                    long id) {
-
-            /*
-            basically if they select an item we launch chat frag with an ID...
-             */
-                Cursor cursor = (Cursor) controller.gridFrag.getListAdapter().getItem(position);
-                controller.removeFragments(false);
-
-                android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
-
-                String key = "";
-                switch (controller.gridFrag.getType()) {
-                    case GridFragment.MY_ALLIANCES:
-                        key = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_KEY));
-                        String title = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.ALLIANCE_NAME));
-                        controller.chatFrag.setCursor(controller.dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
-
-                        //and show
-                        showChat(title);
-
-                        break;
-
-                }
-
-
-                transaction.commit();
-
-
-            }
-        };
-    }
 
 }
