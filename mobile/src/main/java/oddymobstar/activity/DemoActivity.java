@@ -94,17 +94,6 @@ public class DemoActivity extends AppCompatActivity {
     }
 
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
     public void deleteMessages(View view) {
         controller.viewHandler.deleteMessages();
     }
@@ -114,12 +103,8 @@ public class DemoActivity extends AppCompatActivity {
     }
 
 
-    public void allianceInvite(View view, boolean isClient) {
-        controller.viewHandler.allianceInvite(isClient);
-    }
-
     public void allianceInvite(View view) {
-        allianceInvite(view, false);
+        controller.viewHandler.allianceInvite(false);
     }
 
     public void sendPost(View view) {
