@@ -3,6 +3,7 @@ package oddymobstar.activity.helper;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.support.v4.app.Fragment;
 import android.view.View;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -58,6 +59,7 @@ public class MapHelper {
             if (map != null) {
                 setUpMap();
             }
+
         }
     }
 
@@ -69,6 +71,7 @@ public class MapHelper {
         controller.locationHelper.initLocationUpdates();
 
         SharedPreferences sharedPreferences = main.getPreferences(Context.MODE_PRIVATE);
+
 
         zoom = sharedPreferences.getFloat(SharedPreferencesHandler.ZOOM, 10.0f);
         tilt = sharedPreferences.getFloat(SharedPreferencesHandler.TILT, 0.0f);

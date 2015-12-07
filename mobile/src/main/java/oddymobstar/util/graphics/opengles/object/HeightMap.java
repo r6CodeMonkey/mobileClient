@@ -48,7 +48,7 @@ public class HeightMap implements ModelInterface {
     private float[] loadBitmapData(Bitmap bitmap) {
         final int[] pixels = new int[width * height];
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
-        //    bitmap.recycle();  is issue with crash i think!!.   need to sort this out due to removing fragment.
+            bitmap.recycle(); // is issue with crash i think!!.   need to sort this out due to removing fragment.
 
         final float[] heightMapVertices = new float[width * height * TOTAL_COMPONENT_COUNT];
         int offset = 0;

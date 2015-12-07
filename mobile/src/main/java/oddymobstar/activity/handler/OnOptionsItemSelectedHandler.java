@@ -105,7 +105,7 @@ public class OnOptionsItemSelectedHandler {
         controller.materialsHelper.navDrawer.closeDrawer(controller.materialsHelper.navigationView);
 
         try {
-            transaction.add(R.id.grid_view_fragment, controller.fragmentHandler.gridViewFragment);
+            transaction.show(controller.fragmentHandler.gridViewFragment);
         } catch (Exception e) {
 
         }
@@ -133,7 +133,8 @@ public class OnOptionsItemSelectedHandler {
         controller.mapHandler.animateToGrid(controller.mapHelper.getMySubUTM(), MapHandler.SUB_UTM_ZOOM);
 
         try {
-            transaction.replace(R.id.grid_view_fragment, controller.fragmentHandler.gridViewFragment);
+            //
+            transaction.show(controller.fragmentHandler.gridViewFragment);
         } catch (Exception e) {
 
         }

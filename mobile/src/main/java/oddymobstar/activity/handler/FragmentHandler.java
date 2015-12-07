@@ -1,6 +1,7 @@
 package oddymobstar.activity.handler;
 
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 
 import oddymobstar.activity.controller.DemoActivityController;
@@ -69,17 +70,18 @@ public class FragmentHandler {
         }
         if (!backPressed) {
             try {
-                transaction.remove(gridViewFragment);
+              if(controller.mapHandler.CURRENT_GRID_FAB_STATE != MapHandler.UTM_FAB_STATE ||
+                controller.mapHandler.CURRENT_GRID_FAB_STATE   !=  MapHandler.SUBUTM_FAB_STATE) {
+                  transaction.hide(gridViewFragment);
+              }
             } catch (Exception e) {
 
             }
         } else {
             try {
-                if (!gridViewFragment.isAdded()) {
-                    transaction.replace(R.id.grid_view_fragment, gridViewFragment);
-                }
+                    transaction.show(gridViewFragment);
             } catch (Exception e) {
-
+                Log.d("show opengl", "fialed "+e.toString());
             }
         }
 
