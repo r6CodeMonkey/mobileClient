@@ -3,8 +3,12 @@ package oddymobstar.util.graphics.opengles.object;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
+import com.google.android.gms.maps.model.Polygon;
+
+import oddymobstar.graphics.data.VertexArray;
 import oddymobstar.graphics.model.ModelInterface;
 import oddymobstar.graphics.programs.ShaderProgram;
+import oddymobstar.util.graphics.opengles.Geometry;
 import oddymobstar.util.graphics.opengles.IndexBuffer;
 import oddymobstar.util.graphics.opengles.VertexBuffer;
 
@@ -20,6 +24,9 @@ import static android.opengl.GLES20.glDrawElements;
 public class HeightMap implements ModelInterface {
 
     private static final int POSITION_COMPONENT_COUNT = 3;
+    private static final int NORMAL_COMPONENT_COUNT = 3;
+    private static final int TOTAL_COMPONENT_COUNT = POSITION_COMPONENT_COUNT + NORMAL_COMPONENT_COUNT;
+    private static final int STRIDE = (POSITION_COMPONENT_COUNT + NORMAL_COMPONENT_COUNT) * VertexArray.BYTES_PER_FLOAT;
 
     private final int width, height, numElements;
     private final VertexBuffer vertexBuffer;
@@ -43,23 +50,52 @@ public class HeightMap implements ModelInterface {
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
         //    bitmap.recycle();  is issue with crash i think!!.   need to sort this out due to removing fragment.
 
-        final float[] heightMapVertices = new float[width * height * POSITION_COMPONENT_COUNT];
+        final float[] heightMapVertices = new float[width * height * TOTAL_COMPONENT_COUNT];
         int offset = 0;
 
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
 
-                final float xPosition = ((float) col / (float) (width - 1)) - 0.5f;
-                final float yPosition = (float) Color.red(pixels[(row * height) + col]) / (float) 255;
-                final float zPosition = ((float) row / (float) (height - 1)) - 0.5f;
+                final Geometry.Point point = getPoint(pixels, row, col);
 
-                heightMapVertices[offset++] = xPosition;
-                heightMapVertices[offset++] = yPosition;
-                heightMapVertices[offset++] = zPosition;
+                heightMapVertices[offset++] = point.x;
+                heightMapVertices[offset++] = point.y;
+                heightMapVertices[offset++] = point.z;
+
+
+                final Geometry.Point top = getPoint(pixels, row - 1, col);
+                final Geometry.Point left = getPoint(pixels, row, col - 1);
+                final Geometry.Point right = getPoint(pixels, row, col + 1);
+                final Geometry.Point bottom = getPoint(pixels, row + 1, col);
+
+                final Geometry.Vector rightToLeft = Geometry.vectorBetween(right, left);
+                final Geometry.Vector topToBottom = Geometry.vectorBetween(top, bottom);
+                final Geometry.Vector normal = rightToLeft.crossProduct(topToBottom).normalize();
+
+                heightMapVertices[offset++] = normal.x;
+                heightMapVertices[offset++] = normal.y;
+                heightMapVertices[offset++] = normal.z;
             }
         }
         return heightMapVertices;
     }
+
+    private Geometry.Point getPoint(int[] pixels, int row, int col) {
+        float x = ((float)col / (float)(width - 1)) - 0.5f;
+        float z = ((float)row / (float)(height - 1)) - 0.5f;
+
+        row = clamp(row, 0, width - 1);
+        col = clamp(col, 0, height - 1);
+
+        float y = (float)Color.red(pixels[(row * height) + col]) / (float)255;
+
+        return new Geometry.Point(x, y, z);
+    }
+
+    private int clamp(int val, int min, int max) {
+        return Math.max(min, Math.min(max, val));
+    }
+
 
 
     private int calculateNumElements() {
@@ -101,6 +137,13 @@ public class HeightMap implements ModelInterface {
 
     @Override
     public void bindData(ShaderProgram shaderProgram) {
-        vertexBuffer.setVertexAttribPointer(0, shaderProgram.getPositionAttributeLocation(), POSITION_COMPONENT_COUNT, 0);
+        vertexBuffer.setVertexAttribPointer(0,
+                shaderProgram.getPositionAttributeLocation(),
+                POSITION_COMPONENT_COUNT, STRIDE);
+
+        vertexBuffer.setVertexAttribPointer(
+                POSITION_COMPONENT_COUNT * VertexArray.BYTES_PER_FLOAT,
+                shaderProgram.getNormalAttributeLocation(),
+                NORMAL_COMPONENT_COUNT, STRIDE);
     }
 }

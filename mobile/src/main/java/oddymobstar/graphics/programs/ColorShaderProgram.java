@@ -3,6 +3,7 @@ package oddymobstar.graphics.programs;
 import android.content.Context;
 
 import oddymobstar.crazycourier.R;
+import oddymobstar.util.graphics.opengles.Geometry;
 
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
@@ -39,6 +40,22 @@ public class ColorShaderProgram extends ShaderProgram {
 
     public void setUniforms(float[] matrix) {
         //not used
+    }
+
+    @Override
+    public void setUniforms(float[] matrix, Geometry.Vector vectorToLight){
+
+    }
+
+
+    @Override
+    public void setUniforms(float[] mvMatrix,
+                            float[] it_mvMatrix,
+                            float[] mvpMatrix,
+                            float[] vectorToDirectionalLight,
+                            float[] pointLightPositions,
+                            float[] pointLightColors){
+
     }
 
 

@@ -14,7 +14,6 @@ import oddymobstar.crazycourier.R;
 import oddymobstar.fragment.GridFragment;
 import oddymobstar.model.Config;
 import oddymobstar.util.Configuration;
-import oddymobstar.util.UTM;
 
 /**
  * Created by timmytime on 04/12/15.
@@ -77,7 +76,7 @@ public class OnOptionsItemSelectedHandler {
         return true;
     }
 
-    private void handleUTM(){
+    private void handleUTM() {
 
         android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 
@@ -114,7 +113,7 @@ public class OnOptionsItemSelectedHandler {
         transaction.commit();
     }
 
-    private void handleSubUTM(){
+    private void handleSubUTM() {
 
         android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 
@@ -143,7 +142,7 @@ public class OnOptionsItemSelectedHandler {
 
     }
 
-    private void handleAlliance(){
+    private void handleAlliance() {
 
         android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 
@@ -161,7 +160,7 @@ public class OnOptionsItemSelectedHandler {
 
     }
 
-    private void handleSettings(){
+    private void handleSettings() {
 
         android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 

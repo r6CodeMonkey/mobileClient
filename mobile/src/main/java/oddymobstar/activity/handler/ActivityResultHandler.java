@@ -44,7 +44,7 @@ public class ActivityResultHandler {
             case MaterialsListener.USER_IMAGE_RESULT_CODE:
 
                 if (resultCode == main.RESULT_OK) {
-                    handleImage( data);
+                    handleImage(data);
                 }
                 return;
 
@@ -54,7 +54,7 @@ public class ActivityResultHandler {
         }
     }
 
-    private void handleBluetooth(int requestCode, int resultCode, Intent data){
+    private void handleBluetooth(int requestCode, int resultCode, Intent data) {
 
         switch (controller.connectivityHandler.getMode()) {
             case ConnectivityDialog.BLUETOOTH:
@@ -72,7 +72,7 @@ public class ActivityResultHandler {
         }
     }
 
-    private void handleImage(Intent data){
+    private void handleImage(Intent data) {
         try {
             // We need to recyle unused bitmaps
 

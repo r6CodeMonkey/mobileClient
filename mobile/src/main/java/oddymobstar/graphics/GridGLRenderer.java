@@ -52,6 +52,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private final float[] viewProjectionMatrix = new float[16];
     private final float[] modelViewProjectionMatrix = new float[16];
     private final float[] invertedViewProjectionMatrix = new float[16];
+    private final float[] it_modelViewMatrix = new float[16];
     private final float[] viewMatrixForSkybox = new float[16];
     private final float[] tempMatrix = new float[16];
     private final float leftBound = -0.5f;
@@ -73,6 +74,8 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private Geometry.Point blueMalletPosition, previousBlueMalletPosition, puckPosition;
     private Geometry.Vector puckVector;
     private float xRotation, yRotation;
+
+    private final Geometry.Vector vectorToLight = new Geometry.Vector(0.61f, 0.64f, -0.47f).normalize();
 
 
     public GridGLRenderer(Context context) {
@@ -171,10 +174,12 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0);
 
         heightMapShaderProgram.useProgram();
-        heightMapShaderProgram.setUniforms(modelViewProjectionMatrix);
+
+        heightMapShaderProgram.setUniforms(modelViewProjectionMatrix,vectorToLight);
         heightMap.bindData(heightMapShaderProgram);
         heightMap.draw();
-    }
+
+     }
 
     private void drawSkyBox() {
         //draw the skybox.

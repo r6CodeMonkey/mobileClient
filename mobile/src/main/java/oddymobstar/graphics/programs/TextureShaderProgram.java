@@ -4,6 +4,7 @@ package oddymobstar.graphics.programs;
 import android.content.Context;
 
 import oddymobstar.crazycourier.R;
+import oddymobstar.util.graphics.opengles.Geometry;
 
 import static android.opengl.GLES20.GL_TEXTURE0;
 import static android.opengl.GLES20.GL_TEXTURE_2D;
@@ -52,6 +53,22 @@ public class TextureShaderProgram extends ShaderProgram {
     public void setUniforms(float[] matrix, float r, float g, float b) {
         //not used
     }
+
+    @Override
+    public void setUniforms(float[] matrix, Geometry.Vector vectorToLight){
+
+    }
+
+    @Override
+    public void setUniforms(float[] mvMatrix,
+                            float[] it_mvMatrix,
+                            float[] mvpMatrix,
+                            float[] vectorToDirectionalLight,
+                            float[] pointLightPositions,
+                            float[] pointLightColors){
+
+    }
+
 
 
 }
