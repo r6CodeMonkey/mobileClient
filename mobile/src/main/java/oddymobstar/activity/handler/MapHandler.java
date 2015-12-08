@@ -34,10 +34,13 @@ public class MapHandler {
     public static final int UTM_FAB_STATE = 0;
     public static final int SUBUTM_FAB_STATE = 1;
     public static final int UTM_REGION_FAB_STATE = 2;
+    public static final int BASE_STATE = 3;
+    public static final int OTHER_STATE = 4;
+
     public static float UTM_REGION_ZOOM = 3;
     public static float UTM_ZOOM = 5;
     public static float SUB_UTM_ZOOM = 12;
-    public static int CURRENT_GRID_FAB_STATE = UTM_FAB_STATE;
+    public static int CURRENT_GRID_FAB_STATE = BASE_STATE;
 
 
     public static String UTM_REGION = "";

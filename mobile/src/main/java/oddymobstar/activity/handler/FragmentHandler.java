@@ -70,8 +70,7 @@ public class FragmentHandler {
         }
         if (!backPressed) {
             try {
-              if(controller.mapHandler.CURRENT_GRID_FAB_STATE != MapHandler.UTM_FAB_STATE ||
-                controller.mapHandler.CURRENT_GRID_FAB_STATE   !=  MapHandler.SUBUTM_FAB_STATE) {
+              if(controller.mapHandler.CURRENT_GRID_FAB_STATE == MapHandler.OTHER_STATE) {
                   transaction.hide(gridViewFragment);
               }
             } catch (Exception e) {
@@ -80,8 +79,8 @@ public class FragmentHandler {
         } else {
             try {
                     transaction.show(gridViewFragment);
+                controller.mapHandler.CURRENT_GRID_FAB_STATE = MapHandler.BASE_STATE;
             } catch (Exception e) {
-                Log.d("show opengl", "fialed "+e.toString());
             }
         }
 

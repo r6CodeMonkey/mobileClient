@@ -35,7 +35,6 @@ public class OnOptionsItemSelectedHandler {
             return true;
         }
 
-        controller.fragmentHandler.removeFragments(false);
         controller.configuration = new Configuration(controller.dbHelper.getConfigs());
         //bind again if its down.
         if (controller.cheService == null) {
@@ -45,12 +44,17 @@ public class OnOptionsItemSelectedHandler {
         switch (item.getItemId()) {
 
             case android.R.id.home:
+                controller.fragmentHandler.removeFragments(false);
                 controller.materialsHelper.navDrawer.openDrawer(GravityCompat.START);
                 return true;
             case R.id.settings:
+                controller.mapHandler.CURRENT_GRID_FAB_STATE = MapHandler.OTHER_STATE;
+                controller.fragmentHandler.removeFragments(false);
                 handleSettings();
                 break;
             case R.id.alliances:
+                controller.mapHandler.CURRENT_GRID_FAB_STATE = MapHandler.OTHER_STATE;
+                controller.fragmentHandler.removeFragments(false);
                 handleAlliance();
                 break;
             case R.id.bluetooth_receive:
@@ -62,9 +66,11 @@ public class OnOptionsItemSelectedHandler {
                 controller.viewHandler.allianceInvite(false);
                 break;
             case R.id.utm:
+                controller.fragmentHandler.removeFragments(false);
                 handleUTM();
                 break;
             case R.id.sub_utm:
+                controller.fragmentHandler.removeFragments(false);
                 handleSubUTM();
                 break;
             case R.id.encrypt:
@@ -72,6 +78,7 @@ public class OnOptionsItemSelectedHandler {
             case R.id.invite:
                 break;
         }
+
 
         return true;
     }

@@ -32,137 +32,151 @@ public class MessageHandler extends Handler {
 
 
     public void handleList() {
-        if (controller.fragmentHandler.gridFrag != null) {
-            main.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    controller.fragmentHandler.gridFrag.refreshAdapter();
-                }
-            });
+       if(controller != null) {
+           if (controller.fragmentHandler.gridFrag != null) {
+               main.runOnUiThread(new Runnable() {
+                   @Override
+                   public void run() {
+                       controller.fragmentHandler.gridFrag.refreshAdapter();
+                   }
+               });
 
-        }
+           }
+       }
     }
 
 
     public void handleUTMChange(String utm) {
 
-        controller.materialsHandler.setNavConfigValues();
+        if(controller != null) {
 
 
-        final PolygonOptions options = UTMGridCreator.getUTMGrid(new UTM(utm)).strokeColor(main.getResources().getColor(android.R.color.holo_purple));
-        main.runOnUiThread(new Runnable() {
+            controller.materialsHandler.setNavConfigValues();
 
 
-            @Override
-            public void run() {
+            final PolygonOptions options = UTMGridCreator.getUTMGrid(new UTM(utm)).strokeColor(main.getResources().getColor(android.R.color.holo_purple));
+            main.runOnUiThread(new Runnable() {
 
-                if (controller.mapHelper.getMyUTM() != null) {
-                    controller.mapHelper.getMyUTM().remove();
+
+                @Override
+                public void run() {
+
+                    if (controller.mapHelper.getMyUTM() != null) {
+                        controller.mapHelper.getMyUTM().remove();
+                    }
+
+                    controller.mapHelper.setMyUTM(controller.mapHelper.getMap().addPolygon(options));
+
                 }
-
-                controller.mapHelper.setMyUTM(controller.mapHelper.getMap().addPolygon(options));
-
-            }
-        });
+            });
+        }
     }
 
     public void handleSubUTMChange(String subUtm) {
 
-        controller.materialsHandler.setNavConfigValues();
+        if(controller != null) {
 
-        controller.configuration = new Configuration(controller.dbHelper.getConfigs());
+            controller.materialsHandler.setNavConfigValues();
 
-        //timing can cause this to fail...its no biggy its not likely required in end model.
-        UTM utm = null;
-        SubUTM subUTM = null;
+            controller.configuration = new Configuration(controller.dbHelper.getConfigs());
 
-        try {
-            utm = new UTM(controller.configuration.getConfig(Configuration.CURRENT_UTM).getValue());
-            //seem to get problems with this for some reason...ie integer = "".  could be data has not updated etc.
-            subUTM = new SubUTM(subUtm);
-        } catch (Exception e) {
-            Log.d("error on utm", "error " + e.getMessage());
-        }
+            //timing can cause this to fail...its no biggy its not likely required in end model.
+            UTM utm = null;
+            SubUTM subUTM = null;
 
-        if (utm != null && subUTM != null) {
-            PolygonOptions utmOption = UTMGridCreator.getUTMGrid(utm);
-            final PolygonOptions options = UTMGridCreator.getSubUTMGrid(subUTM, utmOption).strokeColor(main.getResources().getColor(android.R.color.holo_orange_dark));
-            main.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+            try {
+                utm = new UTM(controller.configuration.getConfig(Configuration.CURRENT_UTM).getValue());
+                //seem to get problems with this for some reason...ie integer = "".  could be data has not updated etc.
+                subUTM = new SubUTM(subUtm);
+            } catch (Exception e) {
+                Log.d("error on utm", "error " + e.getMessage());
+            }
 
-                    if (controller.mapHelper.getMySubUTM() != null) {
-                        controller.mapHelper.getMySubUTM().remove();
+            if (utm != null && subUTM != null) {
+                PolygonOptions utmOption = UTMGridCreator.getUTMGrid(utm);
+                final PolygonOptions options = UTMGridCreator.getSubUTMGrid(subUTM, utmOption).strokeColor(main.getResources().getColor(android.R.color.holo_orange_dark));
+                main.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (controller.mapHelper.getMySubUTM() != null) {
+                            controller.mapHelper.getMySubUTM().remove();
+                        }
+                        controller.mapHelper.setMySubUTM(controller.mapHelper.getMap().addPolygon(options));
                     }
-                    controller.mapHelper.setMySubUTM(controller.mapHelper.getMap().addPolygon(options));
-                }
-            });
+                });
+            }
         }
 
     }
 
     public void handleChat(final String type) {
-        if (controller.fragmentHandler.chatFrag != null && controller.fragmentHandler.chatFrag.isVisible()) {
-            main.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    controller.fragmentHandler.chatFrag.refreshAdapter(controller.dbHelper.getMessages(type, controller.fragmentHandler.chatFrag.getKey()));
-                }
-            });
+        if(controller != null) {
+            if (controller.fragmentHandler.chatFrag != null && controller.fragmentHandler.chatFrag.isVisible()) {
+                main.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        controller.fragmentHandler.chatFrag.refreshAdapter(controller.dbHelper.getMessages(type, controller.fragmentHandler.chatFrag.getKey()));
+                    }
+                });
+            }
         }
 
     }
 
     public void handleInvite(final String key, final String title) {
 
-        main.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
+        if(controller != null) {
+            main.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    android.support.v4.app.FragmentTransaction transaction = main.getSupportFragmentManager().beginTransaction();
 
 
-                controller.fragmentHandler.chatFrag.setCursor(controller.dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
+                    controller.fragmentHandler.chatFrag.setCursor(controller.dbHelper.getMessages(Message.ALLIANCE_MESSAGE, key), key, title);
 
-                transaction.replace(R.id.chat_fragment, controller.fragmentHandler.chatFrag);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
-        });
+                    transaction.replace(R.id.chat_fragment, controller.fragmentHandler.chatFrag);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                }
+            });
+        }
 
     }
 
     public void handleAllianceMember(final AllianceMember allianceMember, final boolean zoomTo) {
 
+        if(controller != null) {
 
-        Log.d("adding marker", "marker " + allianceMember.getKey() + " lat long is " + allianceMember.getLatLng().toString());
+            Log.d("adding marker", "marker " + allianceMember.getKey() + " lat long is " + allianceMember.getLatLng().toString());
 
 
-        main.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+            main.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
 
-                if (controller.mapHandler.getMarkerMap().containsKey(allianceMember.getKey())) {
-                    controller.mapHandler.getMarkerMap().get(allianceMember.getKey()).remove();
-                    Log.d("adding marker", "removing marker ");
+                    if (controller.mapHandler.getMarkerMap().containsKey(allianceMember.getKey())) {
+                        controller.mapHandler.getMarkerMap().get(allianceMember.getKey()).remove();
+                        Log.d("adding marker", "removing marker ");
+                    }
+
+                    Marker marker = controller.mapHelper.getMap().addMarker(new MarkerOptions().position(allianceMember.getLatLng()).title(allianceMember.getKey()));
+
+                    if (zoomTo) {
+                        controller.mapHandler.handleCamera(allianceMember.getLatLng(),
+                                controller.mapHelper.getMap().getCameraPosition().tilt,
+                                controller.mapHelper.getMap().getCameraPosition().bearing,
+                                controller.mapHelper.getMap().getCameraPosition().zoom);
+                    }
+
+                    if (marker != null) {
+                        controller.mapHandler.getMarkerMap().put(allianceMember.getKey(), marker);
+                    }
+
                 }
 
-                Marker marker = controller.mapHelper.getMap().addMarker(new MarkerOptions().position(allianceMember.getLatLng()).title(allianceMember.getKey()));
-
-                if (zoomTo) {
-                    controller.mapHandler.handleCamera(allianceMember.getLatLng(),
-                            controller.mapHelper.getMap().getCameraPosition().tilt,
-                            controller.mapHelper.getMap().getCameraPosition().bearing,
-                            controller.mapHelper.getMap().getCameraPosition().zoom);
-                }
-
-                if (marker != null) {
-                    controller.mapHandler.getMarkerMap().put(allianceMember.getKey(), marker);
-                }
-
-            }
-
-        });
-
+            });
+        }
 
     }
 }

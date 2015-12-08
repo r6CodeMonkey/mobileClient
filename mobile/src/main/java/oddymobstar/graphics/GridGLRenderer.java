@@ -73,7 +73,8 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private boolean malletPressed = false;
     private Geometry.Point blueMalletPosition, previousBlueMalletPosition, puckPosition;
     private Geometry.Vector puckVector;
-    private float xRotation, yRotation;
+    private float xRotation = 0.0f;
+    private float yRotation = 0.0f;
 
     private final Geometry.Vector vectorToLight = new Geometry.Vector(0.61f, 0.64f, -0.47f).normalize();
 
@@ -91,7 +92,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
 
         skyBox = new SkyBox();
-        heightMap = new HeightMap(((BitmapDrawable) context.getDrawable(R.drawable.heightmap)).getBitmap());
+        heightMap = new HeightMap(((BitmapDrawable) context.getDrawable(R.drawable.canyon)).getBitmap());
 
         table = new Table();
         mallet = new Mallet(0.08f, 0.15f, 32);
@@ -121,7 +122,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         glViewport(0, 0, width, height);
 
         MatrixHelper.perspectiveM(projectionMatrix, 45, (float) width / (float) height, 1f, 100f);
-        setLookAtM(viewMatrix, 0, 0f, 1.2f, 2.2f, 0f, 0f, 0f, 0f, 1f, 0f);
+        setLookAtM(viewMatrix, 0, 0f, 1.2f, 10f, 0f, 0f, 0f, 0f, 1f, 0f);
 
     }
 
@@ -129,6 +130,9 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 glUnused) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      //  setLookAtM(viewMatrix, 0, 1.2f, 2.2f, 2.2f, -yRotation, 0f, -xRotation, 0f, 1f, 0f);
+
 
         puckPosition = puckPosition.translate(puckVector);
 
@@ -156,7 +160,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         invertM(invertedViewProjectionMatrix, 0, viewProjectionMatrix, 0);
 
 
-        drawAirHockey();
+     //   drawAirHockey();
 
 
     }
@@ -164,13 +168,11 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
 
     private void drawHeightMap() {
 
-        //still not working.  probably the crappy image itself.  upside, i dont need this for what i am about to do
-        //therefore, fuck this off and simply use a texture as the floor, as we want the texture to scroll, rather than
-        //scroll the non rendering height map.  debug confirms it exists so it must be file.  not using file from demo which
-        //actually violates the test routine anyway (ie its too big).  note is another GL bug report to review!!
         setIdentityM(modelMatrix, 0);
-        translateM(modelMatrix, 0, 0f, -2f, 0f);
-        scaleM(modelMatrix, 0, 10f, 0f, 10f);
+        translateM(modelMatrix, 0, 0f, -10f, 0f);
+        scaleM(modelMatrix, 0, 100f, 10f, 100f);
+        rotateM(modelMatrix, 0, 0f, 1f, 180f, 0f);
+        rotateM(modelMatrix, 0, -xRotation, 0f, 1f, 0f);
         multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0);
 
         heightMapShaderProgram.useProgram();
@@ -186,7 +188,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
         setIdentityM(modelMatrix, 0);
         //pointless get height map working  translateM(modelMatrix, 0, 0f, -5f, 0f);
         scaleM(modelMatrix, 0, 100f, 100f, 100f);
-        rotateM(modelMatrix, 0, -yRotation, 1f, 0f, 0f);
+     //   rotateM(modelMatrix, 0, -yRotation, 1f, 0f, 0f);
         rotateM(modelMatrix, 0, -xRotation, 0f, 1f, 0f);
         multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0);
 
