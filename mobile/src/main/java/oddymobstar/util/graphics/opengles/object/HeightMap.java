@@ -58,6 +58,7 @@ public class HeightMap implements ModelInterface {
 
                 final Geometry.Point point = getPoint(pixels, row, col);
 
+
                 heightMapVertices[offset++] = point.x;
                 heightMapVertices[offset++] = point.y;
                 heightMapVertices[offset++] = point.z;
@@ -89,7 +90,7 @@ public class HeightMap implements ModelInterface {
 
         float y = (float)Color.red(pixels[(row * height) + col]) / (float)255;
 
-        return new Geometry.Point(x, y, z);
+        return new Geometry.Point(x, -y, z);
     }
 
     private int clamp(int val, int min, int max) {

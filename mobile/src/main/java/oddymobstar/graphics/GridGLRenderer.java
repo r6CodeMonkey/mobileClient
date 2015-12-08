@@ -169,7 +169,7 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private void drawHeightMap() {
 
         setIdentityM(modelMatrix, 0);
-        translateM(modelMatrix, 0, 0f, -10f, 0f);
+        translateM(modelMatrix, 0, 0f, 0f, 0f);
         scaleM(modelMatrix, 0, 100f, 10f, 100f);
         rotateM(modelMatrix, 0, 0f, 1f, 180f, 0f);
         rotateM(modelMatrix, 0, -xRotation, 0f, 1f, 0f);
@@ -186,8 +186,9 @@ public class GridGLRenderer implements GLSurfaceView.Renderer {
     private void drawSkyBox() {
         //draw the skybox.
         setIdentityM(modelMatrix, 0);
+        translateM(modelMatrix, 0, 0f, -10f, 0f);
         //pointless get height map working  translateM(modelMatrix, 0, 0f, -5f, 0f);
-        scaleM(modelMatrix, 0, 100f, 100f, 100f);
+        scaleM(modelMatrix, 0, 200f, 100f, 200f);
      //   rotateM(modelMatrix, 0, -yRotation, 1f, 0f, 0f);
         rotateM(modelMatrix, 0, -xRotation, 0f, 1f, 0f);
         multiplyMM(modelViewProjectionMatrix, 0, viewProjectionMatrix, 0, modelMatrix, 0);
