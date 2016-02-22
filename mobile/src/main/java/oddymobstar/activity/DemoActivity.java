@@ -4,6 +4,7 @@ package oddymobstar.activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +29,7 @@ public class DemoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        controller.onCreate();
         setContentView(R.layout.activity_game);
 
         font = Typeface.createFromAsset(
@@ -43,7 +45,7 @@ public class DemoActivity extends AppCompatActivity {
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
+        controller.onPostCreate();
         // Sync the toggle state after onRestoreInstanceState has occurred.
         controller.onPostCreate();
     }
@@ -51,7 +53,7 @@ public class DemoActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        controller.onBackPressed();
         controller.onBackPressed();
     }
 

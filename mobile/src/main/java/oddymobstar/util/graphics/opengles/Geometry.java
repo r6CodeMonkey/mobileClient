@@ -100,7 +100,7 @@ public class Geometry {
         }
 
         public float length() {
-            return FloatMath.sqrt(x * x + y * y + z * z);
+            return (float)Math.sqrt(x * x + y * y + z * z);
         }
 
         public Vector crossProduct(Vector other) {

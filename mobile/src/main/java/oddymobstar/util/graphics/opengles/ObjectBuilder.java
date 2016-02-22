@@ -80,9 +80,9 @@ public class ObjectBuilder {
 
         for (int i = 0; i <= numPoints; i++) {
             float angleInRadians = ((float) i / (float) numPoints) * ((float) Math.PI * 2f);
-            vertexData[offset++] = circle.centre.x + circle.radius * FloatMath.cos(angleInRadians);
+            vertexData[offset++] = circle.centre.x + circle.radius * (float)Math.cos(angleInRadians);
             vertexData[offset++] = circle.centre.y;
-            vertexData[offset++] = circle.centre.z + circle.radius * FloatMath.sin(angleInRadians);
+            vertexData[offset++] = circle.centre.z + circle.radius * (float)Math.sin(angleInRadians);
 
         }
 
@@ -104,8 +104,8 @@ public class ObjectBuilder {
         for (int i = 0; i <= numPoints; i++) {
             float angleInRadians = ((float) i / (float) numPoints) * ((float) Math.PI * 2f);
 
-            float xPosition = cylinder.centre.x + cylinder.radius * FloatMath.cos(angleInRadians);
-            float zPosition = cylinder.centre.z + cylinder.radius * FloatMath.sin(angleInRadians);
+            float xPosition = cylinder.centre.x + cylinder.radius * (float)Math.cos(angleInRadians);
+            float zPosition = cylinder.centre.z + cylinder.radius * (float)Math.sin(angleInRadians);
 
             vertexData[offset++] = xPosition;
             vertexData[offset++] = yStart;
